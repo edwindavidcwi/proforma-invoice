@@ -6,149 +6,145 @@
     <title>Proforma Invoice</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            font-size: 14px;
-            color: #333;
-        }
-        address { font-style: normal; }
-        [contenteditable="true"] {
-            display: inline-block; min-width: 50px; border-bottom: 1px dashed #c1d6e1;
-            padding: 2px; outline: none; cursor: text; transition: all 0.2s;
-        }
-        [contenteditable="true"]:hover, [contenteditable="true"]:focus { border-bottom-color: #0a5e5e; background-color: #f0f8ff; }
-        input, select {
-            border: 1px solid #c1d6e1; padding: 2px 4px; border-radius: 4px; outline: none;
-            transition: all 0.2s;
-        }
-        input:hover, select:hover, input:focus, select:focus { border-color: #0a5e5e; background-color: #f0f8ff; }
-       
-        /* Hide default dropdown arrow */
-        select {
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            appearance: none;
-            background-image: url('data:image/svg+xml;utf8,<svg fill="%230a5e5e" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
-            background-repeat: no-repeat;
-            background-position: right 0.5rem center;
-            background-size: 1.5em 1.5em;
-        }
-       
-        /* Message box styling */
-        .message-box {
-            position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-            background-color: #004343; color: white; padding: 1rem 2rem; border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); z-index: 1000; display: none;
-            animation: fadeInOut 3s forwards; font-weight: 500;
-        }
-        @keyframes fadeInOut {
-            0%, 100% { opacity: 0; transform: translateX(-50%) scale(0.9); }
-            10%, 90% { opacity: 1; transform: translateX(-50%) scale(1); }
-        }
-       
-        /* A4 Paper Optimization for printing */
-        .invoice-container {
-            width: 210mm; /* A4 width */
-            min-height: 297mm; /* A4 height */
-            margin: 0 auto;
-            padding: 20mm;
-            box-shadow: none;
-        }
-        .invoice-container, body { background-color: #ffffff; }
+         <style>
+         body {
+             font-family: 'Poppins', sans-serif;
+             -webkit-font-smoothing: antialiased;
+             -moz-osx-font-smoothing: grayscale;
+             font-size: 14px;
+             color: #333;
+         }
+         address { font-style: normal; }
+         [contenteditable="true"] {
+             display: inline-block; min-width: 50px; border-bottom: 1px dashed #c1d6e1;
+             padding: 2px; outline: none; cursor: text; transition: all 0.2s;
+         }
+         [contenteditable="true"]:hover, [contenteditable="true"]:focus { border-bottom-color: #0a5e5e; background-color: #f0f8ff; }
+         input, select {
+             border: 1px solid #c1d6e1; padding: 2px 4px; border-radius: 4px; outline: none;
+             transition: all 0.2s;
+         }
+         input:hover, select:hover, input:focus, select:focus { border-color: #0a5e5e; background-color: #f0f8ff; }
 
-        /* Fix for state dropdown overflow */
-        .address-select {
-            max-width: calc(100% - 70px); /* Adjust based on label width */
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+         /* Make particulars easier to read */
+         .item-particulars { white-space: normal; }
 
-        /* Enforce a page break before the terms and conditions section */
-        #terms-and-footer-page {
-            page-break-before: always;
-            padding-top: 20mm; /* Adjust padding for a clean start on the new page */
-            position: relative;
-        }
+         /* Fill handle for Excel-like copy */
+         .item-cell-relative { position: relative; }
+         .fill-handle {
+             position: absolute;
+             right: 4px; bottom: 4px;
+             width: 10px; height: 10px;
+             background-color: #009a7b;
+             border-radius: 2px;
+             cursor: crosshair;
+             display: none;
+         }
+         .item-row:hover .fill-handle { display: block; }
+         .row-highlight { outline: 2px dashed #11c99d; }
 
-        @media print {
-            @page {
-                size: A4;
-                margin: 10mm;
-            }
-            body {
-                margin: 0;
-                font-size: 12px;
-                color: #000;
-            }
-            .invoice-container {
-                width: 100%;
-                min-height: 0;
-                padding: 0;
-                box-shadow: none;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .no-print, .add-remove-buttons { display: none !important; }
-            .print-hide-if-empty.hidden-for-print { display: none !important; }
-            [contenteditable="true"], input, select { border: none !important; background-color: transparent !important; padding: 0; }
-            .delete-item-btn { display: none; }
-           
-            /* Hide dropdown arrows in print */
-            select {
-                -webkit-appearance: none;
-                -moz-appearance: none;
-                appearance: none;
-                background-image: none;
-            }
-            /* Adjust input and span padding for print */
-            .customer-info p > span, .customer-info input { padding: 0 !important; }
+         /* Modal overlay */
+         .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: none; z-index: 2000; }
+         .modal { background: #fff; border-radius: 12px; max-width: 900px; width: 95%; margin: 40px auto; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
 
-            /* Keep table header on every page */
-            table { page-break-after: auto; }
-            thead { display: table-header-group; }
-           
-            /* Prevent rows and footer from splitting across pages */
-            tr, tfoot, .footer-content { page-break-inside: avoid; }
-           
-            /* Fix QR code print size */
-            #qrcode { display: block !important; }
-            #qrcode img {
-                width: 100px !important;
-                height: 100px !important;
-            }
+         /* A4 Paper Optimization for printing */
+         .invoice-container {
+             width: 210mm; /* A4 width */
+             min-height: 297mm; /* A4 height */
+             margin: 0 auto;
+             padding: 20mm;
+             box-shadow: none;
+         }
+         .invoice-container, body { background-color: #ffffff; }
 
-            /* Ensure the footer section is full-page on print */
-            #terms-and-footer-page {
-                height: auto;
-                padding-top: 10mm;
-                padding-bottom: 10mm;
-            }
-            #thank-you-message-print {
-                display: block !important;
-            }
-           
-            /* Vertically shorten the green border in print */
-            .bank-details-block, .terms-block {
-                height: auto; /* Allow height to be determined by content */
-                display: flex;
-                flex-direction: column;
-            }
-            .bank-details-content, .terms-content {
-                flex-grow: 1; /* Allow content to grow, but border stays with content */
-                border-left-width: 4px;
-                border-color: #009a7b;
-            }
-           
-            /* Remove margins that cause extra spacing */
-            .bank-details-block, .terms-block {
-                margin-bottom: 0 !important;
-            }
-        }
-    </style>
+         /* Fix for state dropdown overflow */
+         .address-select {
+             max-width: calc(100% - 70px); /* Adjust based on label width */
+             overflow: hidden;
+             text-overflow: ellipsis;
+             white-space: nowrap;
+         }
+
+         /* Enforce a page break before the terms and conditions section */
+         #terms-and-footer-page {
+             page-break-before: always;
+             padding-top: 20mm; /* Adjust padding for a clean start on the new page */
+             position: relative;
+         }
+
+         @media print {
+             @page {
+                 size: A4;
+                 margin: 10mm;
+             }
+             body {
+                 margin: 0;
+                 font-size: 12px;
+                 color: #000;
+             }
+             .invoice-container {
+                 width: 100%;
+                 min-height: 0;
+                 padding: 0;
+                 box-shadow: none;
+                 -webkit-print-color-adjust: exact;
+                 print-color-adjust: exact;
+             }
+             .no-print, .add-remove-buttons { display: none !important; }
+             .print-hide-if-empty.hidden-for-print { display: none !important; }
+             [contenteditable="true"], input, select, textarea { border: none !important; background-color: transparent !important; padding: 0; }
+             .delete-item-btn { display: none; }
+
+             /* Improve table print behavior */
+             table { page-break-after: auto; }
+             thead { display: table-header-group; }
+             tr.item-row, tfoot, .footer-content, .signatures-below-table, #transportation-table tr { page-break-inside: avoid; break-inside: avoid; }
+
+             /* Hide dropdown arrows in print */
+             select {
+                 -webkit-appearance: none;
+                 -moz-appearance: none;
+                 appearance: none;
+                 background-image: none;
+             }
+             /* Adjust input and span padding for print */
+             .customer-info p > span, .customer-info input { padding: 0 !important; }
+
+             /* Fix QR code print size */
+             #qrcode { display: block !important; }
+             #qrcode img {
+                 width: 100px !important;
+                 height: 100px !important;
+             }
+
+             /* Ensure the footer section is full-page on print */
+             #terms-and-footer-page {
+                 height: auto;
+                 padding-top: 10mm;
+                 padding-bottom: 10mm;
+             }
+             #thank-you-message-print {
+                 display: block !important;
+             }
+
+             /* Vertically shorten the green border in print */
+             .bank-details-block, .terms-block {
+                 height: auto; /* Allow height to be determined by content */
+                 display: flex;
+                 flex-direction: column;
+             }
+             .bank-details-content, .terms-content {
+                 flex-grow: 1; /* Allow content to grow, but border stays with content */
+                 border-left-width: 4px;
+                 border-color: #009a7b;
+             }
+
+             /* Remove margins that cause extra spacing */
+             .bank-details-block, .terms-block {
+                 margin-bottom: 0 !important;
+             }
+         }
+     </style>
     <script>
         tailwind.config = {
             theme: {
@@ -260,12 +256,12 @@
                     <tr>
                         <th scope="col" class="py-3 px-2 font-bold w-[5%]">S.No</th>
                         <th scope="col" class="py-3 px-2 font-bold w-[30%]">Particulars</th>
-                        <th scope="col" class="py-3 px-2 font-bold w-[10%]">Thk(mm)</th>
-                        <th scope="col" class="py-3 px-2 font-bold w-[10%]">Len(ft)</th>
-                        <th scope="col" class="py-3 px-2 font-bold w-[10%]">Brd(ft)</th>
-                        <th scope="col" class="py-3 px-2 font-bold w-[10%]">Qty(Sht)</th>
-                        <th scope="col" class="py-3 px-2 font-bold w-[10%]">Qty(SqFt)</th>
-                        <th scope="col" class="py-3 px-2 font-bold w-[10%]">Rate/SqFt</th>
+                        <th scope="col" class="py-3 px-2 font-bold w-[10%]">Thickness (mm)</th>
+                        <th scope="col" class="py-3 px-2 font-bold w-[10%]">Length (ft)</th>
+                        <th scope="col" class="py-3 px-2 font-bold w-[10%]">Breadth (ft)</th>
+                        <th scope="col" class="py-3 px-2 font-bold w-[10%]">Qty (Sheets)</th>
+                        <th scope="col" class="py-3 px-2 font-bold w-[10%]">Qty (Sq Ft)</th>
+                        <th scope="col" class="py-3 px-2 font-bold w-[10%]">Rate / Sq Ft</th>
                         <th scope="col" class="py-3 px-2 font-bold w-[15%] text-right">Amount</th>
                         <th scope="col" class="py-3 px-2 w-[5%] no-print"></th>
                     </tr>
@@ -771,23 +767,149 @@
             for (const [cat, list] of Object.entries(PRODUCTS)) {
                 for (const e of list) {
                     const label = formatLabel(cat, e);
-                    const record = { label, ...e };
+                    const record = { label, category: cat, ...e };
                     ALL_PRODUCTS.push(record);
                     labelToProduct.set(label, record);
                 }
             }
 
-            // Populate datalist options
-            const datalistEl = document.getElementById('product-list');
-            if (datalistEl) {
-                datalistEl.innerHTML = '';
-                const frag = document.createDocumentFragment();
-                for (const rec of ALL_PRODUCTS) {
-                    const opt = document.createElement('option');
-                    opt.value = rec.label;
-                    frag.appendChild(opt);
+            // Build tree for hierarchical selector
+            const productTree = {};
+            for (const rec of ALL_PRODUCTS) {
+                const c1 = rec.category;
+                productTree[c1] = productTree[c1] || {};
+                // Sub-levels vary per category
+                let key2 = '';
+                if (rec.FaceVeneer) key2 = rec.FaceVeneer;
+                if (rec.Grade && !key2) key2 = rec.Grade;
+                const level2 = key2 || 'Options';
+                productTree[c1][level2] = productTree[c1][level2] || {};
+                let key3 = '';
+                if (rec.Glue) key3 = rec.Glue;
+                if (rec.FilmFaceColor) key3 = `${key3 ? key3 + ' - ' : ''}${rec.FilmFaceColor}`;
+                if (rec.FilmFaceGSM) key3 = `${key3 ? key3 + ' - ' : ''}${rec.FilmFaceGSM} GSM`;
+                if (rec.MeshLevel !== undefined) key3 = `${key3 ? key3 + ' - ' : ''}Mesh ${rec.MeshLevel}`;
+                const level3 = key3 || 'Specifications';
+                productTree[c1][level2][level3] = productTree[c1][level2][level3] || [];
+                productTree[c1][level2][level3].push(rec);
+            }
+
+            // Populate datalist options (still available as quick search)
+                            const datalistEl = document.getElementById('product-list');
+                if (datalistEl) {
+                    datalistEl.innerHTML = '';
+                    const frag = document.createDocumentFragment();
+                    for (const rec of ALL_PRODUCTS) {
+                        const opt = document.createElement('option');
+                        opt.value = rec.label;
+                        opt.textContent = rec.label;
+                        frag.appendChild(opt);
+                    }
+                    datalistEl.appendChild(frag);
                 }
-                datalistEl.appendChild(frag);
+
+            // Modal elements injected lazily
+            let selectorModalOverlay = null;
+            function ensureSelectorModal() {
+                if (selectorModalOverlay) return selectorModalOverlay;
+                selectorModalOverlay = document.createElement('div');
+                selectorModalOverlay.className = 'modal-overlay';
+                selectorModalOverlay.innerHTML = `
+                    <div class="modal">
+                        <div class="bg-primary-dark text-white px-5 py-3 rounded-t-2xl flex items-center justify-between">
+                            <div class="font-semibold">Select Product</div>
+                            <button class="close-modal px-2 py-1 bg-white/10 hover:bg-white/20 rounded text-white">Close</button>
+                        </div>
+                        <div class="p-5 grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div>
+                                <div class="font-semibold text-primary-dark mb-2">Category</div>
+                                <div id="sel-level-1" class="space-y-2 max-h-80 overflow-auto"></div>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-primary-dark mb-2">Subcategory</div>
+                                <div id="sel-level-2" class="space-y-2 max-h-80 overflow-auto"></div>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-primary-dark mb-2">Variants</div>
+                                <div id="sel-level-3" class="space-y-2 max-h-80 overflow-auto"></div>
+                            </div>
+                        </div>
+                    </div>`;
+                document.body.appendChild(selectorModalOverlay);
+                selectorModalOverlay.querySelector('.close-modal').addEventListener('click', () => selectorModalOverlay.style.display = 'none');
+                selectorModalOverlay.addEventListener('click', (e) => { if (e.target === selectorModalOverlay) selectorModalOverlay.style.display = 'none'; });
+                return selectorModalOverlay;
+            }
+
+            function renderSelector(tree, onPick) {
+                const overlay = ensureSelectorModal();
+                const l1 = overlay.querySelector('#sel-level-1');
+                const l2 = overlay.querySelector('#sel-level-2');
+                const l3 = overlay.querySelector('#sel-level-3');
+                l1.innerHTML = l2.innerHTML = l3.innerHTML = '';
+                for (const cat of Object.keys(tree)) {
+                    const btn = document.createElement('button');
+                    btn.className = 'w-full text-left px-3 py-2 bg-gray-100 hover:bg-primary-accent/10 rounded border border-gray-200';
+                    btn.textContent = cat;
+                    btn.addEventListener('click', () => {
+                        l2.innerHTML = l3.innerHTML = '';
+                        for (const sub of Object.keys(tree[cat])) {
+                            const sb = document.createElement('button');
+                            sb.className = 'w-full text-left px-3 py-2 bg-gray-50 hover:bg-primary-accent/10 rounded border border-gray-200';
+                            sb.textContent = sub;
+                            sb.addEventListener('click', () => {
+                                l3.innerHTML = '';
+                                const specs = tree[cat][sub];
+                                for (const spec of Object.keys(specs)) {
+                                    const group = document.createElement('div');
+                                    group.className = 'mb-2';
+                                    const title = document.createElement('div');
+                                    title.className = 'text-xs text-secondary-dark font-semibold mb-1';
+                                    title.textContent = spec;
+                                    group.appendChild(title);
+                                    for (const rec of specs[spec]) {
+                                        const item = document.createElement('button');
+                                        item.className = 'w-full text-left px-3 py-2 bg-white hover:bg-primary-accent/10 rounded border border-gray-200';
+                                        item.innerHTML = `<div class="font-semibold text-primary-dark">${rec.category}</div>
+                                                          <div class="text-xs text-secondary-dark">${formatLabel(rec.category, rec)}</div>`;
+                                        item.addEventListener('click', () => onPick(rec));
+                                        group.appendChild(item);
+                                    }
+                                    l3.appendChild(group);
+                                }
+                            });
+                            l2.appendChild(sb);
+                        }
+                    });
+                    l1.appendChild(btn);
+                }
+                overlay.style.display = 'block';
+            }
+
+            function applyProductToRow(rec, row) {
+                const particulars = row.querySelector('.item-particulars');
+                const thkEl = row.querySelector('.item-thk');
+                const lenEl = row.querySelector('.item-len');
+                const brdEl = row.querySelector('.item-brd');
+                const rateEl = row.querySelector('.item-rate');
+                particulars.value = formatLabel(rec.category, rec);
+                if (rec.Thickness_mm != null) thkEl.value = rec.Thickness_mm;
+                if (rec.Length_ft != null) lenEl.value = rec.Length_ft;
+                if (rec.Breadth_ft != null) brdEl.value = rec.Breadth_ft;
+                if (rec.Price_INR_per_sqft != null) rateEl.value = rec.Price_INR_per_sqft;
+                const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+                const sqft = (parseFloat(lenEl.value)||0) * (parseFloat(brdEl.value)||0) * qty;
+                const amount = sqft * (parseFloat(rateEl.value)||0);
+                row.querySelector('.item-sqft').textContent = sqft.toFixed(2);
+                row.querySelector('.item-amount').textContent = amount.toFixed(2);
+                updateTotals();
+            }
+
+            function openProductSelector(row) {
+                renderSelector(productTree, (rec) => {
+                    applyProductToRow(rec, row);
+                    ensureSelectorModal().style.display = 'none';
+                });
             }
 
             // Function to pad a number with a leading zero if it's a single digit
@@ -841,6 +963,9 @@
 
             // Function to update all totals
             const updateTotals = () => {
+                // Ensure page breaks don't split crucial sections
+                // Mark groups to avoid breaking where possible
+            
                 const productGstRate = parseFloat(productGstSelect.value);
                 const transportationGstRate = parseFloat(transportationGstSelect.value);
 
@@ -881,7 +1006,7 @@
                 tr.className = 'item-row text-center';
                 tr.innerHTML = `
                     <td class="border-t py-2 px-2 text-left">${sno}</td>
-                    <td class="border-t py-2 px-2"><input type="text" list="product-list" class="item-particulars w-full bg-transparent border-none p-0" aria-label="Particulars"></td>
+                                        <td class="border-t py-2 px-2 item-cell-relative"><textarea rows="2" class="item-particulars w-full bg-transparent border-none p-0 resize-y" placeholder="Click to select product" aria-label="Particulars" readonly></textarea><span class="fill-handle no-print" title="Drag to copy"></span></td>
                     <td class="border-t py-2 px-2"><input type="number" step="0.01" class="item-thk w-full bg-transparent border-none p-0 text-center"></td>
                     <td class="border-t py-2 px-2"><input type="number" step="0.01" class="item-len w-full bg-transparent border-none p-0 text-center"></td>
                     <td class="border-t py-2 px-2"><input type="number" step="0.01" class="item-brd w-full bg-transparent border-none p-0 text-center"></td>
@@ -896,25 +1021,73 @@
                     </td>
                 `;
 
-                // Auto-fill row when a known product is selected
+                // Hierarchical selector trigger on click
                 const particularsInput = tr.querySelector('.item-particulars');
+                particularsInput.addEventListener('click', () => openProductSelector(tr));
+
+                // Fallback for datalist/manual selection if needed
                 particularsInput.addEventListener('change', () => {
                     const rec = labelToProduct.get(particularsInput.value);
                     if (!rec) return;
-                    const thkEl = tr.querySelector('.item-thk');
-                    const lenEl = tr.querySelector('.item-len');
-                    const brdEl = tr.querySelector('.item-brd');
-                    const rateEl = tr.querySelector('.item-rate');
-                    if (rec.Thickness_mm != null) thkEl.value = rec.Thickness_mm;
-                    if (rec.Length_ft != null) lenEl.value = rec.Length_ft;
-                    if (rec.Breadth_ft != null) brdEl.value = rec.Breadth_ft;
-                    if (rec.Price_INR_per_sqft != null) rateEl.value = rec.Price_INR_per_sqft;
-                    // Recalculate row values
-                    const qty = parseFloat(tr.querySelector('.item-qty').value) || 0;
-                    const sqft = (parseFloat(lenEl.value)||0) * (parseFloat(brdEl.value)||0) * qty;
-                    const amount = sqft * (parseFloat(rateEl.value)||0);
-                    tr.querySelector('.item-sqft').textContent = sqft.toFixed(2);
-                    tr.querySelector('.item-amount').textContent = amount.toFixed(2);
+                    applyProductToRow(rec, tr);
+                });
+
+                // Excel-like drag-to-fill behavior
+                const handle = tr.querySelector('.fill-handle');
+                let isDragging = false;
+                let sourceValues = null;
+                let startRow = tr;
+                handle.addEventListener('mousedown', (e) => {
+                    e.preventDefault();
+                    isDragging = true;
+                    sourceValues = {
+                        particulars: tr.querySelector('.item-particulars').value,
+                        thk: tr.querySelector('.item-thk').value,
+                        len: tr.querySelector('.item-len').value,
+                        brd: tr.querySelector('.item-brd').value,
+                        qty: tr.querySelector('.item-qty').value,
+                        rate: tr.querySelector('.item-rate').value,
+                    };
+                    tr.classList.add('row-highlight');
+                });
+                document.addEventListener('mouseup', () => {
+                    if (!isDragging) return;
+                    isDragging = false;
+                    document.querySelectorAll('.row-highlight').forEach(r => r.classList.remove('row-highlight'));
+                    sourceValues = null;
+                });
+                document.addEventListener('mousemove', (e) => {
+                    if (!isDragging) return;
+                    const rows = Array.from(invoiceItems.querySelectorAll('.item-row'));
+                    rows.forEach(r => r.classList.remove('row-highlight'));
+                    const target = e.target.closest('.item-row');
+                    if (!target) return;
+                    const startIndex = rows.indexOf(startRow);
+                    const endIndex = rows.indexOf(target);
+                    const [lo, hi] = startIndex <= endIndex ? [startIndex, endIndex] : [endIndex, startIndex];
+                    rows.slice(lo, hi + 1).forEach(r => r.classList.add('row-highlight'));
+                });
+                document.addEventListener('mouseup', (e) => {
+                    if (!startRow || !sourceValues) return;
+                    const rows = Array.from(invoiceItems.querySelectorAll('.item-row'));
+                    const target = e.target.closest('.item-row');
+                    if (!target) return;
+                    const startIndex = rows.indexOf(startRow);
+                    const endIndex = rows.indexOf(target);
+                    const [lo, hi] = startIndex <= endIndex ? [startIndex, endIndex] : [endIndex, startIndex];
+                    for (let i = lo; i <= hi; i++) {
+                        const row = rows[i];
+                        row.querySelector('.item-particulars').value = sourceValues.particulars;
+                        row.querySelector('.item-thk').value = sourceValues.thk;
+                        row.querySelector('.item-len').value = sourceValues.len;
+                        row.querySelector('.item-brd').value = sourceValues.brd;
+                        row.querySelector('.item-qty').value = sourceValues.qty;
+                        row.querySelector('.item-rate').value = sourceValues.rate;
+                        const sqft = (parseFloat(sourceValues.len)||0) * (parseFloat(sourceValues.brd)||0) * (parseFloat(sourceValues.qty)||0);
+                        const amount = sqft * (parseFloat(sourceValues.rate)||0);
+                        row.querySelector('.item-sqft').textContent = sqft.toFixed(2);
+                        row.querySelector('.item-amount').textContent = amount.toFixed(2);
+                    }
                     updateTotals();
                 });
 
