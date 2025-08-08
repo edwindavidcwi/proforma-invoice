@@ -427,18 +427,11 @@
                 <p class="text-lg font-bold text-primary-dark">Thank you for your business!</p>
             </div>
         </div>
-    </div>
-   
-    <datalist id="product-list">
-        <option value="Marine Plywood - BWP Grade"></option>
-        <option value="BWP Laminated Plywood"></option>
-        <option value="Commercial Plywood"></option>
-        <option value="Blockboard - BWR Grade"></option>
-        <option value="MDF Board"></option>
-        <option value="Particle Board"></option>
-    </datalist>
+        </div>
 
-    <div class="no-print mt-6 text-center">
+                <datalist id="product-list"></datalist>
+
+            <div class="no-print mt-6 text-center">
         <button id="saveToSheetBtn" class="bg-secondary-accent text-white font-bold py-2 px-4 rounded-lg shadow-md hover:bg-primary-dark transition-colors">
             Save to Google Sheet
         </button>
@@ -478,6 +471,324 @@
             const copyAddressBtn = document.getElementById('copyAddressBtn');
            
             const messageBox = document.getElementById('message-box');
+
+            // ===== Product Master Data (JS version) =====
+            const getPrice = (base, chemicalDipping = false) => base + (chemicalDipping ? 1.5 : 0);
+
+            const DENSITY_STANDARD = 600;
+            const DENSITY_MARINE = 700;
+
+            const VALID_CONFIGS_SHUTTERING = {
+                "MUF Grade": {
+                    10: [22],
+                    12: [24, 30, 34],
+                    18: [35, 40, 45, 50],
+                },
+                "PF Grade": {
+                    12: [30, 34],
+                    18: [40, 45, 50],
+                }
+            };
+
+            const base_price_muf = new Map([
+                [[10,22].toString(), 37],
+                [[12,24].toString(), 39],
+                [[12,30].toString(), 44],
+                [[12,34].toString(), 48],
+                [[18,35].toString(), 54],
+                [[18,40].toString(), 61],
+                [[18,45].toString(), 67],
+                [[18,50].toString(), 74],
+            ]);
+
+            const base_price_pf = new Map([
+                [[12,30].toString(), 52],
+                [[12,34].toString(), 56],
+                [[18,40].toString(), 67],
+                [[18,45].toString(), 74],
+                [[18,50].toString(), 81],
+            ]);
+
+            const sorted_gsm = ["80","100","120","180"];
+            const mesh_levels = ["0","1","2","3"];
+
+            const getFilmFacedShutteringEntries = () => {
+                const entries = [];
+                for (const [grade, thicknessWeights] of Object.entries(VALID_CONFIGS_SHUTTERING)) {
+                    for (const [thicknessStr, weights] of Object.entries(thicknessWeights)) {
+                        const thickness_mm = Number(thicknessStr);
+                        for (const weight_kg of weights) {
+                            for (const glue of ["Melamine Urea Formaldehyde (MUF)", "Phenol Formaldehyde (PF)"]) {
+                                for (const color of ["Red", "Black"]) {
+                                    for (const gsm of sorted_gsm) {
+                                        const priceMap = grade === "MUF Grade" ? base_price_muf : base_price_pf;
+                                        const price = priceMap.get([thickness_mm, weight_kg].toString());
+                                        if (price == null) continue;
+                                        const final_price = price + (color === "Black" ? 1 : 0);
+                                        entries.push({
+                                            Category: "Film Faced Shuttering Plywood",
+                                            Glue: glue,
+                                            FilmFaceColor: color,
+                                            FilmFaceGSM: gsm,
+                                            Thickness_mm: thickness_mm,
+                                            Weight_kg: weight_kg,
+                                            Grade: `Film Faced, ${grade}`,
+                                            Price_INR_per_sqft: final_price,
+                                            Length_ft: 8,
+                                            Breadth_ft: 4,
+                                            Fixed_Weight_kg: weight_kg,
+                                        });
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return entries;
+            };
+
+            const VALID_CONFIGS_CHEQUERED = {
+                "MUF Grade": {
+                    12: [30, 34],
+                    18: [40, 45, 50],
+                },
+                "PF Grade": {
+                    12: [30, 34],
+                    18: [40, 45, 50],
+                }
+            };
+
+            const base_price_chequered_muf = new Map([
+                [[12,30].toString(), 56],
+                [[12,34].toString(), 58],
+                [[18,40].toString(), 66],
+                [[18,45].toString(), 70],
+                [[18,50].toString(), 74],
+            ]);
+            const base_price_chequered_pf = base_price_chequered_muf;
+
+            const getChequeredPlywoodEntries = () => {
+                const entries = [];
+                for (const [grade, thicknessWeights] of Object.entries(VALID_CONFIGS_CHEQUERED)) {
+                    for (const [thicknessStr, weights] of Object.entries(thicknessWeights)) {
+                        const thickness_mm = Number(thicknessStr);
+                        for (const weight_kg of weights) {
+                            for (const glue of ["Melamine Urea Formaldehyde (MUF)", "Phenol Formaldehyde (PF)"]) {
+                                for (const color of ["Red", "Black"]) {
+                                    for (const gsm of sorted_gsm) {
+                                        for (const mesh of mesh_levels) {
+                                            const priceMap = grade === "MUF Grade" ? base_price_chequered_muf : base_price_chequered_pf;
+                                            const price = priceMap.get([thickness_mm, weight_kg].toString());
+                                            if (price == null) continue;
+                                            const final_price = price + (color === "Black" ? 1 : 0) + (parseInt(mesh, 10) * 5);
+                                            entries.push({
+                                                Category: "Chequered Plywood",
+                                                Glue: glue,
+                                                FilmFaceColor: color,
+                                                FilmFaceGSM: gsm,
+                                                MeshLevel: mesh,
+                                                Thickness_mm: thickness_mm,
+                                                Weight_kg: weight_kg,
+                                                Grade: `Chequered, High Density, ${grade}`,
+                                                Price_INR_per_sqft: final_price,
+                                                Length_ft: 8,
+                                                Breadth_ft: 4,
+                                                Fixed_Weight_kg: weight_kg,
+                                            });
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+                return entries;
+            };
+
+            // Build master list
+            const PRODUCTS = {
+                "Commercial Plywood": (() => {
+                    const entries = [];
+                    const faceVeneers = ["White Recon", "Red Recon", "Okoume", "PLB", "Gurjan"];
+                    const variants = [
+                        [4.5, 19.5], [6, 24], [8, 24.5], [10, 30], [12, 31.5],
+                        [14, 34.5], [16, 37.5], [18, 41], [20, 42], [25, 59.5]
+                    ];
+                    for (const fv of faceVeneers) {
+                        for (const [t, price] of variants) {
+                            for (const dipping of [false, true]) {
+                                entries.push({
+                                    Category: "Commercial Plywood",
+                                    FaceVeneer: fv,
+                                    Thickness_mm: t,
+                                    Density_kg_per_m3: DENSITY_STANDARD,
+                                    Grade: "MR (Moisture Resistant)",
+                                    ChemicalDipping: dipping,
+                                    Price_INR_per_sqft: getPrice(price, dipping)
+                                });
+                            }
+                        }
+                    }
+                    return entries;
+                })(),
+
+                "Semi-Hardwood Plywood": (() => {
+                    const entries = [];
+                    const groups = [
+                        ["Okoume", [[6, 26], [8, 29], [12, 33], [16, 41], [18, 42]]],
+                        ["Gurjan", [[6, 30.5], [8, 37], [12, 39], [16, 46], [18, 47]]]
+                    ];
+                    for (const [fv, variants] of groups) {
+                        for (const [t, price] of variants) {
+                            for (const dipping of [false, true]) {
+                                entries.push({
+                                    Category: "Semi-Hardwood Plywood",
+                                    FaceVeneer: fv,
+                                    Thickness_mm: t,
+                                    Density_kg_per_m3: DENSITY_STANDARD,
+                                    Grade: "MR (Moisture Resistant)",
+                                    ChemicalDipping: dipping,
+                                    Price_INR_per_sqft: getPrice(price, dipping)
+                                });
+                            }
+                        }
+                    }
+                    return entries;
+                })(),
+
+                "Alternate Plywood": (() => {
+                    const entries = [];
+                    const faceVeneers = ["Okoume", "Gurjan"];
+                    const variants = [[6, 32], [8, 39], [12, 43], [16, 52], [18, 53]];
+                    for (const fv of faceVeneers) {
+                        for (const [t, price] of variants) {
+                            for (const dipping of [false, true]) {
+                                entries.push({
+                                    Category: "Alternate Plywood",
+                                    FaceVeneer: fv,
+                                    Thickness_mm: t,
+                                    Density_kg_per_m3: DENSITY_STANDARD,
+                                    Grade: "MR (Moisture Resistant), BWR (Boiling Water Resistant)",
+                                    ChemicalDipping: dipping,
+                                    Price_INR_per_sqft: getPrice(price, dipping)
+                                });
+                            }
+                        }
+                    }
+                    return entries;
+                })(),
+
+                "Full Red Core Plywood": (() => {
+                    const entries = [];
+                    const variants = [[6, 36], [8, 41], [12, 47], [16, 55], [18, 57]];
+                    for (const [t, price] of variants) {
+                        for (const dipping of [false, true]) {
+                            entries.push({
+                                Category: "Full Red Core Plywood",
+                                FaceVeneer: "Gurjan",
+                                Thickness_mm: t,
+                                Density_kg_per_m3: DENSITY_STANDARD,
+                                Grade: "MR (Moisture Resistant), BWR (Boiling Water Resistant)",
+                                ChemicalDipping: dipping,
+                                Price_INR_per_sqft: getPrice(price, dipping)
+                            });
+                        }
+                    }
+                    return entries;
+                })(),
+
+                "Calibrated Semi-Hardwood Plywood": [
+                    { Category: "Calibrated Semi-Hardwood Plywood", FaceVeneer: "Okoume", Thickness_mm: 16, Density_kg_per_m3: DENSITY_STANDARD, Grade: "Calibrated, MR (Moisture Resistant), MUF", Price_INR_per_sqft: 56 },
+                    { Category: "Calibrated Semi-Hardwood Plywood", FaceVeneer: "Okoume", Thickness_mm: 18, Density_kg_per_m3: DENSITY_STANDARD, Grade: "Calibrated, MR (Moisture Resistant), MUF", Price_INR_per_sqft: 59 },
+                ],
+
+                "Cochin Premium Hardwood Plywood": [
+                    { Category: "Cochin Premium Hardwood Plywood", FaceVeneer: "Gurjan", Thickness_mm: 6, Density_kg_per_m3: DENSITY_STANDARD, Grade: "MR (Moisture Resistant), BWR (Boiling Water Resistant), ISI 303", Price_INR_per_sqft: 46 },
+                    { Category: "Cochin Premium Hardwood Plywood", FaceVeneer: "Gurjan", Thickness_mm: 8, Density_kg_per_m3: DENSITY_STANDARD, Grade: "MR (Moisture Resistant), BWR (Boiling Water Resistant), ISI 303", Price_INR_per_sqft: 49 },
+                    { Category: "Cochin Premium Hardwood Plywood", FaceVeneer: "Gurjan", Thickness_mm: 12, Density_kg_per_m3: DENSITY_STANDARD, Grade: "MR (Moisture Resistant), BWR (Boiling Water Resistant), ISI 303", Price_INR_per_sqft: 56 },
+                    { Category: "Cochin Premium Hardwood Plywood", FaceVeneer: "Gurjan", Thickness_mm: 16, Density_kg_per_m3: DENSITY_STANDARD, Grade: "MR (Moisture Resistant), BWR (Boiling Water Resistant), ISI 303", Price_INR_per_sqft: 64 },
+                    { Category: "Cochin Premium Hardwood Plywood", FaceVeneer: "Gurjan", Thickness_mm: 18, Density_kg_per_m3: DENSITY_STANDARD, Grade: "MR (Moisture Resistant), BWR (Boiling Water Resistant), ISI 303", Price_INR_per_sqft: 67 },
+                ],
+
+                "Cochin Premium Marine Plywood": [
+                    { Category: "Cochin Premium Marine Plywood", FaceVeneer: "Gurjan", Thickness_mm: 6, Density_kg_per_m3: DENSITY_MARINE, Grade: "MR (Moisture Resistant), BWP (Boiling Water Proof), ISI 710", Price_INR_per_sqft: 68 },
+                    { Category: "Cochin Premium Marine Plywood", FaceVeneer: "Gurjan", Thickness_mm: 8, Density_kg_per_m3: DENSITY_MARINE, Grade: "MR (Moisture Resistant), BWP (Boiling Water Proof), ISI 710", Price_INR_per_sqft: 74 },
+                    { Category: "Cochin Premium Marine Plywood", FaceVeneer: "Gurjan", Thickness_mm: 12, Density_kg_per_m3: DENSITY_MARINE, Grade: "MR (Moisture Resistant), BWP (Boiling Water Proof), ISI 710", Price_INR_per_sqft: 81 },
+                    { Category: "Cochin Premium Marine Plywood", FaceVeneer: "Gurjan", Thickness_mm: 16, Density_kg_per_m3: DENSITY_MARINE, Grade: "MR (Moisture Resistant), BWP (Boiling Water Proof), ISI 710", Price_INR_per_sqft: 86 },
+                    { Category: "Cochin Premium Marine Plywood", FaceVeneer: "Gurjan", Thickness_mm: 18, Density_kg_per_m3: DENSITY_MARINE, Grade: "MR (Moisture Resistant), BWP (Boiling Water Proof), ISI 710", Price_INR_per_sqft: 95 },
+                ],
+
+                "Block Board": [
+                    { Category: "Block Board", FaceVeneer: "Gurjan", CoreMaterial: "Hardwood", Thickness_mm: 19, Density_kg_per_m3: DENSITY_STANDARD, Grade: "MR (Moisture Resistant), BWR (Boiling Water Resistant)", Price_INR_per_sqft: 54 },
+                    { Category: "Block Board", FaceVeneer: "Gurjan", CoreMaterial: "Hardwood", Thickness_mm: 25, Density_kg_per_m3: DENSITY_STANDARD, Grade: "MR (Moisture Resistant), BWR (Boiling Water Resistant)", Price_INR_per_sqft: 64 },
+                ],
+
+                "Flush Door": [
+                    { Category: "Flush Door", FaceVeneer: "Gurjan", CoreMaterial: "Hardwood", Thickness_mm: 30, Density_kg_per_m3: DENSITY_STANDARD, Grade: "MR (Moisture Resistant), BWR (Boiling Water Resistant)", Price_INR_per_sqft: 81 },
+                    { Category: "Flush Door", FaceVeneer: "Gurjan", CoreMaterial: "Pine Wood", Thickness_mm: 25, Density_kg_per_m3: DENSITY_STANDARD, Grade: "MR (Moisture Resistant), BWR (Boiling Water Resistant)", Price_INR_per_sqft: 85 },
+                    { Category: "Flush Door", FaceVeneer: "Gurjan", CoreMaterial: "Pine Wood", Thickness_mm: 30, Density_kg_per_m3: DENSITY_STANDARD, Grade: "MR (Moisture Resistant), BWR (Boiling Water Resistant)", Price_INR_per_sqft: 92 },
+                ],
+
+                "Rubwood Finger Joint Board": [
+                    { Category: "Rubwood Finger Joint Board", Thickness_mm: 12, Density_kg_per_m3: DENSITY_STANDARD, Grade: "Finger Joint Board", Price_INR_per_sqft: 62 },
+                    { Category: "Rubwood Finger Joint Board", Thickness_mm: 18, Density_kg_per_m3: DENSITY_STANDARD, Grade: "Finger Joint Board", Price_INR_per_sqft: 83 },
+                ],
+
+                "Film Faced Shuttering Plywood": getFilmFacedShutteringEntries(),
+                "Chequered Plywood": getChequeredPlywoodEntries(),
+
+                "Container Flooring Plywood": [
+                    { Category: "Container Flooring Plywood", Glue: "Melamine Urea Formaldehyde (MUF)", Thickness_mm: 28, Length_ft: 8, Breadth_ft: 4, Grade: "IS:4990/ISO 1499, Hardwood, BWP (Boiling Water Proof)", Fixed_Weight_kg: 65, Price_INR_per_sqft: 90 },
+                    { Category: "Container Flooring Plywood", Glue: "Phenol Formaldehyde (PF)", Thickness_mm: 28, Length_ft: 8, Breadth_ft: 4, Grade: "IS:4990/ISO 1499, Hardwood, BWP (Boiling Water Proof)", Fixed_Weight_kg: 65, Price_INR_per_sqft: 90 },
+                ],
+
+                "Particle Board": [
+                    { Category: "Particle Board", Grade: "Laminated", Thickness_mm: 18, Density_kg_per_m3: DENSITY_STANDARD, Length_ft: 8, Breadth_ft: 4, Price_INR_per_sqft: 31.5 },
+                    { Category: "Particle Board", Grade: "Laminated", Thickness_mm: 9, Density_kg_per_m3: DENSITY_STANDARD, Length_ft: 8, Breadth_ft: 4, Price_INR_per_sqft: 28.5 },
+                    { Category: "Particle Board", Grade: "Mother Board", Thickness_mm: 18, Density_kg_per_m3: DENSITY_STANDARD, Length_ft: 8, Breadth_ft: 4, Price_INR_per_sqft: 23.5 },
+                    { Category: "Particle Board", Grade: "Mother Board", Thickness_mm: 9, Density_kg_per_m3: DENSITY_STANDARD, Length_ft: 8, Breadth_ft: 4, Price_INR_per_sqft: 20.5 },
+                ],
+            };
+
+            const ALL_PRODUCTS = [];
+            const labelToProduct = new Map();
+
+            const formatLabel = (cat, e) => {
+                const parts = [cat];
+                if (e.Grade) parts.push(e.Grade);
+                if (e.FaceVeneer) parts.push(e.FaceVeneer);
+                if (e.Glue) parts.push(`Glue: ${e.Glue}`);
+                if (e.FilmFaceColor) parts.push(`Color: ${e.FilmFaceColor}`);
+                if (e.FilmFaceGSM) parts.push(`${e.FilmFaceGSM} GSM`);
+                if (e.MeshLevel !== undefined) parts.push(`Mesh ${e.MeshLevel}`);
+                if (e.Weight_kg) parts.push(`${e.Weight_kg} kg`);
+                if (e.Thickness_mm) parts.push(`${e.Thickness_mm}mm`);
+                if (e.Length_ft && e.Breadth_ft) parts.push(`${e.Length_ft}ft x ${e.Breadth_ft}ft`);
+                const rate = e.Price_INR_per_sqft != null ? `₹${e.Price_INR_per_sqft}/sqft` : '';
+                return `${parts.join(' - ')}${rate ? ' - ' + rate : ''}`;
+            };
+
+            for (const [cat, list] of Object.entries(PRODUCTS)) {
+                for (const e of list) {
+                    const label = formatLabel(cat, e);
+                    const record = { label, ...e };
+                    ALL_PRODUCTS.push(record);
+                    labelToProduct.set(label, record);
+                }
+            }
+
+            // Populate datalist options
+            const datalistEl = document.getElementById('product-list');
+            if (datalistEl) {
+                datalistEl.innerHTML = '';
+                const frag = document.createDocumentFragment();
+                for (const rec of ALL_PRODUCTS) {
+                    const opt = document.createElement('option');
+                    opt.value = rec.label;
+                    frag.appendChild(opt);
+                }
+                datalistEl.appendChild(frag);
+            }
 
             // Function to pad a number with a leading zero if it's a single digit
             const pad = (num) => (num < 10 ? '0' : '') + num;
@@ -584,6 +895,28 @@
                         </button>
                     </td>
                 `;
+
+                // Auto-fill row when a known product is selected
+                const particularsInput = tr.querySelector('.item-particulars');
+                particularsInput.addEventListener('change', () => {
+                    const rec = labelToProduct.get(particularsInput.value);
+                    if (!rec) return;
+                    const thkEl = tr.querySelector('.item-thk');
+                    const lenEl = tr.querySelector('.item-len');
+                    const brdEl = tr.querySelector('.item-brd');
+                    const rateEl = tr.querySelector('.item-rate');
+                    if (rec.Thickness_mm != null) thkEl.value = rec.Thickness_mm;
+                    if (rec.Length_ft != null) lenEl.value = rec.Length_ft;
+                    if (rec.Breadth_ft != null) brdEl.value = rec.Breadth_ft;
+                    if (rec.Price_INR_per_sqft != null) rateEl.value = rec.Price_INR_per_sqft;
+                    // Recalculate row values
+                    const qty = parseFloat(tr.querySelector('.item-qty').value) || 0;
+                    const sqft = (parseFloat(lenEl.value)||0) * (parseFloat(brdEl.value)||0) * qty;
+                    const amount = sqft * (parseFloat(rateEl.value)||0);
+                    tr.querySelector('.item-sqft').textContent = sqft.toFixed(2);
+                    tr.querySelector('.item-amount').textContent = amount.toFixed(2);
+                    updateTotals();
+                });
 
                 const inputs = tr.querySelectorAll('.item-thk, .item-len, .item-brd, .item-qty, .item-rate');
                 inputs.forEach(input => {
