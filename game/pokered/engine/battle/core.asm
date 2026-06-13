@@ -3149,6 +3149,7 @@ PlayerCalcMoveDamage:
 .moveHitTest
 	call MoveHitTest
 HandleIfPlayerMoveMissed:
+	callfar QuizPlayerAttack ; Quiz Battle: a correct answer lands the hit, a wrong one misses
 	ld a, [wMoveMissed]
 	and a
 	jr z, GetPlayerAnimationType

@@ -2252,6 +2252,16 @@ wBoxMonNicksEnd::
 wBoxDataEnd::
 
 
+SECTION "Quiz Battle RAM", WRAMX
+
+; Scratch used by the educational Quiz Battle engine (engine/battle/quiz.asm).
+wQuizQuestionText:: dw  ; pointer to the current question string
+wQuizAnswersPtr::   dw  ; pointer to the current answer-pointer table
+wQuizCorrectIndex:: db  ; which answer (0-based) is correct
+wQuizNumAnswers::   db  ; how many answers are shown
+wQuizAttemptsLeft:: db  ; tries remaining for this question
+
+
 SECTION "Stack", WRAM0
 
 ; the stack grows downward

@@ -204,6 +204,11 @@ INCLUDE "engine/battle/core.asm"
 INCLUDE "engine/battle/effects.asm"
 
 
+SECTION "Quiz Battle", ROMX
+
+INCLUDE "engine/battle/quiz.asm"
+
+
 SECTION "bank10", ROMX
 
 INCLUDE "engine/menus/pokedex.asm"
