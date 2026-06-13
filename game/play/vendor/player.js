@@ -334,6 +334,32 @@ class Emulator {
     } catch (e) { /* ignore */ }
   }
 
+  // --- Named save slots (per-ROM). Used by the menu UI in build_player.py. ---
+  saveStateToSlot(slot) {
+    const buf = this.withNewStateFileData((fileDataPtr, buffer) => {
+      this.module._emulator_write_state(this.e, fileDataPtr);
+      return new Uint8Array(buffer);
+    });
+    try {
+      localStorage.setItem(saveStateKey + ':' + slot, JSON.stringify(Array.from(buf)));
+      localStorage.setItem(saveStateKey + ':' + slot + ':ts', String(Date.now()));
+    } catch (e) { /* ignore */ }
+  }
+
+  loadStateFromSlot(slot) {
+    let saved;
+    try { saved = localStorage.getItem(saveStateKey + ':' + slot); } catch (e) {}
+    if (!saved) return false;
+    const stateBuffer = new Uint8Array(JSON.parse(saved));
+    this.withNewStateFileData((fileDataPtr, buffer) => {
+      if (buffer.byteLength === stateBuffer.byteLength) {
+        buffer.set(new Uint8Array(stateBuffer));
+        this.module._emulator_read_state(this.e, fileDataPtr);
+      }
+    });
+    return true;
+  }
+
   get isPaused() { return this.rafCancelToken === null; }
 
   pause() {
@@ -667,6 +693,27 @@ class Emulator {
   setJoypB(set) { this.module._set_joyp_B(this.e, set); }
   setJoypA(set) { this.module._set_joyp_A(this.e, set); }
 }
+
+// Multiple save slots, keyed per-ROM. Exposed for the menu UI (build_player.py).
+// __pqSave returns false if no game is running yet; __pqSlots reports which
+// slots are occupied and when they were last written.
+window.__pqSave = function (slot) {
+  if (!emulator) return false;
+  emulator.saveStateToSlot(slot);
+  return true;
+};
+window.__pqLoad = function (slot) {
+  return emulator ? emulator.loadStateFromSlot(slot) : false;
+};
+window.__pqSlots = function () {
+  const out = [];
+  for (let i = 1; i <= 3; i++) {
+    let ts = 0;
+    try { const v = localStorage.getItem(saveStateKey + ':' + i + ':ts'); if (v) ts = +v; } catch (e) {}
+    out.push({ slot: i, ts: ts, used: ts > 0 });
+  }
+  return out;
+};
 
 class Audio {
   constructor(module, e) {

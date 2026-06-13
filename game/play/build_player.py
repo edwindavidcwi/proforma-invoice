@@ -238,43 +238,146 @@ body { display: flex; flex-direction: column; }
 /* Let the game area fill whatever height the wrapped bar leaves. */
 #game { position: relative; top: 0; bottom: auto; flex: 1 1 auto; padding-top: 14px; }
 #hint { color: #98bccf; }
+
+/* ===================== Console UI v3 (menu-driven, save slots) ===================== */
+:root { --gold:#ffcb05; }
+/* Minimal top bar: title + two quick actions (Pause, Menu). Everything else
+   lives in the slide-up menu, so the play area stays clean and uncluttered. */
+#toolbar {
+  flex: 0 0 auto; flex-wrap: nowrap; overflow: visible;
+  align-items: center; gap: 10px; padding: 10px 14px;
+  background: linear-gradient(180deg, #0e2838, #071620);
+  border-bottom: 3px solid var(--gold);
+}
+#toolbar .title {
+  display: flex; align-items: center; gap: 9px; width: auto; margin: 0 auto 0 0;
+  font-size: 15px; font-weight: 800; letter-spacing: 1.4px; text-transform: uppercase;
+  color: var(--gold); text-shadow: 0 1px 2px rgba(0,0,0,.5); opacity: 1;
+}
+#led {
+  width: 9px; height: 9px; border-radius: 50%; flex: 0 0 auto;
+  background: radial-gradient(circle at 35% 30%, #ff6d6d, #c5121f 70%); box-shadow: 0 0 8px #ff3b3b;
+}
+.quick { display: flex; gap: 9px; flex: 0 0 auto; }
+.quick button {
+  min-height: 44px; padding: 10px 16px; font-size: 14px; font-weight: 700; border: 0;
+  border-radius: 12px; cursor: pointer; color: #fff;
+  background: linear-gradient(180deg, #4a6fc4, #33508f);
+  box-shadow: 0 3px 0 rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.18);
+}
+#btnMenu { background: linear-gradient(180deg, #ffd23f, #f0a818); color: #3a2600; }
+.quick button:active { transform: translateY(2px); box-shadow: inset 0 2px 6px rgba(0,0,0,.4); }
+#btnPause.on { background: linear-gradient(180deg, #7fe0a3, #39ad6b); color: #04361d; }
+
+/* Handheld-console screen housing. */
+#game { padding-top: 18px; }
+#screenwrap {
+  position: relative; padding: 14px 14px 24px; border-radius: 24px;
+  background: linear-gradient(160deg, #2c4255, #16242e);
+  box-shadow: 0 18px 42px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.07),
+              inset 0 0 0 1px rgba(0,0,0,.25);
+}
+#screenwrap::after {  /* speaker grille */
+  content: ""; position: absolute; left: 50%; transform: translateX(-50%); bottom: 9px;
+  width: 64px; height: 7px; border-radius: 6px; opacity: .65;
+  background: repeating-linear-gradient(90deg, #0a141b 0 3px, transparent 3px 6px);
+}
+#game canvas {
+  display: block; width: min(90vw, calc((100vh - 320px) * 1.1111)); height: auto;
+  border: 8px solid #0c161d; border-radius: 10px; background: #0b1418;
+  box-shadow: inset 0 0 0 2px #1d2c38, 0 6px 18px rgba(0,0,0,.5);
+}
+#hint { bottom: 10px; font-size: 11px; color: #8fb3c6; padding: 0 14px; }
+
+/* ---- slide-up menu sheet ---- */
+#menu {
+  display: none; position: fixed; inset: 0; z-index: 50;
+  background: rgba(2,10,15,.66); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  align-items: flex-end; justify-content: center;
+}
+#menu.show { display: flex; }
+@media (min-width: 760px) { #menu { align-items: center; } }
+#menu_card {
+  width: 100%; max-width: 560px; max-height: 86vh; display: flex; flex-direction: column;
+  color: #eaf3f8; background: linear-gradient(180deg, #0f2937, #0a1922);
+  border: 1px solid rgba(255,255,255,.10); border-top: 4px solid var(--gold);
+  border-radius: 20px 20px 0 0; box-shadow: 0 -10px 40px rgba(0,0,0,.6);
+  animation: pq_slideup .22s ease;
+}
+@media (min-width: 760px) { #menu_card { border-radius: 20px; } }
+@keyframes pq_slideup { from { transform: translateY(26px); opacity: .5; } to { transform: none; opacity: 1; } }
+#menu_head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 16px 18px; font-weight: 800; font-size: 18px; color: var(--gold);
+  border-bottom: 1px solid rgba(255,255,255,.08);
+}
+#btnMenuClose {
+  width: 40px; height: 40px; border-radius: 11px; border: 0; cursor: pointer;
+  font-size: 17px; background: #1b3142; color: #cfe2ee;
+}
+#menu_body { padding: 14px 16px 24px; overflow-y: auto; display: grid; gap: 14px; }
+.card {
+  background: rgba(255,255,255,.035); border: 1px solid rgba(255,255,255,.07);
+  border-radius: 14px; padding: 13px 14px;
+}
+.card h3 {
+  margin: 0 0 10px; font-size: 12px; letter-spacing: 1.6px; text-transform: uppercase;
+  color: #9cc0d4; font-weight: 700;
+}
+.btnrow { display: flex; flex-wrap: wrap; gap: 9px; }
+.card button {
+  min-height: 44px; padding: 10px 15px; font-size: 14px; font-weight: 600; border: 0;
+  border-radius: 11px; cursor: pointer; color: #fff;
+  background: linear-gradient(180deg, #33506f, #26405a);
+  box-shadow: 0 2px 0 rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.12);
+}
+.card button:active { transform: translateY(1px); }
+.card button.on { background: linear-gradient(180deg, #ffd23f, #f0a818); color: #3a2600; }
+
+/* segmented speed control inside the menu */
+#menu .seg { display: inline-flex; border-radius: 12px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,.14); }
+#menu .seg .spd { min-height: 48px; min-width: 78px; font-size: 16px; border-radius: 0; box-shadow: none; background: #15303f; color: #fff; }
+#menu .seg .spd.on { background: linear-gradient(180deg, #ffd23f, #f0a818); color: #3a2600; }
+
+/* save slots */
+#slots { display: grid; gap: 9px; }
+.slot {
+  display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 8px;
+  background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
+  border-radius: 12px; padding: 9px 11px;
+}
+.slot-meta { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.slot-meta b { font-size: 14px; }
+.slot-meta span { font-size: 11.5px; color: #8fb3c6; }
+.slot button { min-height: 40px; min-width: 64px; padding: 8px 12px; font-size: 13px; font-weight: 700; border: 0; border-radius: 10px; cursor: pointer; }
+.slot-save { background: linear-gradient(180deg, #4a6fc4, #33508f); color: #fff; }
+.slot-load { background: linear-gradient(180deg, #7fe0a3, #39ad6b); color: #04361d; }
+.slot button:disabled { opacity: .4; cursor: default; }
+
+/* toast */
+#toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px);
+  background: #0c2030; color: #eaf3f8; border: 1px solid var(--gold);
+  padding: 10px 16px; border-radius: 30px; font-size: 13px; font-weight: 600;
+  opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 60;
+}
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 """
 
 BODY_HTML = r"""
   <div id="toolbar">
-    <span class="title">{title}</span>
-    <div class="group">
-      <button id="btnPause" title="Pause or resume the game (or press Space)">&#10073;&#10073; Pause</button>
+    <span class="title"><span id="led"></span>{title}</span>
+    <div class="quick">
+      <button id="btnPause" title="Pause or resume (or press Space)">&#10073;&#10073; Pause</button>
+      <button id="btnMenu" title="Open the menu (saves &amp; settings)">&#9776; Menu</button>
     </div>
-    <div class="group" title="Game speed">
-      <span class="seg">
-        <button class="spd on" data-spd="1">1&times;</button>
-        <button class="spd" data-spd="2">2&times;</button>
-        <button class="spd" data-spd="4">4&times;</button>
-      </span>
-    </div>
-    <div class="group">
-      <button id="btnSound" title="Music / sound on or off">&#128266; Sound</button>
-      <button id="btnRead" title="Read dialogue aloud (text-to-speech)">&#128483; Read: Off</button>
-    </div>
-    <div class="group">
-      <button id="btnFilter" title="Cycle display filter (HD / Smooth / Crisp / LCD)">&#128444; HD</button>
-    </div>
-    <div class="group">
-      <button id="btnSave" title="Save your progress (or press F6)">&#128190; Save</button>
-      <button id="btnLoad" title="Load your saved progress (or press F9)">&#128229; Load</button>
-    </div>
-    <div class="group">
-      <button id="btnFull" title="Toggle fullscreen">&#9974; Full</button>
-      <button id="btnOpen" title="Open a different .gb / .gbc ROM">&#128193; ROM</button>
-    </div>
-    <input id="romFile" type="file" accept=".gb,.gbc,.bin" style="display:none">
   </div>
 
   <div id="game">
-    <div id="brand"><span id="led"></span> {title}</div>
-    <canvas id="mainCanvas" width="160" height="144">No Canvas Support</canvas>
-    <div id="hint">Tap the buttons above to play &middot; Keyboard: Arrows move, X = A, Z = B, Enter = Start, Space = pause</div>
+    <div id="screenwrap">
+      <canvas id="mainCanvas" width="160" height="144">No Canvas Support</canvas>
+    </div>
+    <div id="hint">Arrows move &middot; X = A &middot; Z = B &middot; Enter = Start &middot; Space = pause &middot; tap &#9776; Menu for saves &amp; settings</div>
     <div id="overlay"><div id="overlay_msg"></div></div>
   </div>
 
@@ -290,6 +393,47 @@ BODY_HTML = r"""
     <div id="controller_b" class="roundBtn">B</div>
     <div id="controller_a" class="roundBtn">A</div>
   </div>
+
+  <div id="menu">
+    <div id="menu_card">
+      <div id="menu_head"><span>&#9776; Menu</span><button id="btnMenuClose" title="Close">&#10005;</button></div>
+      <div id="menu_body">
+        <section class="card">
+          <h3>Speed</h3>
+          <span class="seg" title="Game speed">
+            <button class="spd on" data-spd="1">1&times;</button>
+            <button class="spd" data-spd="2">2&times;</button>
+            <button class="spd" data-spd="4">4&times;</button>
+          </span>
+        </section>
+        <section class="card">
+          <h3>Save slots</h3>
+          <div id="slots"></div>
+        </section>
+        <section class="card">
+          <h3>Display</h3>
+          <button id="btnFilter" title="Cycle display filter (HD / Smooth / Crisp / LCD)">&#128444; HD</button>
+        </section>
+        <section class="card">
+          <h3>Audio &amp; reading</h3>
+          <div class="btnrow">
+            <button id="btnSound" title="Music / sound on or off">&#128266; Sound</button>
+            <button id="btnRead" title="Read dialogue aloud (text-to-speech)">&#128483; Read: Off</button>
+          </div>
+        </section>
+        <section class="card">
+          <h3>System</h3>
+          <div class="btnrow">
+            <button id="btnFull" title="Toggle fullscreen">&#9974; Fullscreen</button>
+            <button id="btnOpen" title="Open a different .gb / .gbc ROM">&#128193; Open ROM</button>
+          </div>
+        </section>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+  <input id="romFile" type="file" accept=".gb,.gbc,.bin" style="display:none">
 """
 
 
@@ -519,6 +663,77 @@ SOUND_JS = r"""
 """
 
 
+# Slide-up menu: open/close the sheet and render the multiple save/load slots.
+# Slot persistence lives in player.js (window.__pqSave / __pqLoad / __pqSlots),
+# which key each slot per-ROM so different games don't clobber each other.
+MENU_JS = r"""
+(function () {
+  var menu = document.getElementById('menu');
+  var openBtn = document.getElementById('btnMenu');
+  var closeBtn = document.getElementById('btnMenuClose');
+  var slotsBox = document.getElementById('slots');
+  var toastEl = document.getElementById('toast');
+  if (!menu || !openBtn) return;
+
+  var toastTimer = null;
+  function toast(msg) {
+    if (!toastEl) return;
+    toastEl.textContent = msg;
+    toastEl.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { toastEl.classList.remove('show'); }, 1700);
+  }
+  window.__pqToast = toast;
+
+  function fmt(ts) {
+    if (!ts) return 'Empty';
+    try {
+      var d = new Date(ts);
+      return d.toLocaleDateString() + '  ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    } catch (e) { return 'Saved'; }
+  }
+
+  function renderSlots() {
+    if (!slotsBox) return;
+    var info = (window.__pqSlots && window.__pqSlots()) || [];
+    slotsBox.innerHTML = '';
+    info.forEach(function (s) {
+      var row = document.createElement('div'); row.className = 'slot';
+      var meta = document.createElement('div'); meta.className = 'slot-meta';
+      var name = document.createElement('b'); name.textContent = 'Slot ' + s.slot;
+      var when = document.createElement('span'); when.textContent = s.used ? fmt(s.ts) : 'Empty';
+      meta.appendChild(name); meta.appendChild(when);
+
+      var save = document.createElement('button'); save.className = 'slot-save'; save.textContent = 'Save';
+      var load = document.createElement('button'); load.className = 'slot-load'; load.textContent = 'Load';
+      if (!s.used) load.disabled = true;
+
+      save.addEventListener('click', function () {
+        if (window.__pqSave && window.__pqSave(s.slot)) { toast('Saved to slot ' + s.slot); renderSlots(); }
+        else toast('Start the game first, then save');
+      });
+      load.addEventListener('click', function () {
+        if (window.__pqLoad && window.__pqLoad(s.slot)) { toast('Loaded slot ' + s.slot); close(); }
+        else toast('Slot ' + s.slot + ' is empty');
+      });
+
+      row.appendChild(meta); row.appendChild(save); row.appendChild(load);
+      slotsBox.appendChild(row);
+    });
+  }
+
+  function open() { renderSlots(); menu.classList.add('show'); }
+  function close() { menu.classList.remove('show'); }
+
+  openBtn.addEventListener('click', open);
+  if (closeBtn) closeBtn.addEventListener('click', close);
+  // Tap the dimmed backdrop (outside the card) to close.
+  menu.addEventListener('click', function (e) { if (e.target === menu) close(); });
+  window.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+})();
+"""
+
+
 def read_text(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -585,6 +800,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -602,6 +818,7 @@ def main():
         TTS_JS,
         SOUND_JS,
         PAUSE_JS,
+        MENU_JS,
     )
 
     with open(args.out, "w", encoding="utf-8") as f:
