@@ -203,8 +203,8 @@ QuizAsk::
 ; Draw the question box, the question, the answers, and prime the menu.
 QuizDrawScreen::
 	ldh a, [hUILayoutFlags]
-	set BIT_DOUBLE_SPACED_MENU, a  ; answers on every other row, easier to read
-	ldh [hUILayoutFlags], a
+	res BIT_DOUBLE_SPACED_MENU, a  ; cursor steps 2 rows, matching answers placed
+	ldh [hUILayoutFlags], a        ; on every other row (see QuizPrintAnswers)
 	hlcoord 0, 6
 	ld b, 10
 	ld c, 18
