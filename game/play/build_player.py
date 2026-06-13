@@ -50,7 +50,8 @@ body {
 
 #game {
   display: flex; flex-direction: column; align-items: center;
-  justify-content: center; position: absolute; top: 52px; bottom: 0;
+  justify-content: flex-start; padding-top: 10px;
+  position: absolute; top: 50px; bottom: 0;
   width: 100%; touch-action: none; background:
     radial-gradient(ellipse at center, #103043 0%, #06141c 100%);
 }
@@ -138,12 +139,16 @@ body {
 body { background: linear-gradient(165deg, #0e2735 0%, #06131b 60%, #03090d 100%); }
 #toolbar {
   background: linear-gradient(180deg, #0d2433, #06141c);
-  box-shadow: 0 2px 12px rgba(0,0,0,0.45); gap: 7px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.45); gap: 6px;
+  flex-wrap: nowrap; overflow-x: auto; overflow-y: hidden;
+  -webkit-overflow-scrolling: touch; scrollbar-width: none;
 }
-#toolbar .title { font-size: 17px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); }
+#toolbar::-webkit-scrollbar { display: none; }
+#toolbar .title { font-size: 15px; text-shadow: 0 1px 2px rgba(0,0,0,0.5); flex: 0 0 auto; }
 #toolbar button {
+  flex: 0 0 auto; white-space: nowrap;
   background: linear-gradient(180deg, #4a6fc4, #33508f);
-  border-radius: 9px; padding: 8px 13px;
+  border-radius: 9px; padding: 7px 10px; font-size: 12px;
   box-shadow: 0 2px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.18);
 }
 #toolbar button:active { transform: translateY(1px); box-shadow: inset 0 2px 5px rgba(0,0,0,0.4); }
@@ -166,8 +171,8 @@ body { background: linear-gradient(165deg, #0e2735 0%, #06131b 60%, #03090d 100%
   box-shadow: 0 0 7px #ff3b3b;
 }
 #game canvas {
-  width: min(90vw, calc((100vh - 160px) * 1.1111));
-  border: 12px solid #25394a; border-radius: 16px;
+  width: min(92vw, calc((100vh - 300px) * 1.1111));
+  border: 10px solid #25394a; border-radius: 14px;
   box-shadow: 0 14px 32px rgba(0,0,0,0.55), inset 0 0 0 3px #16242e, 0 0 0 1px #0a141b;
   background: #0b1418;
 }
@@ -208,6 +213,7 @@ BODY_HTML = r"""
       <button class="spd" data-spd="2">2&times;</button>
       <button class="spd" data-spd="4">4&times;</button>
     </span>
+    <button id="btnSound" title="Music / sound on or off">&#128266; Sound: On</button>
     <button id="btnSave"  title="Save game state (or press F6)">Save</button>
     <button id="btnLoad"  title="Load game state (or press F9)">Load</button>
     <button id="btnFull"  title="Toggle fullscreen">Fullscreen</button>
@@ -398,6 +404,30 @@ TTS_JS = r"""
 """
 
 
+# Sound on/off switch. Toggles the emulator volume (vm.volume) and resumes the
+# audio context. Default on; choice persisted.
+SOUND_JS = r"""
+(function () {
+  var btn = document.getElementById('btnSound');
+  if (!btn) return;
+  var on = true;
+  try { if (localStorage.getItem('pq_sound') === '0') on = false; } catch (e) {}
+  function apply() {
+    if (window.__vm) window.__vm.volume = on ? 0.5 : 0;
+    if (on && window.__resumeAudio) window.__resumeAudio();
+    btn.textContent = '🔊 Sound: ' + (on ? 'On' : 'Off');
+    btn.classList.toggle('on', on);
+    try { localStorage.setItem('pq_sound', on ? '1' : '0'); } catch (e) {}
+  }
+  btn.addEventListener('click', function () { on = !on; apply(); });
+  // vm is created when the ROM loads (async); apply once it's ready.
+  var tries = 0, t = setInterval(function () {
+    if (window.__vm || tries++ > 60) { apply(); if (window.__vm) clearInterval(t); }
+  }, 100);
+})();
+"""
+
+
 def read_text(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -462,6 +492,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -477,6 +508,7 @@ def main():
         SPEED_JS,
         PWA_JS,
         TTS_JS,
+        SOUND_JS,
     )
 
     with open(args.out, "w", encoding="utf-8") as f:

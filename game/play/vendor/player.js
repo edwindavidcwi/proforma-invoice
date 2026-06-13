@@ -126,6 +126,7 @@ class VM {
 };
 
 const vm = new VM();
+window.__vm = vm; // exposed for the Sound on/off toggle (vm.volume)
 
 // Load a ROM ArrayBuffer into the emulator and start it.
 function startRom(module, romBuffer, romName) {
@@ -699,7 +700,13 @@ class Audio {
     const nowPlusLatency = nowSec + AUDIO_LATENCY_SEC;
     const volume = vm.volume;
     this.startSec = (this.startSec || nowPlusLatency);
-    if (this.startSec >= nowSec) {
+    // Resync if we've fallen behind, OR run too far ahead (e.g. at 2x/4x speed
+    // the core generates audio faster than real time). Without this cap the
+    // scheduled time races ahead unbounded and playback eventually stalls.
+    if (this.startSec < nowSec || this.startSec > nowSec + 0.5) {
+      this.startSec = nowPlusLatency;
+    }
+    {
       const buffer = Audio.ctx.createBuffer(2, AUDIO_FRAMES, this.sampleRate);
       const channel0 = buffer.getChannelData(0);
       const channel1 = buffer.getChannelData(1);
@@ -713,8 +720,6 @@ class Audio {
       bufferSource.start(this.startSec);
       const bufferSec = AUDIO_FRAMES / this.sampleRate;
       this.startSec += bufferSec;
-    } else {
-      this.startSec = nowPlusLatency;
     }
   }
 
@@ -741,6 +746,13 @@ class Audio {
 }
 
 Audio.ctx = new AudioContext;
+// Keep audio alive: mobile browsers suspend the AudioContext when the tab/app
+// loses focus or the screen locks. Resume it whenever we regain focus or the
+// user touches the screen. Exposed so UI controls can resume it too.
+window.__resumeAudio = function () { try { if (Audio.ctx.state === 'suspended') Audio.ctx.resume(); } catch (e) {} };
+document.addEventListener('visibilitychange', function () { if (!document.hidden) window.__resumeAudio(); });
+window.addEventListener('pointerdown', window.__resumeAudio, true);
+window.addEventListener('focus', window.__resumeAudio);
 
 class Video {
   constructor(module, e, el) {
