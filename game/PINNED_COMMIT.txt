@@ -1,0 +1,10 @@
+Vendored upstream: pret/pokered
+Pinned commit: d70d99ffbd329473d96eaaf19fd97c86d2220b7f
+Upstream URL:  https://github.com/pret/pokered
+Toolchain:     RGBDS v1.0.1 (see game/pokered/.rgbds-version)
+
+The contents of game/pokered/ started as an unmodified checkout of the commit
+above. Educational "Quiz Battle" modifications are layered on top (see
+game/README.md for the list of changed/added files). Baseline (unmodified)
+build sha1 of pokered.gbc: ea9bcae617fdf159b045185467ae58b2e4a48b9a
+(this is the official Pokemon Red checksum, confirming a correct toolchain).
