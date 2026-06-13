@@ -16,6 +16,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write   # needed to publish the APK as a Release asset
     steps:
       - uses: actions/checkout@v4
 
@@ -54,9 +56,20 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Upload the APK
+      - name: Upload the APK (artifact)
         uses: actions/upload-artifact@v4
         with:
           name: PokemonQuiz-apk
           path: game/android-app/app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+
+      - name: Publish the APK as a Release (clean direct download link)
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          cp game/android-app/app/build/outputs/apk/debug/app-debug.apk PokemonQuiz.apk
+          gh release delete pokemon-quiz-app --yes --cleanup-tag 2>/dev/null || true
+          gh release create pokemon-quiz-app PokemonQuiz.apk \
+            --title "Pokemon Quiz - Android app" \
+            --notes "Installable Android app (offline). Download **PokemonQuiz.apk** below, open it on your phone, and allow installing from this source." \
+            --target "$GITHUB_SHA"
