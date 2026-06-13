@@ -56,9 +56,21 @@ body {
 }
 #game canvas {
   width: min(100vw, calc((100vh - 52px) * 1.111)); height: auto;
+  image-rendering: auto;            /* default: Smooth (bilinear upscale) */
+  background: #000;
+}
+/* Crisp: show the original hard pixels. */
+#game canvas.crisp {
   image-rendering: -moz-crisp-edges; image-rendering: -webkit-crisp-edges;
   image-rendering: pixelated; image-rendering: crisp-edges;
-  background: #000;
+}
+/* LCD: smooth image plus subtle horizontal scanlines, like a handheld screen. */
+#game.lcd::after {
+  content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 10;
+  background: repeating-linear-gradient(
+    to bottom, rgba(0,0,0,0.16) 0, rgba(0,0,0,0.16) 1px,
+    transparent 1px, transparent 3px);
+  mix-blend-mode: multiply;
 }
 
 #overlay {
@@ -129,6 +141,7 @@ BODY_HTML = r"""
     <button id="btnSave"  title="Save game state (or press F6)">Save</button>
     <button id="btnLoad"  title="Load game state (or press F9)">Load</button>
     <button id="btnFull"  title="Toggle fullscreen">Fullscreen</button>
+    <button id="btnFilter" title="Cycle display filter (Smooth / Crisp / LCD)">Filter: Smooth</button>
     <button id="btnOpen"  title="Open a different .gb / .gbc ROM">Open ROM</button>
     <input id="romFile" type="file" accept=".gb,.gbc,.bin" style="display:none">
   </div>
@@ -151,6 +164,35 @@ BODY_HTML = r"""
     <div id="controller_b" class="roundBtn">B</div>
     <div id="controller_a" class="roundBtn">A</div>
   </div>
+"""
+
+
+# Display-filter control. Cycles the canvas between Smooth (bilinear, default),
+# Crisp (original pixels), and LCD (smooth + scanlines). Works for both the
+# WebGL and Canvas2D renderers because the 160x144 canvas is CSS-scaled either
+# way. The choice is remembered in localStorage.
+FILTER_JS = r"""
+(function () {
+  var canvas = document.getElementById('mainCanvas');
+  var game = document.getElementById('game');
+  var btn = document.getElementById('btnFilter');
+  if (!canvas || !game || !btn) return;
+  var modes = [['smooth', 'Smooth'], ['crisp', 'Crisp'], ['lcd', 'LCD']];
+  var i = 0;
+  try {
+    var saved = localStorage.getItem('pq_filter');
+    for (var k = 0; k < modes.length; k++) if (modes[k][0] === saved) i = k;
+  } catch (e) {}
+  function apply() {
+    var key = modes[i][0];
+    canvas.classList.toggle('crisp', key === 'crisp');
+    game.classList.toggle('lcd', key === 'lcd');
+    btn.textContent = 'Filter: ' + modes[i][1];
+    try { localStorage.setItem('pq_filter', key); } catch (e) {}
+  }
+  btn.addEventListener('click', function () { i = (i + 1) % modes.length; apply(); });
+  apply();
+})();
 """
 
 
@@ -214,6 +256,7 @@ def main():
         "  </script>\n"
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -225,6 +268,7 @@ def main():
         rom_b64,
         emu_js,
         wrap_js,
+        FILTER_JS,
     )
 
     with open(args.out, "w", encoding="utf-8") as f:
