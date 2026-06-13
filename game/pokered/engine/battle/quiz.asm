@@ -174,6 +174,40 @@ QuizAsk::
 	ld [wQuizAnswersPtr], a
 	ld a, h
 	ld [wQuizAnswersPtr + 1], a
+	; Pick a random rotation k in [0, numAnswers) so the answers appear in a
+	; different on-screen order every time -- kids must read and compute the
+	; answer instead of memorizing a fixed slot.
+	call Random
+	ld c, a                        ; c = random byte
+	ld a, [wQuizNumAnswers]
+	ld b, a                        ; b = n (reloaded after Random in case it clobbers)
+	ld a, c
+.modK
+	cp b
+	jr c, .haveK
+	sub b
+	jr .modK
+.haveK
+	ld [wQuizRotate], a            ; k in [0, n)
+	; The correct answer is shown at display slot (correctIndex + n - k) mod n.
+	ld a, [wQuizCorrectIndex]
+	ld b, a                        ; b = correct (original index)
+	ld a, [wQuizNumAnswers]
+	add b                          ; a = n + correct
+	ld b, a
+	ld a, [wQuizRotate]
+	ld c, a                        ; c = k
+	ld a, b
+	sub c                          ; a = n + correct - k  (in [1, 2n-1])
+	ld b, a
+	ld a, [wQuizNumAnswers]
+	ld c, a                        ; c = n
+	ld a, b
+	cp c
+	jr c, .haveCorrect
+	sub c                          ; one subtraction suffices (value < 2n)
+.haveCorrect
+	ld [wQuizCorrectIndex], a      ; correct index, now in display space
 	ld a, QUIZ_MAX_ATTEMPTS
 	ld [wQuizAttemptsLeft], a
 .attempt
@@ -232,33 +266,54 @@ QuizDrawScreen::
 	ld [wMenuWrappingEnabled], a
 	ret
 
-; Print up to 4 answers down the left of the box, double-spaced from row 9.
+; Print the answers down the left of the box, double-spaced from row 9, in the
+; rotated order chosen in QuizAsk: display slot s shows the original answer at
+; index (s + wQuizRotate) mod numAnswers.
 QuizPrintAnswers::
-	ld a, [wQuizAnswersPtr]
-	ld c, a
-	ld a, [wQuizAnswersPtr + 1]
-	ld b, a                        ; bc = pointer into the answer table
-	ld a, [wQuizNumAnswers]
-	hlcoord 2, 9                   ; hl = destination tile
+	xor a
+	ld [wQuizSlot], a              ; start at display slot 0
+	hlcoord 2, 9                   ; hl = destination tile for slot 0
 .loop
-	and a
-	ret z
-	dec a
-	push af                        ; save remaining count
+	ld a, [wQuizSlot]
+	ld b, a                        ; b = slot
+	ld a, [wQuizNumAnswers]
+	cp b
+	ret z                          ; printed every slot -> done
+	; original answer index o = (slot + k) mod n
+	ld a, [wQuizRotate]
+	add b                          ; k + slot
+	ld c, a
+	ld a, [wQuizNumAnswers]
+	ld b, a                        ; b = n
+	ld a, c
+.mod
+	cp b
+	jr c, .haveIndex
+	sub b
+	jr .mod
+.haveIndex
+	add a                          ; o * 2 (answer pointers are 2 bytes)
+	ld c, a
+	ld b, 0
 	push hl                        ; save destination
-	ld a, [bc]
-	inc bc
+	ld a, [wQuizAnswersPtr]
+	ld l, a
+	ld a, [wQuizAnswersPtr + 1]
+	ld h, a
+	add hl, bc                     ; hl -> chosen answer pointer
+	ld a, [hli]
 	ld e, a
-	ld a, [bc]
-	inc bc
+	ld a, [hl]
 	ld d, a                        ; de = answer string
-	push bc                        ; save table cursor across PlaceString
+	pop hl                         ; restore destination
+	push hl                        ; keep it across PlaceString
 	call PlaceString
-	pop bc
 	pop hl
 	ld de, 2 * SCREEN_WIDTH        ; advance two rows (double spaced)
 	add hl, de
-	pop af
+	ld a, [wQuizSlot]
+	inc a
+	ld [wQuizSlot], a
 	jr .loop
 
 INCLUDE "engine/battle/quiz_data.asm"

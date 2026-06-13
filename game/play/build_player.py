@@ -365,6 +365,23 @@ body { display: flex; flex-direction: column; }
   opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; z-index: 60;
 }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ---- "Big screen" immersive mode ----
+   A pure-CSS toggle that hides the top bar and enlarges the screen. It works
+   everywhere (even where the Fullscreen API is blocked, e.g. a file opened
+   straight from Downloads); the script also requests real fullscreen as a bonus
+   when the platform allows it. A floating button (and Esc / Back) exits. */
+#btnExitFs {
+  display: none; position: fixed; top: 12px; right: 12px; z-index: 70;
+  width: 46px; height: 46px; border-radius: 50%; border: 0; cursor: pointer;
+  font-size: 18px; color: #fff; background: rgba(13,36,51,.82);
+  box-shadow: 0 2px 10px rgba(0,0,0,.5), inset 0 1px 0 rgba(255,255,255,.18);
+}
+body.immersive #btnExitFs { display: block; }
+body.immersive #toolbar { display: none; }
+body.immersive #game { padding-top: 8px; }
+body.immersive #screenwrap { padding: 8px 8px 14px; border-radius: 12px; }
+body.immersive #game canvas { width: min(98vw, calc((100vh - 30px) * 1.1111)); }
 """
 
 BODY_HTML = r"""
@@ -427,7 +444,7 @@ BODY_HTML = r"""
         <section class="card">
           <h3>System</h3>
           <div class="btnrow">
-            <button id="btnFull" title="Toggle fullscreen">&#9974; Fullscreen</button>
+            <button id="btnFull" title="Make the game fill the screen">&#9974; Big screen</button>
             <button id="btnOpen" title="Open a different .gb / .gbc ROM">&#128193; Open ROM</button>
           </div>
         </section>
@@ -435,6 +452,7 @@ BODY_HTML = r"""
     </div>
   </div>
 
+  <button id="btnExitFs" title="Exit big screen">&#10005;</button>
   <div id="toast"></div>
   <input id="romFile" type="file" accept=".gb,.gbc,.bin" style="display:none">
 """
@@ -728,19 +746,55 @@ MENU_JS = r"""
   function open() { renderSlots(); menu.classList.add('show'); }
   function close() { menu.classList.remove('show'); }
 
-  // Inside the Android app the whole screen is already immersive full-screen, so
-  // the web "Fullscreen" button does nothing useful there -- hide it to avoid
-  // confusion. (window.AndroidTTS only exists in the native app wrapper.)
-  if (window.AndroidTTS) {
-    var fb = document.getElementById('btnFull');
-    if (fb) fb.style.display = 'none';
-  }
-
   openBtn.addEventListener('click', open);
   if (closeBtn) closeBtn.addEventListener('click', close);
   // Tap the dimmed backdrop (outside the card) to close.
   menu.addEventListener('click', function (e) { if (e.target === menu) close(); });
   window.addEventListener('keydown', function (e) { if (e.key === 'Escape') close(); });
+})();
+"""
+
+
+# "Big screen" / immersive toggle. Hides the top bar and enlarges the screen via
+# a CSS class (works even when the Fullscreen API is blocked), and also requests
+# real fullscreen when allowed. Exit via the floating button, Esc, or Back.
+FS_JS = r"""
+(function () {
+  var btn = document.getElementById('btnFull');
+  var exitBtn = document.getElementById('btnExitFs');
+  var menu = document.getElementById('menu');
+  function nativeOn() {
+    var el = document.documentElement;
+    var req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) { try { var p = req.call(el); if (p && p.catch) p.catch(function () {}); } catch (e) {} }
+  }
+  function nativeOff() {
+    var ex = document.exitFullscreen || document.webkitExitFullscreen;
+    if ((document.fullscreenElement || document.webkitFullscreenElement) && ex) {
+      try { ex.call(document); } catch (e) {}
+    }
+  }
+  function enter() {
+    document.body.classList.add('immersive');
+    if (menu) menu.classList.remove('show');
+    nativeOn();
+  }
+  function exit() {
+    document.body.classList.remove('immersive');
+    nativeOff();
+  }
+  function toggle() {
+    if (document.body.classList.contains('immersive')) exit(); else enter();
+  }
+  if (btn) btn.addEventListener('click', toggle);
+  if (exitBtn) exitBtn.addEventListener('click', exit);
+  window.addEventListener('keydown', function (e) { if (e.key === 'Escape') exit(); });
+  // If the user leaves native fullscreen (system gesture/Back), drop immersive too.
+  document.addEventListener('fullscreenchange', function () {
+    if (!(document.fullscreenElement || document.webkitFullscreenElement)) {
+      document.body.classList.remove('immersive');
+    }
+  });
 })();
 """
 
@@ -812,6 +866,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -830,6 +885,7 @@ def main():
         SOUND_JS,
         PAUSE_JS,
         MENU_JS,
+        FS_JS,
     )
 
     with open(args.out, "w", encoding="utf-8") as f:

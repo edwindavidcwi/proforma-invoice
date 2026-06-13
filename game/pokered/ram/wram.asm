@@ -2261,6 +2261,8 @@ wQuizCorrectIndex:: db  ; which answer (0-based) is correct
 wQuizNumAnswers::   db  ; how many answers are shown
 wQuizAttemptsLeft:: db  ; tries remaining for this question
 wQuizResult::       db  ; item-use decision: 1 = allow, 0 = deny
+wQuizRotate::       db  ; random rotation applied to the answer order (anti-memorization)
+wQuizSlot::         db  ; scratch: answer slot being drawn
 
 
 SECTION "Stack", WRAM0

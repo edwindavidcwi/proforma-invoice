@@ -197,21 +197,9 @@ window.addEventListener('DOMContentLoaded', () => {
   const loadBtn = $('#btnLoad');
   if (loadBtn) loadBtn.addEventListener('click', () => emulator && emulator.loadState());
 
-  const fsBtn = $('#btnFull');
-  if (fsBtn) fsBtn.addEventListener('click', () => {
-    // Fullscreen the whole page (documentElement), NOT just #game -- otherwise
-    // the browser hides everything outside the game element (toolbar, on-screen
-    // gamepad, menu) and the controls vanish.
-    const doc = document;
-    const el = doc.documentElement;
-    const req = el.requestFullscreen || el.webkitRequestFullscreen;
-    const exit = doc.exitFullscreen || doc.webkitExitFullscreen;
-    if (doc.fullscreenElement || doc.webkitFullscreenElement) {
-      if (exit) exit.call(doc);
-    } else if (req) {
-      req.call(el);
-    }
-  });
+  // The "Big screen" button (#btnFull) is handled by the immersive-mode script
+  // injected by build_player.py, which works even where the Fullscreen API is
+  // blocked (e.g. a file opened directly in a browser).
 
   // Drag-and-drop a ROM onto the window.
   window.addEventListener('dragover', (e) => e.preventDefault());
