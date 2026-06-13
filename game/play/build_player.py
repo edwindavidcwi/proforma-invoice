@@ -147,6 +147,7 @@ body { background: linear-gradient(165deg, #0e2735 0%, #06131b 60%, #03090d 100%
   box-shadow: 0 2px 0 rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.18);
 }
 #toolbar button:active { transform: translateY(1px); box-shadow: inset 0 2px 5px rgba(0,0,0,0.4); }
+#toolbar button.on { background: linear-gradient(180deg, #ffd23f, #f0a818); color: #3a2600; }
 /* segmented speed control */
 .seg { display: inline-flex; border-radius: 9px; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.14); }
 .seg .spd { background: #173042; border-radius: 0; box-shadow: none; padding: 8px 11px; min-width: 40px; }
@@ -211,6 +212,7 @@ BODY_HTML = r"""
     <button id="btnLoad"  title="Load game state (or press F9)">Load</button>
     <button id="btnFull"  title="Toggle fullscreen">Fullscreen</button>
     <button id="btnFilter" title="Cycle display filter (Smooth / Crisp / LCD)">Filter: Smooth</button>
+    <button id="btnRead" title="Read dialogue aloud (text-to-speech)">&#128266; Read: Off</button>
     <button id="btnOpen"  title="Open a different .gb / .gbc ROM">Open ROM</button>
     <input id="romFile" type="file" accept=".gb,.gbc,.bin" style="display:none">
   </div>
@@ -317,6 +319,85 @@ PWA_JS = r"""
 """
 
 
+# Read-aloud (text-to-speech). Scrapes the on-screen text from the emulator's
+# tile buffer (wTileMap @ 0xC3A0), converts Game Boy tiles to text via the
+# pokered charmap, and speaks new dialogue. Major named characters get male /
+# female voices (by keyword); system "notices" use a third voice; everyone else
+# a neutral narrator. Voices differ by pitch/rate so it works on any device.
+TTS_JS = r"""
+(function () {
+  var btn = document.getElementById('btnRead');
+  if (!btn || !window.speechSynthesis) { if (btn) btn.style.display = 'none'; return; }
+  var TILE = 0xC3A0, W = 20;
+  function ch(t) {
+    if (t === 0x7f) return ' ';
+    if (t >= 0x80 && t <= 0x99) return String.fromCharCode(65 + t - 0x80);
+    if (t >= 0xa0 && t <= 0xb9) return String.fromCharCode(97 + t - 0xa0);
+    if (t >= 0xf6 && t <= 0xff) return String.fromCharCode(48 + t - 0xf6);
+    var m = {0x9a:'(',0x9b:')',0x9c:':',0x9d:';',0x9e:'[',0x9f:']',0xe0:"'",0xe3:'-',
+      0xe6:'?',0xe7:'!',0xe8:'.',0xba:'e',0xbb:"'d",0xbc:"'l",0xbd:"'s",0xbe:"'t",
+      0xbf:"'v",0xe4:"'r",0xe5:"'m",0x75:'...',0x54:'Poke',0xe1:'Poke',0xe2:'mon',
+      0x70:"'",0x71:"'",0x72:'"',0x73:'"'};
+    return (t in m) ? m[t] : '';
+  }
+  function readScreenText() {
+    var em = window.__emulator;
+    if (!em || !em.module || !em.e) return '';
+    var rd = function (a) { return em.module._emulator_read_mem(em.e, a); };
+    var rows = [];
+    for (var r = 1; r <= 16; r++) {
+      var line = '', letters = 0;
+      for (var c = 1; c <= 18; c++) {
+        var t = rd(TILE + r * W + c); line += ch(t);
+        if (t >= 0x80 && t <= 0xb9) letters++;
+      }
+      if (letters >= 2) rows.push(line.replace(/\s+$/, ''));
+    }
+    return rows.join(' ').replace(/\s+/g, ' ').trim();
+  }
+  var vMale = null, vFemale = null, vNote = null;
+  function pickVoices() {
+    var all = speechSynthesis.getVoices() || [];
+    var en = all.filter(function (v) { return /^en/i.test(v.lang) || /english/i.test(v.name); });
+    var pool = en.length ? en : all;
+    function f(re) { for (var i = 0; i < pool.length; i++) if (re.test(pool[i].name)) return pool[i]; return null; }
+    vFemale = f(/female|samantha|victoria|zira|fiona|tessa|karen|moira|susan|woman/i) || pool[0] || null;
+    vMale = f(/male|david|daniel|fred|alex|george|james|arthur|man\b/i) || pool[1] || pool[0] || null;
+    vNote = f(/google|en-US|en-GB|english/i) || pool[2] || pool[0] || null;
+  }
+  pickVoices(); speechSynthesis.onvoiceschanged = pickVoices;
+  var FEM = /\b(MOM|MOTHER|NURSE|JOY|MISTY|ERIKA|SABRINA|LORELEI|DAISY|JESSIE|LASS|BEAUTY|LADY|GIRL|SISTER|GRANNY|NIDORINA|CLEFAIRY)\b/;
+  var MAL = /\b(OAK|PROF|GARY|BLUE|BROCK|SURGE|KOGA|BLAINE|GIOVANNI|BRUNO|LANCE|YOUNGSTER|BUG|CATCHER|GENTLEMAN|BOY|MAN|FATHER|DAD|SAILOR|BIKER|ROCKET|GRAMPS|JR)\b/;
+  function kindOf(text) { var U = text.toUpperCase(); if (FEM.test(U)) return 'f'; if (MAL.test(U)) return 'm'; return 'n'; }
+  function speak(text) {
+    var u = new SpeechSynthesisUtterance(text), k = kindOf(text);
+    if (k === 'f') { u.pitch = 1.5; u.rate = 1.0; if (vFemale) u.voice = vFemale; }
+    else if (k === 'm') { u.pitch = 0.6; u.rate = 0.95; if (vMale) u.voice = vMale; }
+    else { u.pitch = 1.05; u.rate = 1.0; if (vNote) u.voice = vNote; }
+    try { speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {}
+  }
+  var prev = '', lastSpoken = '', timer = null, on = false;
+  try { on = localStorage.getItem('pq_read') === '1'; } catch (e) {}
+  function poll() {
+    var t = readScreenText();
+    if (t && t.length >= 6 && !/^ABCDEFGHIJKLMNOP/.test(t) && t === prev && t !== lastSpoken) {
+      lastSpoken = t; speak(t);
+    }
+    prev = t;
+  }
+  function setOn(v) {
+    on = v; btn.textContent = '🔊 Read: ' + (on ? 'On' : 'Off');
+    btn.classList.toggle('on', on);
+    try { localStorage.setItem('pq_read', on ? '1' : '0'); } catch (e) {}
+    if (on) { if (!timer) timer = setInterval(poll, 180); }
+    else { if (timer) { clearInterval(timer); timer = null; } speechSynthesis.cancel(); }
+  }
+  btn.addEventListener('click', function () { setOn(!on); });
+  setOn(on);
+})();
+"""
+
+
 def read_text(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -380,6 +461,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -394,6 +476,7 @@ def main():
         FILTER_JS,
         SPEED_JS,
         PWA_JS,
+        TTS_JS,
     )
 
     with open(args.out, "w", encoding="utf-8") as f:
