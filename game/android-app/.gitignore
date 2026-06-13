@@ -1,0 +1,9 @@
+# The bundled player is a build artifact (copied in by bundle.sh) -- not committed.
+app/src/main/assets/*.html
+# Gradle / build output.
+.gradle/
+build/
+app/build/
+local.properties
+*.iml
+.idea/
