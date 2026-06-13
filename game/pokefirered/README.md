@@ -18,9 +18,13 @@ FireRed is chosen for its much nicer GBA-era graphics.
       miss. Builds cleanly into the ROM; boots in the headless emulator test.
       The UI reuses the engine's own Yes/No window + cursor (a clean 2-choice),
       so the selection always matches the highlighted answer.
+- [x] **Auto-heal after every wild battle** + **no overworld poison** (the
+      forgiving design): `CB2_EndWildBattle`/`CB2_EndScriptedWildBattle` call
+      `HealPlayerParty()`, and `DoPoisonFieldEffect` is disabled. (In
+      `mod/changes.patch`.)
 - [ ] Expand the answer UI to 3–4 choices (custom battle window).
 - [ ] Defense hook (wrong answer → enemy doubled crit) + item-use gate.
-- [ ] Auto-heal after battle, forgiving difficulty, no overworld status.
+- [ ] Auto-heal after trainer battles too.
 - [x] Offline single-file player working (see `../play-gba`).
 
 ## How it's organized

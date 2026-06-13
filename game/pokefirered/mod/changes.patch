@@ -42,3 +42,35 @@
  @ various command changed to more readable macros
  	.macro cancelmultiturnmoves battler:req
  	various \battler, VARIOUS_CANCEL_MULTI_TURN_MOVES
+--- a/src/field_poison.c
++++ b/src/field_poison.c
+@@ -91,6 +91,8 @@
+ 
+ s32 DoPoisonFieldEffect(void)
+ {
++    // Quiz Battle mod: overworld poison never hurts the party (forgiving design).
++    return FLDPSN_NONE;
+     int i;
+     u32 hp;
+     
+--- a/src/battle_setup.c
++++ b/src/battle_setup.c
+@@ -429,6 +429,7 @@
+     }
+     else
+     {
++        HealPlayerParty(); // Quiz Battle mod: full heal after every wild battle.
+         SetMainCallback2(CB2_ReturnToField);
+         gFieldCallback = FieldCB_SafariZoneRanOutOfBalls;
+     }
+@@ -441,7 +442,10 @@
+     if (IsPlayerDefeated(gBattleOutcome) == TRUE)
+         SetMainCallback2(CB2_WhiteOut);
+     else
++    {
++        HealPlayerParty(); // Quiz Battle mod: full heal after every wild battle.
+         SetMainCallback2(CB2_ReturnToFieldContinueScriptPlayMapMusic);
++    }
+ }
+ 
+ static void CB2_EndMarowakBattle(void)
