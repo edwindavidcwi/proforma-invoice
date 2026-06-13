@@ -1,0 +1,98 @@
+// Headless verification harness for the Quiz Battle Red build, using binjgb's
+// debug API (read/write memory, set PC, run). Two checks:
+//
+//   1. Cursor alignment: call the REAL PlaceMenuCursor (home bank, always
+//      mapped) with the quiz's menu setup and confirm the cursor lands on the
+//      same rows the answers are drawn on (9,11,13,15). Clearing
+//      BIT_DOUBLE_SPACED_MENU (the fix) gives the 2-row step the answers use;
+//      SETTING it (the old code) misaligns onto rows 9,10,11,12.
+//   2. Boot stability: the modded ROM boots and the screen advances (no crash).
+//
+// The cursor checks run in the early intro state (no active menu) so the game's
+// own per-frame menu loop can't race with our injected calls.
+//
+// Run:  node test_quiz_cursor.js [path/to/pokered.gbc]
+const fs = require("fs"), path = require("path");
+const Binjgb = require("./vendor/binjgb.js");
+
+const ROM = process.argv[2] || path.join(__dirname, "..", "pokered", "pokered.gbc");
+const TICKS_PER_FRAME = 70224;
+
+// pokered symbol addresses (from pokered.sym)
+const PlaceMenuCursor = 0x3b7c;
+const wTileMap = 0xc3a0, SCREEN_W = 20;
+const wTopMenuItemY = 0xcc24, wTopMenuItemX = 0xcc25, wCurrentMenuItem = 0xcc26;
+const wTileBehindCursor = 0xcc27, wMaxMenuItem = 0xcc28, wLastMenuItem = 0xcc2a;
+const wMenuCursorLocation = 0xcc30, hUILayoutFlags = 0xfff6;
+const BIT_DOUBLE_SPACED_MENU = 1; // bit index 1 -> mask 0x02
+
+let failures = 0;
+const check = (name, cond, detail) => {
+  console.log(`${cond ? "PASS" : "FAIL"}  ${name}${detail ? "  (" + detail + ")" : ""}`);
+  if (!cond) failures++;
+};
+
+(async () => {
+  const module = await Binjgb({ wasmBinary: fs.readFileSync(path.join(__dirname, "vendor", "binjgb.wasm")) });
+  const rom = fs.readFileSync(ROM);
+  const size = (rom.length + 0x7fff) & ~0x7fff;
+  const romPtr = module._malloc(size);
+  module.HEAPU8.fill(0, romPtr, romPtr + size);
+  module.HEAPU8.set(rom, romPtr);
+  const e = module._emulator_new_simple(romPtr, size, 44100, 4096, 0);
+  if (e === 0) throw new Error("emulator_new_simple failed (invalid ROM)");
+
+  const rd = (a) => module._emulator_read_mem(e, a);
+  const wr = (a, v) => module._emulator_write_mem(e, a, v & 0xff);
+  const getPC = () => module._emulator_get_PC(e);
+  const setPC = (a) => module._emulator_set_PC(e, a);
+  const ticks = () => module._emulator_get_ticks_f64(e);
+  const fbPtr = module._get_frame_buffer_ptr(e), fbSize = module._get_frame_buffer_size(e);
+  const fbHash = () => { let h = 2166136261; const b = module.HEAPU8; for (let i = fbPtr; i < fbPtr + fbSize; i += 7) { h = (h ^ b[i]) * 16777619; } return h >>> 0; };
+  const runFrames = (n) => { for (let i = 0; i < n; i++) module._emulator_run_until_f64(e, ticks() + TICKS_PER_FRAME); };
+
+  const h0 = fbHash();
+  runFrames(150); // reach the intro animation: initialized, but no active menu
+
+  // ---- Check 1: cursor alignment via the real PlaceMenuCursor ----
+  const setupMenu = (item, doubleSpacedFlagSet) => {
+    wr(wMenuCursorLocation, 0); wr(wMenuCursorLocation + 1, 0); // clear so a stale value can't pass
+    wr(wTopMenuItemY, 9); wr(wTopMenuItemX, 1);
+    wr(wCurrentMenuItem, item); wr(wLastMenuItem, item);
+    wr(wTileBehindCursor, 0x7f); wr(wMaxMenuItem, 3);
+    const f = rd(hUILayoutFlags);
+    wr(hUILayoutFlags, doubleSpacedFlagSet ? (f | (1 << BIT_DOUBLE_SPACED_MENU)) : (f & ~(1 << BIT_DOUBLE_SPACED_MENU)));
+  };
+  const callAndReadRow = (item, flagSet) => {
+    setupMenu(item, flagSet);
+    setPC(PlaceMenuCursor);
+    module._emulator_run_until_f64(e, ticks() + 5000); // > enough for the routine
+    const loc = rd(wMenuCursorLocation) | (rd(wMenuCursorLocation + 1) << 8);
+    return { row: Math.floor((loc - wTileMap) / SCREEN_W), col: (loc - wTileMap) % SCREEN_W };
+  };
+
+  console.log("-- flag CLEARED (the fix): answers are drawn on rows 9,11,13,15 --");
+  for (let item = 0; item <= 3; item++) {
+    const { row, col } = callAndReadRow(item, false);
+    check(`answer ${item}: cursor on row ${9 + 2 * item}, col 1`, row === 9 + 2 * item && col === 1, `got row=${row} col=${col}`);
+  }
+
+  console.log("\n-- flag SET (the OLD buggy code): cursor steps only 1 row --");
+  let mismatchShown = false;
+  for (let item = 1; item <= 3; item++) {
+    const { row } = callAndReadRow(item, true);
+    if (row !== 9 + 2 * item) mismatchShown = true;
+    console.log(`   answer ${item}: old code -> row ${row} (answer is on row ${9 + 2 * item}) -> ${row === 9 + 2 * item ? "aligned" : "MISALIGNED"}`);
+  }
+  check("regression: old (flag-set) code misaligns, confirming the fix is needed", mismatchShown);
+
+  // ---- Check 2: boot stability soak ----
+  let aborted = false;
+  try { runFrames(1700); } catch (err) { aborted = true; console.log("  abort during run:", err.message || err); }
+  check("boot: no crash/abort over ~1850 frames", !aborted);
+  check("boot: PC stays in ROM/RAM (not 0x0000)", getPC() !== 0x0000, "PC=0x" + getPC().toString(16));
+  check("boot: screen advanced (framebuffer changed)", h0 !== fbHash());
+
+  console.log(`\n${failures === 0 ? "ALL CHECKS PASSED" : failures + " CHECK(S) FAILED"}`);
+  process.exit(failures === 0 ? 0 : 1);
+})().catch((err) => { console.error("harness error:", err); process.exit(2); });
