@@ -12,77 +12,78 @@
 ; Re-run `make` afterwards.
 ; ============================================================================
 
-; One question entry (12 bytes):
-;   quizq QUESTION, CORRECT_INDEX(0-3), NUM_ANSWERS(2-4), ANS0, ANS1, ANS2, ANS3
+; One question entry (14 bytes):
+;   quizq QUESTION, CORRECT_INDEX(0-3), NUM_ANSWERS(2-4), ANS0, ANS1, ANS2, ANS3, HINT
 MACRO quizq
 	dw \1       ; question text
 	db \2       ; index (0-based) of the correct answer
 	db \3       ; how many answers to show
 	dw \4, \5, \6, \7
+	dw \8       ; method hint, shown on a wrong-answer retry
 ENDM
 
 ; Grade lookup: badge count -> grade.  Each entry: list pointer + question count.
 ; Counts are computed from the contiguous entry tables below.
 QuizGradeTable::
 	dw Grade1Questions
-	db (Grade2Questions - Grade1Questions) / 12
+	db (Grade2Questions - Grade1Questions) / 14
 	dw Grade2Questions
-	db (Grade3Questions - Grade2Questions) / 12
+	db (Grade3Questions - Grade2Questions) / 14
 	dw Grade3Questions
-	db (Grade4Questions - Grade3Questions) / 12
+	db (Grade4Questions - Grade3Questions) / 14
 	dw Grade4Questions
-	db (Grade5Questions - Grade4Questions) / 12
+	db (Grade5Questions - Grade4Questions) / 14
 	dw Grade5Questions
-	db (QuestionsEnd - Grade5Questions) / 12
+	db (QuestionsEnd - Grade5Questions) / 14
 
 ; ---- entry tables (must stay contiguous; strings live further down) ----
 Grade1Questions::
-	quizq G1Q1, 1, 3, G1Q1A, G1Q1B, G1Q1C, G1Q1C
-	quizq G1Q2, 2, 3, G1Q2A, G1Q2B, G1Q2C, G1Q2C
-	quizq G1Q3, 0, 3, G1Q3A, G1Q3B, G1Q3C, G1Q3C
-	quizq G1Q4, 1, 3, G1Q4A, G1Q4B, G1Q4C, G1Q4C
-	quizq G1Q5, 2, 3, G1Q5A, G1Q5B, G1Q5C, G1Q5C
-	quizq G1Q6, 1, 3, G1Q6A, G1Q6B, G1Q6C, G1Q6C
-	quizq G1Q7, 1, 3, G1Q7A, G1Q7B, G1Q7C, G1Q7C
-	quizq G1Q8, 1, 3, G1Q8A, G1Q8B, G1Q8C, G1Q8C
-	quizq G1Q9, 0, 3, G1Q9A, G1Q9B, G1Q9C, G1Q9C
-	quizq G1Q10, 2, 3, G1Q10A, G1Q10B, G1Q10C, G1Q10C
+	quizq G1Q1, 1, 3, G1Q1A, G1Q1B, G1Q1C, G1Q1C, G1Q1H
+	quizq G1Q2, 2, 3, G1Q2A, G1Q2B, G1Q2C, G1Q2C, G1Q2H
+	quizq G1Q3, 0, 3, G1Q3A, G1Q3B, G1Q3C, G1Q3C, G1Q3H
+	quizq G1Q4, 1, 3, G1Q4A, G1Q4B, G1Q4C, G1Q4C, G1Q4H
+	quizq G1Q5, 2, 3, G1Q5A, G1Q5B, G1Q5C, G1Q5C, G1Q5H
+	quizq G1Q6, 1, 3, G1Q6A, G1Q6B, G1Q6C, G1Q6C, G1Q6H
+	quizq G1Q7, 1, 3, G1Q7A, G1Q7B, G1Q7C, G1Q7C, G1Q7H
+	quizq G1Q8, 1, 3, G1Q8A, G1Q8B, G1Q8C, G1Q8C, G1Q8H
+	quizq G1Q9, 0, 3, G1Q9A, G1Q9B, G1Q9C, G1Q9C, G1Q9H
+	quizq G1Q10, 2, 3, G1Q10A, G1Q10B, G1Q10C, G1Q10C, G1Q10H
 Grade2Questions::
-	quizq G2Q1, 2, 3, G2Q1A, G2Q1B, G2Q1C, G2Q1C
-	quizq G2Q2, 0, 3, G2Q2A, G2Q2B, G2Q2C, G2Q2C
-	quizq G2Q3, 1, 3, G2Q3A, G2Q3B, G2Q3C, G2Q3C
-	quizq G2Q4, 2, 3, G2Q4A, G2Q4B, G2Q4C, G2Q4C
-	quizq G2Q5, 1, 3, G2Q5A, G2Q5B, G2Q5C, G2Q5C
-	quizq G2Q6, 1, 3, G2Q6A, G2Q6B, G2Q6C, G2Q6C
-	quizq G2Q7, 1, 3, G2Q7A, G2Q7B, G2Q7C, G2Q7C
-	quizq G2Q8, 2, 3, G2Q8A, G2Q8B, G2Q8C, G2Q8C
+	quizq G2Q1, 2, 3, G2Q1A, G2Q1B, G2Q1C, G2Q1C, G2Q1H
+	quizq G2Q2, 0, 3, G2Q2A, G2Q2B, G2Q2C, G2Q2C, G2Q2H
+	quizq G2Q3, 1, 3, G2Q3A, G2Q3B, G2Q3C, G2Q3C, G2Q3H
+	quizq G2Q4, 2, 3, G2Q4A, G2Q4B, G2Q4C, G2Q4C, G2Q4H
+	quizq G2Q5, 1, 3, G2Q5A, G2Q5B, G2Q5C, G2Q5C, G2Q5H
+	quizq G2Q6, 1, 3, G2Q6A, G2Q6B, G2Q6C, G2Q6C, G2Q6H
+	quizq G2Q7, 1, 3, G2Q7A, G2Q7B, G2Q7C, G2Q7C, G2Q7H
+	quizq G2Q8, 2, 3, G2Q8A, G2Q8B, G2Q8C, G2Q8C, G2Q8H
 Grade3Questions::
-	quizq G3Q1, 1, 3, G3Q1A, G3Q1B, G3Q1C, G3Q1C
-	quizq G3Q2, 2, 3, G3Q2A, G3Q2B, G3Q2C, G3Q2C
-	quizq G3Q3, 0, 3, G3Q3A, G3Q3B, G3Q3C, G3Q3C
-	quizq G3Q4, 1, 3, G3Q4A, G3Q4B, G3Q4C, G3Q4C
-	quizq G3Q5, 1, 3, G3Q5A, G3Q5B, G3Q5C, G3Q5C
-	quizq G3Q6, 1, 3, G3Q6A, G3Q6B, G3Q6C, G3Q6C
-	quizq G3Q7, 1, 3, G3Q7A, G3Q7B, G3Q7C, G3Q7C
-	quizq G3Q8, 1, 3, G3Q8A, G3Q8B, G3Q8C, G3Q8C
+	quizq G3Q1, 1, 3, G3Q1A, G3Q1B, G3Q1C, G3Q1C, G3Q1H
+	quizq G3Q2, 2, 3, G3Q2A, G3Q2B, G3Q2C, G3Q2C, G3Q2H
+	quizq G3Q3, 0, 3, G3Q3A, G3Q3B, G3Q3C, G3Q3C, G3Q3H
+	quizq G3Q4, 1, 3, G3Q4A, G3Q4B, G3Q4C, G3Q4C, G3Q4H
+	quizq G3Q5, 1, 3, G3Q5A, G3Q5B, G3Q5C, G3Q5C, G3Q5H
+	quizq G3Q6, 1, 3, G3Q6A, G3Q6B, G3Q6C, G3Q6C, G3Q6H
+	quizq G3Q7, 1, 3, G3Q7A, G3Q7B, G3Q7C, G3Q7C, G3Q7H
+	quizq G3Q8, 1, 3, G3Q8A, G3Q8B, G3Q8C, G3Q8C, G3Q8H
 Grade4Questions::
-	quizq G4Q1, 2, 3, G4Q1A, G4Q1B, G4Q1C, G4Q1C
-	quizq G4Q2, 0, 3, G4Q2A, G4Q2B, G4Q2C, G4Q2C
-	quizq G4Q3, 1, 3, G4Q3A, G4Q3B, G4Q3C, G4Q3C
-	quizq G4Q4, 2, 3, G4Q4A, G4Q4B, G4Q4C, G4Q4C
-	quizq G4Q5, 1, 3, G4Q5A, G4Q5B, G4Q5C, G4Q5C
-	quizq G4Q6, 1, 3, G4Q6A, G4Q6B, G4Q6C, G4Q6C
-	quizq G4Q7, 1, 3, G4Q7A, G4Q7B, G4Q7C, G4Q7C
-	quizq G4Q8, 1, 3, G4Q8A, G4Q8B, G4Q8C, G4Q8C
+	quizq G4Q1, 2, 3, G4Q1A, G4Q1B, G4Q1C, G4Q1C, G4Q1H
+	quizq G4Q2, 0, 3, G4Q2A, G4Q2B, G4Q2C, G4Q2C, G4Q2H
+	quizq G4Q3, 1, 3, G4Q3A, G4Q3B, G4Q3C, G4Q3C, G4Q3H
+	quizq G4Q4, 2, 3, G4Q4A, G4Q4B, G4Q4C, G4Q4C, G4Q4H
+	quizq G4Q5, 1, 3, G4Q5A, G4Q5B, G4Q5C, G4Q5C, G4Q5H
+	quizq G4Q6, 1, 3, G4Q6A, G4Q6B, G4Q6C, G4Q6C, G4Q6H
+	quizq G4Q7, 1, 3, G4Q7A, G4Q7B, G4Q7C, G4Q7C, G4Q7H
+	quizq G4Q8, 1, 3, G4Q8A, G4Q8B, G4Q8C, G4Q8C, G4Q8H
 Grade5Questions::
-	quizq G5Q1, 1, 3, G5Q1A, G5Q1B, G5Q1C, G5Q1C
-	quizq G5Q2, 2, 3, G5Q2A, G5Q2B, G5Q2C, G5Q2C
-	quizq G5Q3, 0, 3, G5Q3A, G5Q3B, G5Q3C, G5Q3C
-	quizq G5Q4, 1, 3, G5Q4A, G5Q4B, G5Q4C, G5Q4C
-	quizq G5Q5, 1, 3, G5Q5A, G5Q5B, G5Q5C, G5Q5C
-	quizq G5Q6, 1, 3, G5Q6A, G5Q6B, G5Q6C, G5Q6C
-	quizq G5Q7, 1, 3, G5Q7A, G5Q7B, G5Q7C, G5Q7C
-	quizq G5Q8, 0, 3, G5Q8A, G5Q8B, G5Q8C, G5Q8C
+	quizq G5Q1, 1, 3, G5Q1A, G5Q1B, G5Q1C, G5Q1C, G5Q1H
+	quizq G5Q2, 2, 3, G5Q2A, G5Q2B, G5Q2C, G5Q2C, G5Q2H
+	quizq G5Q3, 0, 3, G5Q3A, G5Q3B, G5Q3C, G5Q3C, G5Q3H
+	quizq G5Q4, 1, 3, G5Q4A, G5Q4B, G5Q4C, G5Q4C, G5Q4H
+	quizq G5Q5, 1, 3, G5Q5A, G5Q5B, G5Q5C, G5Q5C, G5Q5H
+	quizq G5Q6, 1, 3, G5Q6A, G5Q6B, G5Q6C, G5Q6C, G5Q6H
+	quizq G5Q7, 1, 3, G5Q7A, G5Q7B, G5Q7C, G5Q7C, G5Q7H
+	quizq G5Q8, 0, 3, G5Q8A, G5Q8B, G5Q8C, G5Q8C, G5Q8H
 QuestionsEnd::
 
 ; ---- strings ----
@@ -271,15 +272,67 @@ G5Q8A: db "4@"
 G5Q8B: db "24@"
 G5Q8C: db "8@"
 
+; ---- method hints (shown on a wrong-answer retry; <= 18 chars) ----
+; Grade 1
+G1Q1H: db "Count on from 2@"
+G1Q2H: db "Take 4 from 7@"
+G1Q3H: db "1 2 3 then 4@"
+G1Q4H: db "One more than 6@"
+G1Q5H: db "Double of 4@"
+G1Q6H: db "3 less than 9@"
+G1Q7H: db "Skip count by 2@"
+G1Q8H: db "Half of 10@"
+G1Q9H: db "Count on from 6@"
+G1Q10H: db "2 less than 8@"
+; Grade 2
+G2Q1H: db "14 plus 6 is 20@"
+G2Q2H: db "30 -10 then -2@"
+G2Q3H: db "40 is 4 tens@"
+G2Q4H: db "5 plus 5 plus 5@"
+G2Q5H: db "Add tens then ones@"
+G2Q6H: db "Half of 50@"
+G2Q7H: db "70 is 7 tens@"
+G2Q8H: db "Double of 9@"
+; Grade 3
+G3Q1H: db "Six 7s@"
+G3Q2H: db "4 times what is 24@"
+G3Q3H: db "Eight 5s@"
+G3Q4H: db "Split 18 in two@"
+G3Q5H: db "Seven 8s@"
+G3Q6H: db "6 times what is 36@"
+G3Q7H: db "Nine 9s@"
+G3Q8H: db "Split 20 in two@"
+; Grade 4
+G4Q1H: db "10x12 plus 2x12@"
+G4Q2H: db "1.0 split in two@"
+G4Q3H: db "12 x what is 144@"
+G4Q4H: db "Top and bottom /2@"
+G4Q5H: db "11 tens plus 11@"
+G4Q6H: db "8 /4 then x3@"
+G4Q7H: db "Quarter of 100@"
+G4Q8H: db "Two halves make 1@"
+; Grade 5
+G5Q1H: db "Add the tenths@"
+G5Q2H: db "Times before plus@"
+G5Q3H: db "Add tops: 3 plus 1@"
+G5Q4H: db ".5 or more goes up@"
+G5Q5H: db "Times first 42-2@"
+G5Q6H: db "1/2 is 2/4@"
+G5Q7H: db ".5 rounds up@"
+G5Q8H: db "Times first 10-6@"
+
 ; ---- result messages (shown via PrintText) ----
 QuizCorrectText::
 	text "Great job!"
-	line "Direct hit!"
+	line "Streak "
+	text_ram wStringBuffer
 	prompt
 
 QuizTryAgainText::
-	text "Not quite..."
-	line "Try once more!"
+	text "Hint:"
+	line ""
+	text_ram wStringBuffer
+	cont "Try once more!"
 	prompt
 
 QuizMissText::

@@ -146,20 +146,20 @@ QuizPickGrade:
 	sub c
 	jr .mod
 .haveIndex
-	; hl = de + index*12
+	; hl = de + index*14
 	ld h, d
 	ld l, e
 	and a
 	ret z                          ; index 0 -> first entry
 	ld b, a                        ; b = index
-	ld de, 12
+	ld de, 14
 .addLoop
 	add hl, de
 	dec b
 	jr nz, .addLoop
 	ret
 
-; Ask the question pointed to by hl (12-byte entry).
+; Ask the question pointed to by hl (14-byte entry).
 ; Returns carry set if answered correctly, carry clear if not (after retries).
 QuizAsk::
 	ld a, [hli]
@@ -186,6 +186,15 @@ QuizAsk::
 	ld [wQuizCorrectAnsPtr], a
 	ld a, [hl]
 	ld [wQuizCorrectAnsPtr + 1], a
+	pop hl
+	; Remember the method-hint pointer (entry offset 12 = answer-table base + 8).
+	push hl
+	ld bc, 8
+	add hl, bc
+	ld a, [hli]
+	ld [wQuizHintPtr], a
+	ld a, [hl]
+	ld [wQuizHintPtr + 1], a
 	pop hl
 	; Pick a random rotation k in [0, numAnswers) so the answers appear in a
 	; different on-screen order every time -- kids must read and compute the
@@ -233,15 +242,31 @@ QuizAsk::
 	ld hl, wQuizAttemptsLeft
 	dec [hl]
 	jr z, .failed
+	; Wrong, but a try is left: teach the method via the hint, then retry.
+	ld a, [wQuizHintPtr]
+	ld e, a
+	ld a, [wQuizHintPtr + 1]
+	ld d, a
+	call CopyToStringBuffer        ; wStringBuffer <- hint text
 	ld hl, QuizTryAgainText
 	call PrintText
 	jr .attempt
 .correct
+	; Bump the answered-in-a-row streak (capped at 99) and show it.
+	ld a, [wQuizStreak]
+	cp 99
+	jr nc, .streakReady
+	inc a
+	ld [wQuizStreak], a
+.streakReady
+	call QuizStreakToBuffer        ; wStringBuffer <- streak as text
 	ld hl, QuizCorrectText
 	call PrintText
 	scf
 	ret
 .failed
+	xor a
+	ld [wQuizStreak], a            ; a miss breaks the streak
 	; Reveal the correct answer so even a missed question teaches the fact.
 	ld a, [wQuizCorrectAnsPtr]
 	ld e, a
@@ -251,6 +276,31 @@ QuizAsk::
 	ld hl, QuizMissText
 	call PrintText
 	and a                          ; clear carry
+	ret
+
+; Write wQuizStreak (0-99) as a decimal string into wStringBuffer for display.
+QuizStreakToBuffer::
+	ld a, [wQuizStreak]
+	ld b, 0                        ; b = tens digit
+.tens
+	cp 10
+	jr c, .ones
+	sub 10
+	inc b
+	jr .tens
+.ones
+	ld c, a                        ; c = ones digit
+	ld hl, wStringBuffer
+	ld a, b
+	and a
+	jr z, .noTens
+	add CHARVAL("0")               ; tens digit (skip a leading zero)
+	ld [hli], a
+.noTens
+	ld a, c
+	add CHARVAL("0")               ; ones digit
+	ld [hli], a
+	ld [hl], CHARVAL("@")          ; string terminator
 	ret
 
 ; Draw the question box, the question, the answers, and prime the menu.
