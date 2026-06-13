@@ -2263,6 +2263,7 @@ wQuizAttemptsLeft:: db  ; tries remaining for this question
 wQuizResult::       db  ; item-use decision: 1 = allow, 0 = deny
 wQuizRotate::       db  ; random rotation applied to the answer order (anti-memorization)
 wQuizSlot::         db  ; scratch: answer slot being drawn
+wQuizCorrectAnsPtr:: dw ; pointer to the correct answer's text (revealed on a miss)
 
 
 SECTION "Stack", WRAM0

@@ -283,7 +283,8 @@ QuizTryAgainText::
 	prompt
 
 QuizMissText::
-	text "That's okay!"
-	line "We'll get the"
-	cont "next one!"
+	text "The answer was"
+	line ""
+	text_ram wStringBuffer
+	cont "Now you know!"
 	prompt

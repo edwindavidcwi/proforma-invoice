@@ -174,6 +174,19 @@ QuizAsk::
 	ld [wQuizAnswersPtr], a
 	ld a, h
 	ld [wQuizAnswersPtr + 1], a
+	; Remember the correct answer's text pointer (hl still points at the answer
+	; table) so a missed question can reveal the answer and still teach.
+	ld a, [wQuizCorrectIndex]
+	add a                          ; correct index * 2 (pointers are 2 bytes)
+	ld c, a
+	ld b, 0
+	push hl
+	add hl, bc
+	ld a, [hli]
+	ld [wQuizCorrectAnsPtr], a
+	ld a, [hl]
+	ld [wQuizCorrectAnsPtr + 1], a
+	pop hl
 	; Pick a random rotation k in [0, numAnswers) so the answers appear in a
 	; different on-screen order every time -- kids must read and compute the
 	; answer instead of memorizing a fixed slot.
@@ -229,6 +242,12 @@ QuizAsk::
 	scf
 	ret
 .failed
+	; Reveal the correct answer so even a missed question teaches the fact.
+	ld a, [wQuizCorrectAnsPtr]
+	ld e, a
+	ld a, [wQuizCorrectAnsPtr + 1]
+	ld d, a
+	call CopyToStringBuffer        ; wStringBuffer <- correct answer text
 	ld hl, QuizMissText
 	call PrintText
 	and a                          ; clear carry
