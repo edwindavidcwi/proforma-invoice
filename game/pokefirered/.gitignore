@@ -1,0 +1,6 @@
+src/
+pokefirered_modern.gba
+*.gba
+*.elf
+*.map
+*.sym

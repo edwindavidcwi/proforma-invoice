@@ -1,0 +1,8 @@
+pret/pokefirered
+70b76a15df8c6a6dd03d7a09e8f9eddd2e4dc29d
+
+This is the upstream commit of the Pokémon FireRed disassembly that the
+educational "Quiz Battle" mod is built on top of. The mod is developed against
+this exact revision so builds are reproducible.
+
+Upstream: https://github.com/pret/pokefirered
