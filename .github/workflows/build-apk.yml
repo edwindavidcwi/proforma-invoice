@@ -1,0 +1,62 @@
+name: Build Pokemon Quiz APK
+
+# Builds the installable Android app entirely on GitHub's servers (which have the
+# Android SDK + internet), so no local Android Studio is needed. The finished
+# .apk is uploaded as a downloadable artifact on each run.
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "claude/pokemon-red-question-combat-epas1o" ]
+    paths:
+      - "game/pokered/**"
+      - "game/play/**"
+      - "game/android-app/**"
+      - ".github/workflows/build-apk.yml"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build deps + rgbds v1.0.1 (Game Boy assembler)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bison flex libpng-dev pkg-config build-essential cmake
+          git clone --depth 1 --branch v1.0.1 https://github.com/gbdev/rgbds.git /tmp/rgbds
+          make -C /tmp/rgbds -j"$(nproc)"
+          sudo make -C /tmp/rgbds install
+          rgbasm --version
+
+      - name: Build the Pokemon Red (Quiz) ROM
+        run: make -C game/pokered pokered.gbc
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Bundle the offline player into the app assets
+        run: |
+          mkdir -p game/android-app/app/src/main/assets
+          python3 game/play/build_player.py \
+            --out game/android-app/app/src/main/assets/PokemonQuiz.html
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Build the APK
+        run: |
+          cd game/android-app
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload the APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: PokemonQuiz-apk
+          path: game/android-app/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
