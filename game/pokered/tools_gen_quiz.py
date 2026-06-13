@@ -117,6 +117,81 @@ banks[5] += [
     Q("Round 8.9?", 9, [8, 10], "Close to 9"),
 ]
 
+# ---------------- Other subjects (mixed into each grade, grade-scaled) ----
+def add(g, text, correct, distractors, hint):
+    banks[g].append(Q(text, correct, distractors, hint))
+
+# English / words
+add(1, "Opposite of big?", "small", ["tall", "fat"], "Tiny not big")
+add(1, "Opposite of hot?", "cold", ["warm", "wet"], "Think of ice")
+add(1, "Many cat?", "cats", ["cat", "cates"], "Add s")
+add(1, "Opposite of up?", "down", ["top", "in"], "Not up is down")
+add(1, "Rhymes with cat?", "hat", ["dog", "sun"], "Ends in -at")
+add(1, "Apple starts?", "A", ["B", "P"], "A is first")
+add(2, "Opposite of fast?", "slow", ["quick", "run"], "Not fast")
+add(2, "Many baby?", "babies", ["babys", "baby"], "y to ies")
+add(2, "Past of run?", "ran", ["runned", "runs"], "run to ran")
+add(2, "Opposite of happy?", "sad", ["glad", "mad"], "Feeling down")
+add(2, "Rhymes with star?", "car", ["sun", "cat"], "Ends in -ar")
+add(3, "Plural of mouse?", "mice", ["mouses", "mouse"], "mouse to mice")
+add(3, "Opposite of empty?", "full", ["open", "soft"], "Not empty")
+add(3, "Past of go?", "went", ["goed", "gone"], "go to went")
+add(4, "Plural of child?", "children", ["childs", "childes"], "Not childs")
+add(4, "Opp of old?", "new", ["big", "wet"], "Fresh and new")
+add(4, "Past of buy?", "bought", ["buyed", "buys"], "buy to bought")
+add(5, "Plural of leaf?", "leaves", ["leafs", "leaf"], "f to ves")
+add(5, "Opp of brave?", "afraid", ["bold", "strong"], "Not brave")
+add(5, "Past of teach?", "taught", ["teached", "teachs"], "teach to taught")
+
+# Science & Nature
+add(1, "Baby of a dog?", "puppy", ["kitten", "calf"], "Dogs: puppies")
+add(1, "Baby of a cat?", "kitten", ["puppy", "cub"], "Cats: kittens")
+add(1, "Cow says?", "moo", ["baa", "woof"], "Moo!")
+add(1, "Legs on a dog?", 4, [2, 6], "Count: 4")
+add(1, "We breathe?", "air", ["water", "sand"], "In the air")
+add(2, "Legs on a spider?", 8, [6, 4], "Spiders: 8")
+add(2, "Bees make?", "honey", ["milk", "web"], "Sweet honey")
+add(2, "Baby of a frog?", "tadpole", ["puppy", "chick"], "Tadpole!")
+add(2, "Birds lay?", "eggs", ["milk", "cubs"], "Eggs in nests")
+add(3, "Sun rises in?", "east", ["west", "north"], "E for sunrise")
+add(3, "Plants need?", "sun", ["dark", "snow"], "Sunlight")
+add(3, "Ice melts to?", "water", ["steam", "snow"], "Melts to water")
+add(4, "Planet we live?", "Earth", ["Mars", "Sun"], "Our home")
+add(4, "Insect legs?", 6, [8, 4], "Insects: 6")
+add(4, "Blood is?", "red", ["blue", "green"], "Red blood")
+add(5, "Star at center?", "Sun", ["Moon", "Mars"], "The Sun")
+add(5, "Largest planet?", "Jupiter", ["Mars", "Earth"], "Giant Jupiter")
+
+# General Knowledge
+add(1, "Days in a week?", 7, [5, 10], "Seven days")
+add(1, "Colors in rainbow", 7, [5, 3], "Seven colors")
+add(1, "How many fingers?", 10, [8, 12], "Ten fingers")
+add(2, "Months in a year?", 12, [10, 7], "Twelve")
+add(2, "Days in weekend?", 2, [1, 3], "Sat and Sun")
+add(2, "Hours in a day?", 24, [12, 10], "Twenty four")
+add(3, "Seasons in year?", 4, [2, 3], "Four seasons")
+add(3, "Minutes in hour?", 60, [30, 100], "Sixty")
+add(4, "Days in a year?", 365, [360, 100], "365 days")
+add(4, "Seconds in min?", 60, [100, 30], "Sixty")
+add(5, "Years in decade?", 10, [5, 100], "Ten years")
+add(5, "Years in century", 100, [10, 50], "One hundred")
+
+# Shapes & Colors
+add(1, "Sides on triangle", 3, [4, 5], "Tri means 3")
+add(1, "Sides on square?", 4, [3, 5], "Four sides")
+add(1, "Red and blue make", "purple", ["green", "pink"], "Purple!")
+add(2, "Sides on hexagon?", 6, [5, 8], "Hexa means 6")
+add(2, "Blue and yellow?", "green", ["purple", "orange"], "Green!")
+add(2, "A ball is a?", "circle", ["square", "star"], "Round is circle")
+add(3, "Sides on pentagon", 5, [6, 4], "Penta means 5")
+add(3, "Red and yellow?", "orange", ["green", "purple"], "Orange!")
+add(3, "Sides on octagon?", 8, [6, 10], "Octa means 8")
+add(4, "Angles in triangle", 3, [4, 2], "Three angles")
+add(4, "A cube has faces?", 6, [4, 8], "Six faces")
+add(5, "Right angle deg?", 90, [45, 180], "Ninety deg")
+add(5, "Circle degrees?", 360, [180, 90], "360 round")
+
+
 def emit():
     L = []
     w = L.append

@@ -122,6 +122,23 @@ Grade1Questions::
 	quizq G1Q91, 0, 3, G1Q91A, G1Q91B, G1Q91C, G1Q91C, G1Q91H
 	quizq G1Q92, 0, 3, G1Q92A, G1Q92B, G1Q92C, G1Q92C, G1Q92H
 	quizq G1Q93, 0, 3, G1Q93A, G1Q93B, G1Q93C, G1Q93C, G1Q93H
+	quizq G1Q94, 0, 3, G1Q94A, G1Q94B, G1Q94C, G1Q94C, G1Q94H
+	quizq G1Q95, 0, 3, G1Q95A, G1Q95B, G1Q95C, G1Q95C, G1Q95H
+	quizq G1Q96, 0, 3, G1Q96A, G1Q96B, G1Q96C, G1Q96C, G1Q96H
+	quizq G1Q97, 0, 3, G1Q97A, G1Q97B, G1Q97C, G1Q97C, G1Q97H
+	quizq G1Q98, 0, 3, G1Q98A, G1Q98B, G1Q98C, G1Q98C, G1Q98H
+	quizq G1Q99, 0, 3, G1Q99A, G1Q99B, G1Q99C, G1Q99C, G1Q99H
+	quizq G1Q100, 0, 3, G1Q100A, G1Q100B, G1Q100C, G1Q100C, G1Q100H
+	quizq G1Q101, 0, 3, G1Q101A, G1Q101B, G1Q101C, G1Q101C, G1Q101H
+	quizq G1Q102, 0, 3, G1Q102A, G1Q102B, G1Q102C, G1Q102C, G1Q102H
+	quizq G1Q103, 0, 3, G1Q103A, G1Q103B, G1Q103C, G1Q103C, G1Q103H
+	quizq G1Q104, 0, 3, G1Q104A, G1Q104B, G1Q104C, G1Q104C, G1Q104H
+	quizq G1Q105, 0, 3, G1Q105A, G1Q105B, G1Q105C, G1Q105C, G1Q105H
+	quizq G1Q106, 0, 3, G1Q106A, G1Q106B, G1Q106C, G1Q106C, G1Q106H
+	quizq G1Q107, 0, 3, G1Q107A, G1Q107B, G1Q107C, G1Q107C, G1Q107H
+	quizq G1Q108, 0, 3, G1Q108A, G1Q108B, G1Q108C, G1Q108C, G1Q108H
+	quizq G1Q109, 0, 3, G1Q109A, G1Q109B, G1Q109C, G1Q109C, G1Q109H
+	quizq G1Q110, 0, 3, G1Q110A, G1Q110B, G1Q110C, G1Q110C, G1Q110H
 Grade2Questions::
 	quizq G2Q1, 0, 3, G2Q1A, G2Q1B, G2Q1C, G2Q1C, G2Q1H
 	quizq G2Q2, 0, 3, G2Q2A, G2Q2B, G2Q2C, G2Q2C, G2Q2H
@@ -155,6 +172,21 @@ Grade2Questions::
 	quizq G2Q30, 0, 3, G2Q30A, G2Q30B, G2Q30C, G2Q30C, G2Q30H
 	quizq G2Q31, 0, 3, G2Q31A, G2Q31B, G2Q31C, G2Q31C, G2Q31H
 	quizq G2Q32, 0, 3, G2Q32A, G2Q32B, G2Q32C, G2Q32C, G2Q32H
+	quizq G2Q33, 0, 3, G2Q33A, G2Q33B, G2Q33C, G2Q33C, G2Q33H
+	quizq G2Q34, 0, 3, G2Q34A, G2Q34B, G2Q34C, G2Q34C, G2Q34H
+	quizq G2Q35, 0, 3, G2Q35A, G2Q35B, G2Q35C, G2Q35C, G2Q35H
+	quizq G2Q36, 0, 3, G2Q36A, G2Q36B, G2Q36C, G2Q36C, G2Q36H
+	quizq G2Q37, 0, 3, G2Q37A, G2Q37B, G2Q37C, G2Q37C, G2Q37H
+	quizq G2Q38, 0, 3, G2Q38A, G2Q38B, G2Q38C, G2Q38C, G2Q38H
+	quizq G2Q39, 0, 3, G2Q39A, G2Q39B, G2Q39C, G2Q39C, G2Q39H
+	quizq G2Q40, 0, 3, G2Q40A, G2Q40B, G2Q40C, G2Q40C, G2Q40H
+	quizq G2Q41, 0, 3, G2Q41A, G2Q41B, G2Q41C, G2Q41C, G2Q41H
+	quizq G2Q42, 0, 3, G2Q42A, G2Q42B, G2Q42C, G2Q42C, G2Q42H
+	quizq G2Q43, 0, 3, G2Q43A, G2Q43B, G2Q43C, G2Q43C, G2Q43H
+	quizq G2Q44, 0, 3, G2Q44A, G2Q44B, G2Q44C, G2Q44C, G2Q44H
+	quizq G2Q45, 0, 3, G2Q45A, G2Q45B, G2Q45C, G2Q45C, G2Q45H
+	quizq G2Q46, 0, 3, G2Q46A, G2Q46B, G2Q46C, G2Q46C, G2Q46H
+	quizq G2Q47, 0, 3, G2Q47A, G2Q47B, G2Q47C, G2Q47C, G2Q47H
 Grade3Questions::
 	quizq G3Q1, 0, 3, G3Q1A, G3Q1B, G3Q1C, G3Q1C, G3Q1H
 	quizq G3Q2, 0, 3, G3Q2A, G3Q2B, G3Q2C, G3Q2C, G3Q2H
@@ -206,6 +238,17 @@ Grade3Questions::
 	quizq G3Q48, 0, 3, G3Q48A, G3Q48B, G3Q48C, G3Q48C, G3Q48H
 	quizq G3Q49, 0, 3, G3Q49A, G3Q49B, G3Q49C, G3Q49C, G3Q49H
 	quizq G3Q50, 0, 3, G3Q50A, G3Q50B, G3Q50C, G3Q50C, G3Q50H
+	quizq G3Q51, 0, 3, G3Q51A, G3Q51B, G3Q51C, G3Q51C, G3Q51H
+	quizq G3Q52, 0, 3, G3Q52A, G3Q52B, G3Q52C, G3Q52C, G3Q52H
+	quizq G3Q53, 0, 3, G3Q53A, G3Q53B, G3Q53C, G3Q53C, G3Q53H
+	quizq G3Q54, 0, 3, G3Q54A, G3Q54B, G3Q54C, G3Q54C, G3Q54H
+	quizq G3Q55, 0, 3, G3Q55A, G3Q55B, G3Q55C, G3Q55C, G3Q55H
+	quizq G3Q56, 0, 3, G3Q56A, G3Q56B, G3Q56C, G3Q56C, G3Q56H
+	quizq G3Q57, 0, 3, G3Q57A, G3Q57B, G3Q57C, G3Q57C, G3Q57H
+	quizq G3Q58, 0, 3, G3Q58A, G3Q58B, G3Q58C, G3Q58C, G3Q58H
+	quizq G3Q59, 0, 3, G3Q59A, G3Q59B, G3Q59C, G3Q59C, G3Q59H
+	quizq G3Q60, 0, 3, G3Q60A, G3Q60B, G3Q60C, G3Q60C, G3Q60H
+	quizq G3Q61, 0, 3, G3Q61A, G3Q61B, G3Q61C, G3Q61C, G3Q61H
 Grade4Questions::
 	quizq G4Q1, 0, 3, G4Q1A, G4Q1B, G4Q1C, G4Q1C, G4Q1H
 	quizq G4Q2, 0, 3, G4Q2A, G4Q2B, G4Q2C, G4Q2C, G4Q2H
@@ -228,6 +271,16 @@ Grade4Questions::
 	quizq G4Q19, 0, 3, G4Q19A, G4Q19B, G4Q19C, G4Q19C, G4Q19H
 	quizq G4Q20, 0, 3, G4Q20A, G4Q20B, G4Q20C, G4Q20C, G4Q20H
 	quizq G4Q21, 0, 3, G4Q21A, G4Q21B, G4Q21C, G4Q21C, G4Q21H
+	quizq G4Q22, 0, 3, G4Q22A, G4Q22B, G4Q22C, G4Q22C, G4Q22H
+	quizq G4Q23, 0, 3, G4Q23A, G4Q23B, G4Q23C, G4Q23C, G4Q23H
+	quizq G4Q24, 0, 3, G4Q24A, G4Q24B, G4Q24C, G4Q24C, G4Q24H
+	quizq G4Q25, 0, 3, G4Q25A, G4Q25B, G4Q25C, G4Q25C, G4Q25H
+	quizq G4Q26, 0, 3, G4Q26A, G4Q26B, G4Q26C, G4Q26C, G4Q26H
+	quizq G4Q27, 0, 3, G4Q27A, G4Q27B, G4Q27C, G4Q27C, G4Q27H
+	quizq G4Q28, 0, 3, G4Q28A, G4Q28B, G4Q28C, G4Q28C, G4Q28H
+	quizq G4Q29, 0, 3, G4Q29A, G4Q29B, G4Q29C, G4Q29C, G4Q29H
+	quizq G4Q30, 0, 3, G4Q30A, G4Q30B, G4Q30C, G4Q30C, G4Q30H
+	quizq G4Q31, 0, 3, G4Q31A, G4Q31B, G4Q31C, G4Q31C, G4Q31H
 Grade5Questions::
 	quizq G5Q1, 0, 3, G5Q1A, G5Q1B, G5Q1C, G5Q1C, G5Q1H
 	quizq G5Q2, 0, 3, G5Q2A, G5Q2B, G5Q2C, G5Q2C, G5Q2H
@@ -248,6 +301,15 @@ Grade5Questions::
 	quizq G5Q17, 0, 3, G5Q17A, G5Q17B, G5Q17C, G5Q17C, G5Q17H
 	quizq G5Q18, 0, 3, G5Q18A, G5Q18B, G5Q18C, G5Q18C, G5Q18H
 	quizq G5Q19, 0, 3, G5Q19A, G5Q19B, G5Q19C, G5Q19C, G5Q19H
+	quizq G5Q20, 0, 3, G5Q20A, G5Q20B, G5Q20C, G5Q20C, G5Q20H
+	quizq G5Q21, 0, 3, G5Q21A, G5Q21B, G5Q21C, G5Q21C, G5Q21H
+	quizq G5Q22, 0, 3, G5Q22A, G5Q22B, G5Q22C, G5Q22C, G5Q22H
+	quizq G5Q23, 0, 3, G5Q23A, G5Q23B, G5Q23C, G5Q23C, G5Q23H
+	quizq G5Q24, 0, 3, G5Q24A, G5Q24B, G5Q24C, G5Q24C, G5Q24H
+	quizq G5Q25, 0, 3, G5Q25A, G5Q25B, G5Q25C, G5Q25C, G5Q25H
+	quizq G5Q26, 0, 3, G5Q26A, G5Q26B, G5Q26C, G5Q26C, G5Q26H
+	quizq G5Q27, 0, 3, G5Q27A, G5Q27B, G5Q27C, G5Q27C, G5Q27H
+	quizq G5Q28, 0, 3, G5Q28A, G5Q28B, G5Q28C, G5Q28C, G5Q28H
 QuestionsEnd::
 
 ; ---- strings ----
@@ -717,6 +779,91 @@ G1Q93A: db "10@"
 G1Q93B: db "9@"
 G1Q93C: db "11@"
 G1Q93H: db "Count on 1@"
+G1Q94: db "Opposite of big?@"
+G1Q94A: db "small@"
+G1Q94B: db "tall@"
+G1Q94C: db "fat@"
+G1Q94H: db "Tiny not big@"
+G1Q95: db "Opposite of hot?@"
+G1Q95A: db "cold@"
+G1Q95B: db "warm@"
+G1Q95C: db "wet@"
+G1Q95H: db "Think of ice@"
+G1Q96: db "Many cat?@"
+G1Q96A: db "cats@"
+G1Q96B: db "cat@"
+G1Q96C: db "cates@"
+G1Q96H: db "Add s@"
+G1Q97: db "Opposite of up?@"
+G1Q97A: db "down@"
+G1Q97B: db "top@"
+G1Q97C: db "in@"
+G1Q97H: db "Not up is down@"
+G1Q98: db "Rhymes with cat?@"
+G1Q98A: db "hat@"
+G1Q98B: db "dog@"
+G1Q98C: db "sun@"
+G1Q98H: db "Ends in -at@"
+G1Q99: db "Apple starts?@"
+G1Q99A: db "A@"
+G1Q99B: db "B@"
+G1Q99C: db "P@"
+G1Q99H: db "A is first@"
+G1Q100: db "Baby of a dog?@"
+G1Q100A: db "puppy@"
+G1Q100B: db "kitten@"
+G1Q100C: db "calf@"
+G1Q100H: db "Dogs: puppies@"
+G1Q101: db "Baby of a cat?@"
+G1Q101A: db "kitten@"
+G1Q101B: db "puppy@"
+G1Q101C: db "cub@"
+G1Q101H: db "Cats: kittens@"
+G1Q102: db "Cow says?@"
+G1Q102A: db "moo@"
+G1Q102B: db "baa@"
+G1Q102C: db "woof@"
+G1Q102H: db "Moo!@"
+G1Q103: db "Legs on a dog?@"
+G1Q103A: db "4@"
+G1Q103B: db "2@"
+G1Q103C: db "6@"
+G1Q103H: db "Count: 4@"
+G1Q104: db "We breathe?@"
+G1Q104A: db "air@"
+G1Q104B: db "water@"
+G1Q104C: db "sand@"
+G1Q104H: db "In the air@"
+G1Q105: db "Days in a week?@"
+G1Q105A: db "7@"
+G1Q105B: db "5@"
+G1Q105C: db "10@"
+G1Q105H: db "Seven days@"
+G1Q106: db "Colors in rainbow@"
+G1Q106A: db "7@"
+G1Q106B: db "5@"
+G1Q106C: db "3@"
+G1Q106H: db "Seven colors@"
+G1Q107: db "How many fingers?@"
+G1Q107A: db "10@"
+G1Q107B: db "8@"
+G1Q107C: db "12@"
+G1Q107H: db "Ten fingers@"
+G1Q108: db "Sides on triangle@"
+G1Q108A: db "3@"
+G1Q108B: db "4@"
+G1Q108C: db "5@"
+G1Q108H: db "Tri means 3@"
+G1Q109: db "Sides on square?@"
+G1Q109A: db "4@"
+G1Q109B: db "3@"
+G1Q109C: db "5@"
+G1Q109H: db "Four sides@"
+G1Q110: db "Red and blue make@"
+G1Q110A: db "purple@"
+G1Q110B: db "green@"
+G1Q110C: db "pink@"
+G1Q110H: db "Purple!@"
 ; Grade 2
 G2Q1: db "14 plus 8?@"
 G2Q1A: db "22@"
@@ -878,6 +1025,81 @@ G2Q32A: db "18@"
 G2Q32B: db "17@"
 G2Q32C: db "19@"
 G2Q32H: db "6 plus 6 plus 6@"
+G2Q33: db "Opposite of fast?@"
+G2Q33A: db "slow@"
+G2Q33B: db "quick@"
+G2Q33C: db "run@"
+G2Q33H: db "Not fast@"
+G2Q34: db "Many baby?@"
+G2Q34A: db "babies@"
+G2Q34B: db "babys@"
+G2Q34C: db "baby@"
+G2Q34H: db "y to ies@"
+G2Q35: db "Past of run?@"
+G2Q35A: db "ran@"
+G2Q35B: db "runned@"
+G2Q35C: db "runs@"
+G2Q35H: db "run to ran@"
+G2Q36: db "Opposite of happy?@"
+G2Q36A: db "sad@"
+G2Q36B: db "glad@"
+G2Q36C: db "mad@"
+G2Q36H: db "Feeling down@"
+G2Q37: db "Rhymes with star?@"
+G2Q37A: db "car@"
+G2Q37B: db "sun@"
+G2Q37C: db "cat@"
+G2Q37H: db "Ends in -ar@"
+G2Q38: db "Legs on a spider?@"
+G2Q38A: db "8@"
+G2Q38B: db "6@"
+G2Q38C: db "4@"
+G2Q38H: db "Spiders: 8@"
+G2Q39: db "Bees make?@"
+G2Q39A: db "honey@"
+G2Q39B: db "milk@"
+G2Q39C: db "web@"
+G2Q39H: db "Sweet honey@"
+G2Q40: db "Baby of a frog?@"
+G2Q40A: db "tadpole@"
+G2Q40B: db "puppy@"
+G2Q40C: db "chick@"
+G2Q40H: db "Tadpole!@"
+G2Q41: db "Birds lay?@"
+G2Q41A: db "eggs@"
+G2Q41B: db "milk@"
+G2Q41C: db "cubs@"
+G2Q41H: db "Eggs in nests@"
+G2Q42: db "Months in a year?@"
+G2Q42A: db "12@"
+G2Q42B: db "10@"
+G2Q42C: db "7@"
+G2Q42H: db "Twelve@"
+G2Q43: db "Days in weekend?@"
+G2Q43A: db "2@"
+G2Q43B: db "1@"
+G2Q43C: db "3@"
+G2Q43H: db "Sat and Sun@"
+G2Q44: db "Hours in a day?@"
+G2Q44A: db "24@"
+G2Q44B: db "12@"
+G2Q44C: db "10@"
+G2Q44H: db "Twenty four@"
+G2Q45: db "Sides on hexagon?@"
+G2Q45A: db "6@"
+G2Q45B: db "5@"
+G2Q45C: db "8@"
+G2Q45H: db "Hexa means 6@"
+G2Q46: db "Blue and yellow?@"
+G2Q46A: db "green@"
+G2Q46B: db "purple@"
+G2Q46C: db "orange@"
+G2Q46H: db "Green!@"
+G2Q47: db "A ball is a?@"
+G2Q47A: db "circle@"
+G2Q47B: db "square@"
+G2Q47C: db "star@"
+G2Q47H: db "Round is circle@"
 ; Grade 3
 G3Q1: db "2 x 2?@"
 G3Q1A: db "4@"
@@ -1129,6 +1351,61 @@ G3Q50A: db "10@"
 G3Q50B: db "9@"
 G3Q50C: db "11@"
 G3Q50H: db "Split 20 in two@"
+G3Q51: db "Plural of mouse?@"
+G3Q51A: db "mice@"
+G3Q51B: db "mouses@"
+G3Q51C: db "mouse@"
+G3Q51H: db "mouse to mice@"
+G3Q52: db "Opposite of empty?@"
+G3Q52A: db "full@"
+G3Q52B: db "open@"
+G3Q52C: db "soft@"
+G3Q52H: db "Not empty@"
+G3Q53: db "Past of go?@"
+G3Q53A: db "went@"
+G3Q53B: db "goed@"
+G3Q53C: db "gone@"
+G3Q53H: db "go to went@"
+G3Q54: db "Sun rises in?@"
+G3Q54A: db "east@"
+G3Q54B: db "west@"
+G3Q54C: db "north@"
+G3Q54H: db "E for sunrise@"
+G3Q55: db "Plants need?@"
+G3Q55A: db "sun@"
+G3Q55B: db "dark@"
+G3Q55C: db "snow@"
+G3Q55H: db "Sunlight@"
+G3Q56: db "Ice melts to?@"
+G3Q56A: db "water@"
+G3Q56B: db "steam@"
+G3Q56C: db "snow@"
+G3Q56H: db "Melts to water@"
+G3Q57: db "Seasons in year?@"
+G3Q57A: db "4@"
+G3Q57B: db "2@"
+G3Q57C: db "3@"
+G3Q57H: db "Four seasons@"
+G3Q58: db "Minutes in hour?@"
+G3Q58A: db "60@"
+G3Q58B: db "30@"
+G3Q58C: db "100@"
+G3Q58H: db "Sixty@"
+G3Q59: db "Sides on pentagon@"
+G3Q59A: db "5@"
+G3Q59B: db "6@"
+G3Q59C: db "4@"
+G3Q59H: db "Penta means 5@"
+G3Q60: db "Red and yellow?@"
+G3Q60A: db "orange@"
+G3Q60B: db "green@"
+G3Q60C: db "purple@"
+G3Q60H: db "Orange!@"
+G3Q61: db "Sides on octagon?@"
+G3Q61A: db "8@"
+G3Q61B: db "6@"
+G3Q61C: db "10@"
+G3Q61H: db "Octa means 8@"
 ; Grade 4
 G4Q1: db "11 x 11?@"
 G4Q1A: db "121@"
@@ -1235,6 +1512,56 @@ G4Q21A: db "1.0@"
 G4Q21B: db "0.5@"
 G4Q21C: db "1.5@"
 G4Q21H: db "Two halves make 1@"
+G4Q22: db "Plural of child?@"
+G4Q22A: db "children@"
+G4Q22B: db "childs@"
+G4Q22C: db "childes@"
+G4Q22H: db "Not childs@"
+G4Q23: db "Opp of old?@"
+G4Q23A: db "new@"
+G4Q23B: db "big@"
+G4Q23C: db "wet@"
+G4Q23H: db "Fresh and new@"
+G4Q24: db "Past of buy?@"
+G4Q24A: db "bought@"
+G4Q24B: db "buyed@"
+G4Q24C: db "buys@"
+G4Q24H: db "buy to bought@"
+G4Q25: db "Planet we live?@"
+G4Q25A: db "Earth@"
+G4Q25B: db "Mars@"
+G4Q25C: db "Sun@"
+G4Q25H: db "Our home@"
+G4Q26: db "Insect legs?@"
+G4Q26A: db "6@"
+G4Q26B: db "8@"
+G4Q26C: db "4@"
+G4Q26H: db "Insects: 6@"
+G4Q27: db "Blood is?@"
+G4Q27A: db "red@"
+G4Q27B: db "blue@"
+G4Q27C: db "green@"
+G4Q27H: db "Red blood@"
+G4Q28: db "Days in a year?@"
+G4Q28A: db "365@"
+G4Q28B: db "360@"
+G4Q28C: db "100@"
+G4Q28H: db "365 days@"
+G4Q29: db "Seconds in min?@"
+G4Q29A: db "60@"
+G4Q29B: db "100@"
+G4Q29C: db "30@"
+G4Q29H: db "Sixty@"
+G4Q30: db "Angles in triangle@"
+G4Q30A: db "3@"
+G4Q30B: db "4@"
+G4Q30C: db "2@"
+G4Q30H: db "Three angles@"
+G4Q31: db "A cube has faces?@"
+G4Q31A: db "6@"
+G4Q31B: db "4@"
+G4Q31C: db "8@"
+G4Q31H: db "Six faces@"
 ; Grade 5
 G5Q1: db "2 plus 3 x 4?@"
 G5Q1A: db "14@"
@@ -1331,6 +1658,51 @@ G5Q19A: db "9@"
 G5Q19B: db "8@"
 G5Q19C: db "10@"
 G5Q19H: db "Close to 9@"
+G5Q20: db "Plural of leaf?@"
+G5Q20A: db "leaves@"
+G5Q20B: db "leafs@"
+G5Q20C: db "leaf@"
+G5Q20H: db "f to ves@"
+G5Q21: db "Opp of brave?@"
+G5Q21A: db "afraid@"
+G5Q21B: db "bold@"
+G5Q21C: db "strong@"
+G5Q21H: db "Not brave@"
+G5Q22: db "Past of teach?@"
+G5Q22A: db "taught@"
+G5Q22B: db "teached@"
+G5Q22C: db "teachs@"
+G5Q22H: db "teach to taught@"
+G5Q23: db "Star at center?@"
+G5Q23A: db "Sun@"
+G5Q23B: db "Moon@"
+G5Q23C: db "Mars@"
+G5Q23H: db "The Sun@"
+G5Q24: db "Largest planet?@"
+G5Q24A: db "Jupiter@"
+G5Q24B: db "Mars@"
+G5Q24C: db "Earth@"
+G5Q24H: db "Giant Jupiter@"
+G5Q25: db "Years in decade?@"
+G5Q25A: db "10@"
+G5Q25B: db "5@"
+G5Q25C: db "100@"
+G5Q25H: db "Ten years@"
+G5Q26: db "Years in century@"
+G5Q26A: db "100@"
+G5Q26B: db "10@"
+G5Q26C: db "50@"
+G5Q26H: db "One hundred@"
+G5Q27: db "Right angle deg?@"
+G5Q27A: db "90@"
+G5Q27B: db "45@"
+G5Q27C: db "180@"
+G5Q27H: db "Ninety deg@"
+G5Q28: db "Circle degrees?@"
+G5Q28A: db "360@"
+G5Q28B: db "180@"
+G5Q28C: db "90@"
+G5Q28H: db "360 round@"
 
 ; ---- result messages (shown via PrintText) ----
 QuizCorrectText::
