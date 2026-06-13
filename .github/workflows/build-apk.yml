@@ -1,8 +1,9 @@
-name: Build Pokemon Quiz APK
+name: Build Pokemon Quiz apps
 
-# Builds the installable Android app entirely on GitHub's servers (which have the
-# Android SDK + internet), so no local Android Studio is needed. The finished
-# .apk is uploaded as a downloadable artifact on each run.
+# Builds the installable apps entirely on GitHub's servers (which have the
+# Android SDK, Windows runners, and internet), so nothing needs to be installed
+# locally. One run produces both the Android .apk and the Windows Setup .exe and
+# publishes them to the "pokemon-quiz-app" release.
 on:
   workflow_dispatch:
   push:
@@ -11,13 +12,13 @@ on:
       - "game/pokered/**"
       - "game/play/**"
       - "game/android-app/**"
+      - "game/windows-app/**"
       - ".github/workflows/build-apk.yml"
 
 jobs:
-  build:
+  # 1. Build the ROM, the self-contained offline player HTML, and the Android APK.
+  android:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write   # needed to publish the APK as a Release asset
     steps:
       - uses: actions/checkout@v4
 
@@ -38,7 +39,7 @@ jobs:
         with:
           python-version: "3.x"
 
-      - name: Bundle the offline player into the app assets
+      - name: Bundle the offline player (single self-contained HTML)
         run: |
           mkdir -p game/android-app/app/src/main/assets
           python3 game/play/build_player.py \
@@ -56,20 +57,91 @@ jobs:
           chmod +x gradlew
           ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Upload the APK (artifact)
+      - name: Stage the APK and the player HTML for later jobs
+        run: |
+          mkdir -p out
+          cp game/android-app/app/build/outputs/apk/debug/app-debug.apk out/PokemonQuiz.apk
+          cp game/android-app/app/src/main/assets/PokemonQuiz.html out/PokemonQuiz.html
+
+      - name: Upload the APK + player HTML (artifact)
         uses: actions/upload-artifact@v4
         with:
-          name: PokemonQuiz-apk
-          path: game/android-app/app/build/outputs/apk/debug/app-debug.apk
+          name: android-and-html
+          path: out/
           if-no-files-found: error
 
-      - name: Publish the APK as a Release (clean direct download link)
+  # 2. Wrap that same offline HTML in an Electron app and build a Windows installer.
+  windows:
+    needs: android
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the player HTML built on Linux
+        uses: actions/download-artifact@v4
+        with:
+          name: android-and-html
+          path: out
+
+      - name: Place the game inside the Windows app
+        shell: bash
+        run: |
+          mkdir -p game/windows-app/assets
+          cp out/PokemonQuiz.html game/windows-app/assets/PokemonQuiz.html
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build the Windows installer (Electron + electron-builder)
+        working-directory: game/windows-app
+        run: |
+          npm install
+          npm run dist
+
+      - name: Collect the installer under a friendly name
+        shell: bash
+        run: |
+          mkdir -p win-out
+          cp game/windows-app/dist/*Setup*.exe "win-out/PokemonQuiz-Windows-Setup.exe"
+
+      - name: Upload the Windows installer (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-installer
+          path: win-out/
+          if-no-files-found: error
+
+  # 3. Publish both apps to a single release with clean direct download links.
+  release:
+    needs: [android, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the Android + HTML artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-and-html
+          path: dl
+
+      - name: Download the Windows installer artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-installer
+          path: dl
+
+      - name: Publish/refresh the release with both apps
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          cp game/android-app/app/build/outputs/apk/debug/app-debug.apk PokemonQuiz.apk
           gh release delete pokemon-quiz-app --yes --cleanup-tag 2>/dev/null || true
-          gh release create pokemon-quiz-app PokemonQuiz.apk \
-            --title "Pokemon Quiz - Android app" \
-            --notes "Installable Android app (offline). Download **PokemonQuiz.apk** below, open it on your phone, and allow installing from this source." \
+          gh release create pokemon-quiz-app \
+            dl/PokemonQuiz.apk \
+            dl/PokemonQuiz-Windows-Setup.exe \
+            --title "Pokemon Quiz - Android & Windows apps" \
+            --notes $'Installable, offline Pokemon Quiz game.\n\n- **Android:** download **PokemonQuiz.apk**, open it on your phone, allow installing from this source.\n- **Windows:** download **PokemonQuiz-Windows-Setup.exe** and run it (if SmartScreen warns, click *More info -> Run anyway* - it is unsigned).' \
             --target "$GITHUB_SHA"
