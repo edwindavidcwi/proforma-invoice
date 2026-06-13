@@ -1,5 +1,6 @@
-src/
-pokefirered_modern.gba
+# The cloned upstream FireRed tree (reproduced by setup.sh) — not committed.
+/src/
+# Build artifacts.
 *.gba
 *.elf
 *.map

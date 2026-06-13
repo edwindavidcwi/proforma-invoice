@@ -10,12 +10,18 @@ FireRed is chosen for its much nicer GBA-era graphics.
 - [x] Toolchain proven — FireRed builds here with the modern `arm-none-eabi`
       compiler (`make modern`), producing a 16 MB `.gba` ROM.
 - [x] Upstream pinned (`PINNED_COMMIT.txt`) + `setup.sh` to reproduce the tree.
-- [ ] Quiz Battle engine ported to FireRed's C battle code (the big task —
-      FireRed is written in C, so the Red assembly hooks are reimplemented, not
-      copied).
-- [ ] Question banks (reuse the grade 1–5 content from the Red version).
-- [ ] Auto-heal after battle, forgiving difficulty, no-status, etc.
-- [ ] Offline player decision (see below).
+- [x] Question banks ported to C (grade 1–5 content from the Red version):
+      `mod/src/quiz_data.c`, `mod/include/quiz_battle.h`.
+- [x] **Quiz Battle engine + attack hook** (`mod/src/quiz_battle.c`): a new
+      battle-script command `showquiz` (0xF8) asks the player a badge-scaled
+      question when they use a damaging move; a wrong answer makes the move
+      miss. Builds cleanly into the ROM; boots in the headless emulator test.
+      The UI reuses the engine's own Yes/No window + cursor (a clean 2-choice),
+      so the selection always matches the highlighted answer.
+- [ ] Expand the answer UI to 3–4 choices (custom battle window).
+- [ ] Defense hook (wrong answer → enemy doubled crit) + item-use gate.
+- [ ] Auto-heal after battle, forgiving difficulty, no overworld status.
+- [x] Offline single-file player working (see `../play-gba`).
 
 ## How it's organized
 

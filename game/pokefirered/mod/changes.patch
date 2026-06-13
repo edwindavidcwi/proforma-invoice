@@ -1,0 +1,44 @@
+--- a/src/battle_script_commands.c
++++ b/src/battle_script_commands.c
+@@ -36,6 +36,7 @@
+ #include "constants/abilities.h"
+ #include "constants/pokemon.h"
+ #include "constants/maps.h"
++#include "quiz_battle.h"
+ 
+ extern const u8 *const gBattleScriptsForMoveEffects[];
+ 
+@@ -559,6 +560,7 @@
+     Cmd_removeattackerstatus1,                   //0xF5
+     Cmd_finishaction,                            //0xF6
+     Cmd_finishturn,                              //0xF7
++    Cmd_showquiz,                                //0xF8 (Quiz Battle mod)
+ };
+ 
+ struct StatFractions
+--- a/data/battle_scripts_1.s
++++ b/data/battle_scripts_1.s
+@@ -245,6 +245,7 @@
+ 	attackcanceler
+ BattleScript_HitFromAccCheck::
+ 	accuracycheck BattleScript_PrintMoveMissed, ACC_CURR_MOVE
++	showquiz BattleScript_PrintMoveMissed
+ BattleScript_HitFromAtkString::
+ 	attackstring
+ 	ppreduce
+--- a/asm/macros/battle_script.inc
++++ b/asm/macros/battle_script.inc
+@@ -1249,6 +1249,13 @@
+ 	.byte 0xf7
+ 	.endm
+ 
++	@ Educational Quiz Battle mod: ask the player a question. On a wrong
++	@ answer, force the move to miss by jumping to \failptr.
++	.macro showquiz failptr:req
++	.byte 0xf8
++	.4byte \failptr
++	.endm
++
+ @ various command changed to more readable macros
+ 	.macro cancelmultiturnmoves battler:req
+ 	various \battler, VARIOUS_CANCEL_MULTI_TURN_MOVES

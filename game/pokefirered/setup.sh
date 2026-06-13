@@ -37,13 +37,19 @@ git -C "$SRC" clean -fdq
 git -C "$SRC" checkout -q .
 
 if [ -d "$HERE/mod" ]; then
-  echo "==> Overlaying mod files from ./mod"
-  # Copy every file under mod/ into the source tree, preserving paths.
-  ( cd "$HERE/mod" && find . -type f -print0 | while IFS= read -r -d '' f; do
+  echo "==> Overlaying new mod files from ./mod"
+  # Copy every NEW file under mod/ into the source tree, preserving paths.
+  # (changes.patch is applied separately below, not copied.)
+  ( cd "$HERE/mod" && find . -type f ! -name 'changes.patch' -print0 | while IFS= read -r -d '' f; do
       mkdir -p "$SRC/$(dirname "$f")"
       cp "$f" "$SRC/$f"
       echo "    + $f"
   done )
+
+  if [ -f "$HERE/mod/changes.patch" ]; then
+    echo "==> Applying changes.patch to upstream files"
+    patch -p1 -d "$SRC" < "$HERE/mod/changes.patch"
+  fi
 fi
 
 echo "==> Done. Build with:"
