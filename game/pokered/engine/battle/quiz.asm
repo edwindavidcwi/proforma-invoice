@@ -31,7 +31,60 @@ QuizPlayerAttack::
 	ld [wMoveMissed], a
 	ret
 
-; Choose a question for the current grade.
+; Enemy is attacking: ask a grade-scaled question to defend.
+; Correct -> the enemy hits normally.  Wrong -> force a doubled critical hit.
+; Only triggers for damaging moves (power > 0).
+QuizEnemyDefense::
+	ld a, [wEnemyMovePower]
+	and a
+	ret z                          ; status move: nothing to defend against
+	call SaveScreenTilesToBuffer2
+	call QuizSelectQuestion
+	call QuizAsk                   ; carry set = answered correctly
+	push af
+	call LoadScreenTilesFromBuffer2
+	call Delay3
+	pop af
+	ret c                          ; correct -> leave damage as the game rolled it
+	; wrong -> make sure the hit lands, flag a critical hit, and double the damage
+	xor a
+	ld [wMoveMissed], a
+	ld a, $01
+	ld [wCriticalHitOrOHKO], a
+	ld hl, wDamage + 1             ; wDamage is stored high byte first
+	ld a, [hl]
+	add a
+	ld [hld], a
+	ld a, [hl]
+	adc a
+	ld [hl], a
+	ret nc
+	ld a, $ff                      ; cap at 0xFFFF (clamped to HP downstream)
+	ld [hli], a
+	ld [hl], a
+	ret
+
+; Player wants to use a bag item in battle: ask a question scaled to the
+; active Pokemon's level.  Sets wQuizResult to 1 (allow) or 0 (deny).
+; The battle engine skips UseItem on a deny, so the item is not consumed.
+QuizItemUse::
+	call SaveScreenTilesToBuffer2
+	call QuizSelectByLevel
+	call QuizAsk
+	push af
+	call LoadScreenTilesFromBuffer2
+	call Delay3
+	pop af
+	jr nc, .deny
+	ld a, $01
+	ld [wQuizResult], a
+	ret
+.deny
+	xor a
+	ld [wQuizResult], a
+	ret
+
+; Choose a question scaled to the player's badges (used by battle attack/defense).
 ; Grade = min(5, badgeCount / 2 + 1).  Returns hl -> 12-byte question entry.
 QuizSelectQuestion::
 	ld hl, wObtainedBadges
@@ -40,6 +93,32 @@ QuizSelectQuestion::
 	ld a, [wNumSetBits]
 	srl a                          ; badges / 2
 	inc a                          ; + 1
+	jr QuizPickGrade
+
+; Choose a question scaled to the active Pokemon's level (used by item use).
+; Grade rises every 10 levels: Lv<=10 -> 1, <=20 -> 2, ... Lv 41+ -> 5.
+QuizSelectByLevel::
+	ld a, [wBattleMonLevel]
+	ld b, 1
+	cp 11
+	jr c, .got
+	inc b
+	cp 21
+	jr c, .got
+	inc b
+	cp 31
+	jr c, .got
+	inc b
+	cp 41
+	jr c, .got
+	inc b
+.got
+	ld a, b
+	; fall through
+
+; Pick a random question from grade `a` (1-based, clamped to 5).
+; Returns hl -> 12-byte question entry.
+QuizPickGrade:
 	cp 6
 	jr c, .capped
 	ld a, 5

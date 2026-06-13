@@ -2260,6 +2260,7 @@ wQuizAnswersPtr::   dw  ; pointer to the current answer-pointer table
 wQuizCorrectIndex:: db  ; which answer (0-based) is correct
 wQuizNumAnswers::   db  ; how many answers are shown
 wQuizAttemptsLeft:: db  ; tries remaining for this question
+wQuizResult::       db  ; item-use decision: 1 = allow, 0 = deny
 
 
 SECTION "Stack", WRAM0

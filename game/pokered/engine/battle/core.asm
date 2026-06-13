@@ -2245,6 +2245,10 @@ UseBagItem:
 	call CopyToStringBuffer
 	xor a
 	ld [wPseudoItemID], a
+	callfar QuizItemUse ; Quiz Battle: must answer a level-scaled question to use an item
+	ld a, [wQuizResult]
+	and a
+	jp z, BagWasSelected ; wrong answer -> item not used (and not consumed)
 	call UseItem
 	call LoadHudTilePatterns
 	call ClearSprites
@@ -5543,6 +5547,7 @@ EnemyCalcMoveDamage:
 EnemyMoveHitTest:
 	call MoveHitTest
 HandleIfEnemyMoveMissed:
+	callfar QuizEnemyDefense ; Quiz Battle: a wrong answer lets the enemy land a doubled critical hit
 	ld a, [wMoveMissed]
 	and a
 	jr z, .moveDidNotMiss
@@ -6763,6 +6768,7 @@ _InitBattleCommon:
 	call z, DrawEnemyHUDAndHPBar ; draw enemy HUD and HP bar if it's a wild battle
 	call StartBattle
 	callfar EndOfBattle
+	callfar HealParty ; Quiz Battle: fully restore the party (HP/PP/status) after every battle
 	pop af
 	ld [wLetterPrintingDelayFlags], a
 	pop af
