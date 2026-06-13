@@ -219,6 +219,7 @@ class Emulator {
   static start(module, romBuffer, extRamBuffer) {
     Emulator.stop();
     emulator = new Emulator(module, romBuffer, extRamBuffer);
+    window.__emulator = emulator; // exposed for UI controls (speed, etc.)
     emulator.run();
   }
 
@@ -433,8 +434,9 @@ class Emulator {
       deltaSec = Math.max(startSec - (this.lastRafSec || startSec), 0);
 
       const startTimeMs = performance.now();
+      const speedMul = window.__speed || 1; // UI speed control: 1x / 2x / 4x
       const deltaTicks =
-          Math.min(deltaSec, MAX_UPDATE_SEC) * CPU_TICKS_PER_SECOND;
+          Math.min(deltaSec, MAX_UPDATE_SEC) * CPU_TICKS_PER_SECOND * speedMul;
       let runUntilTicks = this.ticks + deltaTicks - this.leftoverTicks;
       this.runUntil(runUntilTicks);
       const deltaTimeMs = performance.now() - startTimeMs;
