@@ -203,30 +203,78 @@ body { background: linear-gradient(165deg, #0e2735 0%, #06131b 60%, #03090d 100%
   background: linear-gradient(180deg, #6c7178, #494e55);
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 3px 6px rgba(0,0,0,0.35);
 }
+
+/* ============== Control-bar redesign v2 (responsive, touch-first) ============== */
+/* A flex column so the toolbar can wrap onto multiple rows without ever
+   overlapping the game. Nothing is hidden off-screen anymore. */
+html, body { height: 100%; }
+body { display: flex; flex-direction: column; }
+
+#toolbar {
+  position: relative; z-index: 30;
+  flex: 0 0 auto; flex-wrap: wrap; overflow: visible;
+  align-items: center; gap: 7px 8px; padding: 9px 12px;
+}
+#toolbar .title {
+  width: 100%; margin: 0 0 1px 0; font-size: 13px; letter-spacing: 1.6px;
+  text-transform: uppercase; opacity: 0.92;
+}
+@media (min-width: 780px) {
+  #toolbar .title { width: auto; margin: 0 auto 0 0; font-size: 15px; }
+}
+/* Logical groups, separated by faint dividers. */
+.group { display: inline-flex; align-items: center; gap: 6px; }
+.group + .group { padding-left: 8px; border-left: 1px solid rgba(255,255,255,0.10); }
+
+/* Bigger, friendlier tap targets (Apple/Google min is ~44px). */
+#toolbar button {
+  min-height: 42px; padding: 8px 13px; font-size: 13px; border-radius: 11px;
+  display: inline-flex; align-items: center; gap: 5px;
+}
+.seg { border-radius: 11px; }
+.seg .spd { min-height: 42px; min-width: 48px; font-size: 15px; padding: 8px 12px; }
+#btnPause.on { background: linear-gradient(180deg, #ffd23f, #f0a818); color: #3a2600; }
+
+/* Let the game area fill whatever height the wrapped bar leaves. */
+#game { position: relative; top: 0; bottom: auto; flex: 1 1 auto; padding-top: 14px; }
+#hint { color: #98bccf; }
 """
 
 BODY_HTML = r"""
   <div id="toolbar">
     <span class="title">{title}</span>
-    <span class="seg" title="Game speed">
-      <button class="spd on" data-spd="1">1&times;</button>
-      <button class="spd" data-spd="2">2&times;</button>
-      <button class="spd" data-spd="4">4&times;</button>
-    </span>
-    <button id="btnSound" title="Music / sound on or off">&#128266; Sound: On</button>
-    <button id="btnSave"  title="Save game state (or press F6)">Save</button>
-    <button id="btnLoad"  title="Load game state (or press F9)">Load</button>
-    <button id="btnFull"  title="Toggle fullscreen">Fullscreen</button>
-    <button id="btnFilter" title="Cycle display filter (Smooth / Crisp / LCD)">Filter: HD</button>
-    <button id="btnRead" title="Read dialogue aloud (text-to-speech)">&#128266; Read: Off</button>
-    <button id="btnOpen"  title="Open a different .gb / .gbc ROM">Open ROM</button>
+    <div class="group">
+      <button id="btnPause" title="Pause or resume the game (or press Space)">&#10073;&#10073; Pause</button>
+    </div>
+    <div class="group" title="Game speed">
+      <span class="seg">
+        <button class="spd on" data-spd="1">1&times;</button>
+        <button class="spd" data-spd="2">2&times;</button>
+        <button class="spd" data-spd="4">4&times;</button>
+      </span>
+    </div>
+    <div class="group">
+      <button id="btnSound" title="Music / sound on or off">&#128266; Sound</button>
+      <button id="btnRead" title="Read dialogue aloud (text-to-speech)">&#128483; Read: Off</button>
+    </div>
+    <div class="group">
+      <button id="btnFilter" title="Cycle display filter (HD / Smooth / Crisp / LCD)">&#128444; HD</button>
+    </div>
+    <div class="group">
+      <button id="btnSave" title="Save your progress (or press F6)">&#128190; Save</button>
+      <button id="btnLoad" title="Load your saved progress (or press F9)">&#128229; Load</button>
+    </div>
+    <div class="group">
+      <button id="btnFull" title="Toggle fullscreen">&#9974; Full</button>
+      <button id="btnOpen" title="Open a different .gb / .gbc ROM">&#128193; ROM</button>
+    </div>
     <input id="romFile" type="file" accept=".gb,.gbc,.bin" style="display:none">
   </div>
 
   <div id="game">
     <div id="brand"><span id="led"></span> {title}</div>
     <canvas id="mainCanvas" width="160" height="144">No Canvas Support</canvas>
-    <div id="hint">Keyboard: Arrows = move &middot; Z = B &middot; X = A &middot; Enter = Start &middot; Tab = Select &middot; Shift = fast-forward &middot; Backspace = rewind</div>
+    <div id="hint">Tap the buttons above to play &middot; Keyboard: Arrows move, X = A, Z = B, Enter = Start, Space = pause</div>
     <div id="overlay"><div id="overlay_msg"></div></div>
   </div>
 
@@ -270,7 +318,7 @@ FILTER_JS = r"""
     if (window.__glSetHD) window.__glSetHD(hd);
     canvas.classList.toggle('crisp', key === 'crisp');
     game.classList.toggle('lcd', key === 'lcd');
-    btn.textContent = 'Filter: ' + modes[i][1];
+    btn.textContent = '🖼 ' + modes[i][1];
     try { localStorage.setItem('pq_filter', key); } catch (e) {}
   }
   btn.addEventListener('click', function () { i = (i + 1) % modes.length; apply(); });
@@ -338,7 +386,8 @@ PWA_JS = r"""
 TTS_JS = r"""
 (function () {
   var btn = document.getElementById('btnRead');
-  if (!btn || !window.speechSynthesis) { if (btn) btn.style.display = 'none'; return; }
+  var nativeTTS = window.AndroidTTS && window.AndroidTTS.speak ? window.AndroidTTS : null;
+  if (!btn || (!window.speechSynthesis && !nativeTTS)) { if (btn) btn.style.display = 'none'; return; }
   var TILE = 0xC3A0, W = 20;
   function ch(t) {
     if (t === 0x7f) return ' ';
@@ -381,10 +430,19 @@ TTS_JS = r"""
   var MAL = /\b(OAK|PROF|GARY|BLUE|BROCK|SURGE|KOGA|BLAINE|GIOVANNI|BRUNO|LANCE|YOUNGSTER|BUG|CATCHER|GENTLEMAN|BOY|MAN|FATHER|DAD|SAILOR|BIKER|ROCKET|GRAMPS|JR)\b/;
   function kindOf(text) { var U = text.toUpperCase(); if (FEM.test(U)) return 'f'; if (MAL.test(U)) return 'm'; return 'n'; }
   function speak(text) {
-    var u = new SpeechSynthesisUtterance(text), k = kindOf(text);
-    if (k === 'f') { u.pitch = 1.5; u.rate = 1.0; if (vFemale) u.voice = vFemale; }
-    else if (k === 'm') { u.pitch = 0.6; u.rate = 0.95; if (vMale) u.voice = vMale; }
-    else { u.pitch = 1.05; u.rate = 1.0; if (vNote) u.voice = vNote; }
+    var k = kindOf(text);
+    var pitch = k === 'f' ? 1.5 : k === 'm' ? 0.6 : 1.05;
+    var rate = k === 'm' ? 0.95 : 1.0;
+    // Prefer the native Android engine (reliable voices in a WebView); fall back
+    // to the browser's Web Speech API everywhere else (desktop, real browsers).
+    if (nativeTTS) {
+      try { nativeTTS.speak(text, pitch, rate); return; } catch (e) {}
+    }
+    var u = new SpeechSynthesisUtterance(text);
+    u.pitch = pitch; u.rate = rate;
+    if (k === 'f') { if (vFemale) u.voice = vFemale; }
+    else if (k === 'm') { if (vMale) u.voice = vMale; }
+    else { if (vNote) u.voice = vNote; }
     try { speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {}
   }
   var prev = '', lastSpoken = '', timer = null, on = false;
@@ -396,15 +454,43 @@ TTS_JS = r"""
     }
     prev = t;
   }
+  function stopSpeaking() {
+    if (nativeTTS && nativeTTS.stop) { try { nativeTTS.stop(); } catch (e) {} }
+    if (window.speechSynthesis) { try { speechSynthesis.cancel(); } catch (e) {} }
+  }
   function setOn(v) {
-    on = v; btn.textContent = '🔊 Read: ' + (on ? 'On' : 'Off');
+    on = v; btn.textContent = '🗣 Read: ' + (on ? 'On' : 'Off');
     btn.classList.toggle('on', on);
     try { localStorage.setItem('pq_read', on ? '1' : '0'); } catch (e) {}
     if (on) { if (!timer) timer = setInterval(poll, 180); }
-    else { if (timer) { clearInterval(timer); timer = null; } speechSynthesis.cancel(); }
+    else { if (timer) { clearInterval(timer); timer = null; } stopSpeaking(); }
   }
   btn.addEventListener('click', function () { setOn(!on); });
   setOn(on);
+})();
+"""
+
+
+# Pause / resume button. Drives vm.togglePause() (same path as the Space key)
+# so the game can be paused by touch on a phone. The label tracks the real state
+# (it also flips when Space is pressed) by polling the emulator a few times/sec.
+PAUSE_JS = r"""
+(function () {
+  var btn = document.getElementById('btnPause');
+  if (!btn) return;
+  function sync() {
+    var em = window.__emulator;
+    var paused = !!(em && em.isPaused);
+    btn.innerHTML = paused ? '▶ Play' : '❚❚ Pause';
+    btn.classList.toggle('on', paused);
+  }
+  btn.addEventListener('click', function () {
+    if (window.__vm) { window.__vm.togglePause(); }
+    if (window.__resumeAudio) window.__resumeAudio();
+    setTimeout(sync, 0);
+  });
+  setInterval(sync, 350);
+  sync();
 })();
 """
 
@@ -420,7 +506,7 @@ SOUND_JS = r"""
   function apply() {
     if (window.__vm) window.__vm.volume = on ? 0.5 : 0;
     if (on && window.__resumeAudio) window.__resumeAudio();
-    btn.textContent = '🔊 Sound: ' + (on ? 'On' : 'Off');
+    btn.textContent = on ? '🔊 Sound: On' : '🔈 Sound: Off';
     btn.classList.toggle('on', on);
     try { localStorage.setItem('pq_sound', on ? '1' : '0'); } catch (e) {}
   }
@@ -498,6 +584,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -514,6 +601,7 @@ def main():
         PWA_JS,
         TTS_JS,
         SOUND_JS,
+        PAUSE_JS,
     )
 
     with open(args.out, "w", encoding="utf-8") as f:
