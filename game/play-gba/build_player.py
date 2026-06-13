@@ -69,12 +69,31 @@ JS_FILES = [
     "IodineGBA/core/cartridge/EEPROM.js",
     "IodineGBA/core/cartridge/GPIO.js",
     # glue
-    "user_scripts/XAudioJS/swfobject.js",
+    # NOTE: XAudioJS/swfobject.js (an ancient Flash-detection shim) is
+    # deliberately NOT loaded: it throws at top-level on real browsers
+    # (navigator parsing), which aborted the whole concatenated script and
+    # left GfxGlueCode without its prototype methods ("initializeVSync is not
+    # a function"). We use WebAudio, not Flash, so it is unneeded. A no-op
+    # `swfobject` stub is injected below so the unused Flash path can't throw.
     "user_scripts/XAudioJS/resampler.js",
     "user_scripts/XAudioJS/XAudioServer.js",
     "user_scripts/AudioGlueCode.js",
     "user_scripts/GfxGlueCode.js",
 ]
+
+# Harmless stand-in for the removed Flash shim. XAudioJS only touches these
+# from its Flash fallback (never taken with WebAudio available), but defining
+# them keeps any stray reference from throwing a ReferenceError.
+SWFOBJECT_STUB = (
+    "var swfobject={embedSWF:function(){},registerObject:function(){},"
+    "getObjectById:function(){},switchOffAutoHideShow:function(){},ua:{},"
+    "getFlashPlayerVersion:function(){return{major:0,minor:0,release:0};},"
+    "hasFlashPlayerVersion:function(){return false;},createSWF:function(){},"
+    "showExpressInstall:function(){},removeSWF:function(){},"
+    "createCSS:function(){},addDomLoadEvent:function(){},"
+    "addLoadEvent:function(){},getQueryParamValue:function(){return'';},"
+    "expressInstallCallback:function(){}};"
+)
 
 PAGE_CSS = r"""
 :root { --bg:#10131a; --panel:#0a0d12; --accent:#e3350d; --accent2:#3b5ba5; }
@@ -201,7 +220,7 @@ def main():
         sys.exit("error: ROM not found: %s\nBuild it first (see game/pokefirered/README.md)." % args.rom)
 
     # Concatenate the emulator core + glue in load order.
-    chunks = []
+    chunks = ["/* swfobject Flash-shim stub (see build_player.py) */", SWFOBJECT_STUB]
     for rel in JS_FILES:
         chunks.append("/* ==== %s ==== */" % rel)
         chunks.append(read_text(os.path.join(VENDOR, rel)))
