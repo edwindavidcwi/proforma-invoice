@@ -790,6 +790,12 @@ class WebGLRenderer {
     const gl = this.gl = el.getContext('webgl', {preserveDrawingBuffer: true});
     if (gl === null) { throw new Error('unable to create webgl context'); }
 
+    // Render at 3x the GB resolution for a sharper base image (and so the HD
+    // upscaler has output pixels to fill).
+    el.width = SCREEN_WIDTH * 3;
+    el.height = SCREEN_HEIGHT * 3;
+    gl.viewport(0, 0, el.width, el.height);
+
     const w = SCREEN_WIDTH / 256;
     const h = SCREEN_HEIGHT / 256;
     const buffer = gl.createBuffer();
@@ -826,12 +832,45 @@ class WebGLRenderer {
           gl_Position = vec4(aPos, 0.0, 1.0);
           vTexCoord = aTexCoord;
         }`);
-    const fragmentShader = compileShader(gl.FRAGMENT_SHADER,
+    // HD upscaler: when uHD>=0.5, smooth jagged edges with the Scale3x
+    // algorithm; otherwise pass the pixels through unchanged. If this richer
+    // shader fails to compile on some GPU, fall back to the plain passthrough.
+    const hdFragSrc =
+       `precision highp float;
+        varying highp vec2 vTexCoord;
+        uniform sampler2D uSampler;
+        uniform vec2 uTexSize;
+        uniform float uHD;
+        bool eq(vec3 a, vec3 b){ return all(lessThan(abs(a-b), vec3(0.02))); }
+        vec3 tx(vec2 t){ return texture2D(uSampler, t).rgb; }
+        void main(void){
+          if (uHD < 0.5) { gl_FragColor = texture2D(uSampler, vTexCoord); return; }
+          vec2 px = 1.0/uTexSize; vec2 t = vTexCoord;
+          vec3 A=tx(t+px*vec2(-1.,-1.)), B=tx(t+px*vec2(0.,-1.)), C=tx(t+px*vec2(1.,-1.));
+          vec3 D=tx(t+px*vec2(-1.,0.)),  E=tx(t),                 F=tx(t+px*vec2(1.,0.));
+          vec3 G=tx(t+px*vec2(-1.,1.)),  H=tx(t+px*vec2(0.,1.)),  I=tx(t+px*vec2(1.,1.));
+          bool DB=eq(D,B), BF=eq(B,F), DH=eq(D,H), HF=eq(H,F);
+          vec2 f = floor(fract(t*uTexSize)*3.0);
+          vec3 r = E;
+          if (f.x<0.5 && f.y<0.5) { if (DB&&!BF&&!DH) r=D; }
+          else if (f.x>1.5 && f.y<0.5) { if (BF&&!DB&&!HF) r=F; }
+          else if (f.x<0.5 && f.y>1.5) { if (DH&&!DB&&!HF) r=D; }
+          else if (f.x>1.5 && f.y>1.5) { if (HF&&!DH&&!BF) r=F; }
+          else if (f.y<0.5) { if ((DB&&!BF&&!DH&&!eq(E,C))||(BF&&!DB&&!HF&&!eq(E,A))) r=B; }
+          else if (f.y>1.5) { if ((DH&&!DB&&!HF&&!eq(E,I))||(HF&&!DH&&!BF&&!eq(E,G))) r=H; }
+          else if (f.x<0.5) { if ((DB&&!BF&&!DH&&!eq(E,G))||(DH&&!DB&&!HF&&!eq(E,A))) r=D; }
+          else if (f.x>1.5) { if ((BF&&!DB&&!HF&&!eq(E,I))||(HF&&!DH&&!BF&&!eq(E,C))) r=F; }
+          gl_FragColor = vec4(r, 1.0);
+        }`;
+    let fragmentShader, hdEnabled = true;
+    try { fragmentShader = compileShader(gl.FRAGMENT_SHADER, hdFragSrc); }
+    catch (e) {
+      hdEnabled = false;
+      fragmentShader = compileShader(gl.FRAGMENT_SHADER,
        `varying highp vec2 vTexCoord;
         uniform sampler2D uSampler;
-        void main(void) {
-          gl_FragColor = texture2D(uSampler, vTexCoord);
-        }`);
+        void main(void) { gl_FragColor = texture2D(uSampler, vTexCoord); }`);
+    }
 
     const program = gl.createProgram();
     gl.attachShader(program, vertexShader);
@@ -851,6 +890,20 @@ class WebGLRenderer {
     gl.vertexAttribPointer(aPos, 2, gl.FLOAT, gl.FALSE, 16, 0);
     gl.vertexAttribPointer(aTexCoord, 2, gl.FLOAT, gl.FALSE, 16, 8);
     gl.uniform1i(uSampler, 0);
+
+    // HD upscaler controls (no-ops if the HD shader wasn't compiled).
+    const uTexSize = gl.getUniformLocation(program, 'uTexSize');
+    if (uTexSize) gl.uniform2f(uTexSize, 256.0, 256.0);
+    this.uHD = hdEnabled ? gl.getUniformLocation(program, 'uHD') : null;
+    const initHD = hdEnabled && window.__hd !== false ? 1.0 : 0.0;
+    if (this.uHD) gl.uniform1f(this.uHD, initHD);
+    const self = this;
+    window.__glSetHD = function (on) {
+      if (!self.uHD) return;
+      self.gl.useProgram(program);
+      self.gl.uniform1f(self.uHD, on ? 1.0 : 0.0);
+    };
+    window.__hdAvailable = hdEnabled;
   }
 
   renderTexture() {

@@ -217,7 +217,7 @@ BODY_HTML = r"""
     <button id="btnSave"  title="Save game state (or press F6)">Save</button>
     <button id="btnLoad"  title="Load game state (or press F9)">Load</button>
     <button id="btnFull"  title="Toggle fullscreen">Fullscreen</button>
-    <button id="btnFilter" title="Cycle display filter (Smooth / Crisp / LCD)">Filter: Smooth</button>
+    <button id="btnFilter" title="Cycle display filter (Smooth / Crisp / LCD)">Filter: HD</button>
     <button id="btnRead" title="Read dialogue aloud (text-to-speech)">&#128266; Read: Off</button>
     <button id="btnOpen"  title="Open a different .gb / .gbc ROM">Open ROM</button>
     <input id="romFile" type="file" accept=".gb,.gbc,.bin" style="display:none">
@@ -255,7 +255,9 @@ FILTER_JS = r"""
   var game = document.getElementById('game');
   var btn = document.getElementById('btnFilter');
   if (!canvas || !game || !btn) return;
-  var modes = [['smooth', 'Smooth'], ['crisp', 'Crisp'], ['lcd', 'LCD']];
+  // HD = Scale3x upscaler (smooths jagged edges); Smooth = bilinear blur;
+  // Crisp = original pixels; LCD = smooth + scanlines.
+  var modes = [['hd', 'HD'], ['smooth', 'Smooth'], ['crisp', 'Crisp'], ['lcd', 'LCD']];
   var i = 0;
   try {
     var saved = localStorage.getItem('pq_filter');
@@ -263,6 +265,9 @@ FILTER_JS = r"""
   } catch (e) {}
   function apply() {
     var key = modes[i][0];
+    var hd = (key === 'hd');
+    window.__hd = hd;                       // read by the WebGL renderer on init
+    if (window.__glSetHD) window.__glSetHD(hd);
     canvas.classList.toggle('crisp', key === 'crisp');
     game.classList.toggle('lcd', key === 'lcd');
     btn.textContent = 'Filter: ' + modes[i][1];
