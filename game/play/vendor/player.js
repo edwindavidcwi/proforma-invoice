@@ -199,9 +199,18 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const fsBtn = $('#btnFull');
   if (fsBtn) fsBtn.addEventListener('click', () => {
-    const el = $('#game');
-    if (document.fullscreenElement) document.exitFullscreen();
-    else if (el.requestFullscreen) el.requestFullscreen();
+    // Fullscreen the whole page (documentElement), NOT just #game -- otherwise
+    // the browser hides everything outside the game element (toolbar, on-screen
+    // gamepad, menu) and the controls vanish.
+    const doc = document;
+    const el = doc.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    const exit = doc.exitFullscreen || doc.webkitExitFullscreen;
+    if (doc.fullscreenElement || doc.webkitFullscreenElement) {
+      if (exit) exit.call(doc);
+    } else if (req) {
+      req.call(el);
+    }
   });
 
   // Drag-and-drop a ROM onto the window.

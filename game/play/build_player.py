@@ -725,6 +725,14 @@ MENU_JS = r"""
   function open() { renderSlots(); menu.classList.add('show'); }
   function close() { menu.classList.remove('show'); }
 
+  // Inside the Android app the whole screen is already immersive full-screen, so
+  // the web "Fullscreen" button does nothing useful there -- hide it to avoid
+  // confusion. (window.AndroidTTS only exists in the native app wrapper.)
+  if (window.AndroidTTS) {
+    var fb = document.getElementById('btnFull');
+    if (fb) fb.style.display = 'none';
+  }
+
   openBtn.addEventListener('click', open);
   if (closeBtn) closeBtn.addEventListener('click', close);
   // Tap the dimmed backdrop (outside the card) to close.
