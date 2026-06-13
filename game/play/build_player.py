@@ -288,6 +288,9 @@ body { display: flex; flex-direction: column; }
   box-shadow: inset 0 0 0 2px #1d2c38, 0 6px 18px rgba(0,0,0,.5);
 }
 #hint { bottom: 10px; font-size: 11px; color: #8fb3c6; padding: 0 14px; }
+/* On touch devices the on-screen gamepad fills the bottom, so the keyboard
+   hint would just overlap the Select/Start buttons -- hide it there. */
+@media (pointer: coarse) { #hint { display: none; } }
 
 /* ---- slide-up menu sheet ---- */
 #menu {
