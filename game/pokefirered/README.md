@@ -41,13 +41,13 @@ cd src && make modern -j"$(nproc)"
 
 ## Playing it (offline)
 
-A GBA ROM is 16 MB, and the good open-source in-browser GBA core (mGBA-wasm)
-needs multi-threading / cross-origin isolation, which a plain local `file://`
-page can't provide. So the single-file `.html` trick used for the tiny GBC ROM
-does not transfer cleanly to GBA. The recommended offline path is a native
-open-source emulator:
+The single-file `.html` model is preserved: see `../play-gba`, which bakes the
+ROM + a pure-JS GBA emulator (IodineGBA) + an open-source GBA BIOS into one
+self-contained file that runs offline from `file://` on Windows/Android. Build
+it with `python3 ../play-gba/build_player.py`.
+
+Because a GBA ROM is 16 MB and the core is pure JavaScript, that file is ~22 MB
+and its speed depends on the device. For the smoothest experience you can also
+use a native open-source emulator:
 
 - **mGBA** — open source (MPL-2.0), Windows + Android. Load `pokefirered_modern.gba`.
-
-(A pure-JS in-browser single-file player using IodineGBA is possible as a
-convenience but is larger and slower; see the project notes / ask if you want it.)
