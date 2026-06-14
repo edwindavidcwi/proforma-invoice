@@ -129,7 +129,7 @@ def science(g):
            ("Legs on a dog?","4",["2","6"]),("Sun gives?","light",["rain","snow"])],
         2:[("Bees make?","honey",["milk","web"]),("Spider legs?","8",["6","4"]),
            ("Birds lay?","eggs",["milk","cubs"]),("Cows give?","milk",["eggs","honey"]),
-           ("Ice is cold?","yes",["no","warm"]),("Plants need?","sun",["dark","snow"]),
+           ("Snow is?","cold",["hot","dry"]),("Plants need?","sun",["dark","snow"]),
            ("Snail is?","slow",["fast","loud"]),("Bat flies at?","night",["noon","dawn"])],
         3:[("Sun rises in?","east",["west","north"]),("Water freezes to?","ice",["steam","sand"]),
            ("Insect legs?","6",["8","4"]),("Frog baby?","tadpole",["chick","cub"]),
@@ -140,7 +140,7 @@ def science(g):
            ("Water is H?","H2O",["CO2","O2"]),("Closest star?","Sun",["Mars","Moon"]),
            ("Bones make a?","body",["car","tree"]),("Fish breathe with?","gills",["lungs","skin"])],
         5:[("Largest planet?","Jupiter",["Mars","Earth"]),("Red planet?","Mars",["Earth","Sun"]),
-           ("Plants make food?","yes",["no","never"]),("Lungs are for?","air",["food","blood"]),
+           ("Sun is a?","star",["moon","planet"]),("Lungs are for?","air",["food","blood"]),
            ("Moon orbits?","Earth",["Sun","Mars"]),("Speed of?","light",["sound","wind"]),
            ("Ice is frozen?","water",["milk","air"]),("Bee wings?","2",["4","6"])],
     }[g]
@@ -153,7 +153,7 @@ def gk(g):
         1:[("Days in a week?",7,"Seven days"),("How many fingers?",10,"Ten"),
            ("Colors in rainbow",7,"Seven"),("Eyes on a face?",2,"Two eyes"),
            ("Legs on a person?",2,"Two legs"),("Wheels on a car?",4,"Four"),
-           ("Sides of a coin?",2,"Heads tails")],
+           ("Thumbs on hands?",2,"One each")],
         2:[("Months in a year?",12,"Twelve"),("Days in weekend?",2,"Sat Sun"),
            ("Hours in a day?",24,"Twenty four"),("Days in a week?",7,"Seven"),
            ("Half of a dozen?",6,"Dozen is 12"),("Legs on 2 cats?",8,"4 and 4")],
@@ -165,12 +165,12 @@ def gk(g):
            ("Continents?",7,"Seven"),("Days in leap yr?",366,"One more")],
         5:[("Years in decade?",10,"Ten"),("Years in century",100,"Hundred"),
            ("Days in 2 weeks?",14,"7 and 7"),("Minutes half hr?",30,"Thirty"),
-           ("Hours in 2 days?",48,"24 and 24"),("Colors in flag?",3,"Often three")],
+           ("Hours in 2 days?",48,"24 and 24"),("Sides on a cube?",6,"A box")],
     }[g]
     return [q for q in (num(t, c, h) for t, c, h in facts) if q]
 
 def shapes(g):
-    SIDES = [("triangle",3),("square",4),("circle",0),("pentagon",5),("hexagon",6),
+    SIDES = [("triangle",3),("square",4),("pentagon",5),("hexagon",6),
              ("rectangle",4),("octagon",8),("heptagon",7),("nonagon",9),("decagon",10)]
     win = {1:(0,3),2:(0,6),3:(3,8),4:(5,10),5:(6,10)}[g]
     out = []
