@@ -123,7 +123,16 @@ BABIES = [("dog","puppy"),("cat","kitten"),("cow","calf"),("sheep","lamb"),
           ("horse","foal"),("goat","kid"),("hen","chick"),("frog","tadpole"),
           ("bear","cub"),("lion","cub"),("deer","fawn"),("pig","piglet"),
           ("duck","duckling"),("kangaroo","joey"),("cat","kitten")]
-BABY_WORDS = list({b for _, b in BABIES})
+# dict.fromkeys dedupes while preserving order (a plain set is hash-randomized
+# per run, which would make the generated distractors non-deterministic).
+BABY_WORDS = list(dict.fromkeys(b for _, b in BABIES))
+
+def stable_rot(*parts):
+    """A deterministic small offset (0-8) from the given parts. Replaces the
+    built-in hash(), which Python randomizes per process (PYTHONHASHSEED) and
+    would otherwise make the generated question bank change on every re-run."""
+    s = "|".join(str(p) for p in parts)
+    return sum(ord(c) for c in s) % 9
 
 # ===================== subject builders (per grade) =====================
 def fit(long, short):
@@ -134,7 +143,7 @@ def english(g):
     out = []
     win = {1:(0,12),2:(6,20),3:(12,26),4:(18,32),5:(23,35)}[g]
     for w, o in OPP[win[0]:win[1]]:
-        d = pick2(o, w, OPP_WORDS[(hash((g,w)) % 9):] + OPP_WORDS)
+        d = pick2(o, w, OPP_WORDS[stable_rot(g, w):] + OPP_WORDS)
         if d: out.append(mk(fit(f"Opposite of {w}?", f"Opp of {w}?"), o, d, "The opposite word"))
     pl = {1:PLURALS[:6],2:PLURALS[4:12],3:PLURALS[9:16],4:PLURALS[13:20],5:PLURALS[15:]}[g]
     for s, p in pl:
@@ -278,14 +287,25 @@ def dedupe(qs):
     return out
 
 banks = {g: [] for g in range(1, 6)}
+subject_of = {}  # (grade, question_text) -> subject name; for the content audit
+SUBJECT_CAPS = (("English", english, 20), ("Science & Nature", science, 20),
+                ("General Knowledge", gk, 20), ("Shapes & Colors", shapes, 20))
 for g in range(1, 6):
-    bucket = []
-    for builder, cap in ((english, 20), (science, 20), (gk, 20), (shapes, 20)):
-        bucket += dedupe(builder(g))[:cap]
-    bucket = dedupe(bucket)
-    need = TARGET - len(bucket)
-    bucket += dedupe(math(g))[:max(need, 0)]
-    banks[g] = dedupe(bucket)[:TARGET]
+    tagged = []  # (Q, subject) in emit order, before the final cross-dedupe
+    for sname, builder, cap in SUBJECT_CAPS:
+        tagged += [(q, sname) for q in dedupe(builder(g))[:cap]]
+    need = TARGET - len(dedupe([q for q, _ in tagged]))
+    tagged += [(q, "Math") for q in dedupe(math(g))[:max(need, 0)]]
+    # Final dedupe keeping the first occurrence (matches the original pipeline),
+    # capped at TARGET, while recording each surviving question's subject.
+    seen, final = set(), []
+    for q, sname in tagged:
+        if q.text in seen:
+            continue
+        seen.add(q.text); final.append(q); subject_of[(g, q.text)] = sname
+        if len(final) == TARGET:
+            break
+    banks[g] = final
 
 
 def emit():
@@ -353,8 +373,9 @@ def emit():
     return "\n".join(L)
 
 
-text = emit()
-with open(OUT, "w") as f:
-    f.write(text)
-print("wrote", OUT)
-print("counts:", {g: len(v) for g, v in banks.items()}, "total", sum(len(v) for v in banks.values()))
+if __name__ == "__main__":
+    text = emit()
+    with open(OUT, "w") as f:
+        f.write(text)
+    print("wrote", OUT)
+    print("counts:", {g: len(v) for g, v in banks.items()}, "total", sum(len(v) for v in banks.values()))
