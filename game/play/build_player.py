@@ -301,6 +301,34 @@ body { display: flex; flex-direction: column; }
 #visualAid .swatch { flex: 1 1 0; min-width: 0; height: 88%; border-radius: 8px;
   border: 2px solid rgba(0,0,0,.4); }
 #visualAid .op { flex: 0 0 auto; font: 700 100% / 1 system-ui, sans-serif; color: #222; }
+/* ---- parent Report Card ---- */
+.pqOpenBtn { width: 100%; padding: 10px; border: 0; border-radius: 10px; cursor: pointer;
+  font: 600 14px/1 system-ui, sans-serif; color: #3a2600;
+  background: linear-gradient(180deg, #ffd23f, #f0a818); }
+#pqReport { display: none; position: fixed; inset: 0; z-index: 60;
+  background: rgba(2,10,15,.7); -webkit-backdrop-filter: blur(3px); backdrop-filter: blur(3px);
+  align-items: center; justify-content: center; }
+#pqReport.show { display: flex; }
+#pqReportCard { width: min(94vw, 460px); max-height: 88vh; display: flex; flex-direction: column;
+  background: #14222c; color: #dceaf2; border-radius: 16px; overflow: hidden;
+  box-shadow: 0 20px 50px rgba(0,0,0,.6); font-family: system-ui, sans-serif; }
+#pqReportHead { display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 16px; font-weight: 700; font-size: 17px; background: #1b2e3a; }
+#pqReportHead button { background: none; border: 0; color: #9fc2d6; font-size: 18px; cursor: pointer; }
+#pqReportBody { padding: 14px 16px; overflow-y: auto; }
+#pqReportBody h4 { margin: 14px 0 6px; font-size: 13px; color: #8fb3c6; text-transform: uppercase; letter-spacing: .04em; }
+#pqReportBody h4:first-child { margin-top: 0; }
+.pgBig { margin: 0; font-size: 15px; }
+.pgRow { display: flex; align-items: center; gap: 8px; margin: 5px 0; font-size: 13px; }
+.pgLbl { flex: 0 0 38%; }
+.pgBar { flex: 1 1 auto; height: 12px; border-radius: 6px; background: #253a48; overflow: hidden; }
+.pgBar i { display: block; height: 100%; background: linear-gradient(90deg, #43c06a, #8fe06a); }
+.pgPct { flex: 0 0 auto; min-width: 64px; text-align: right; } .pgPct small { color: #80a0b2; }
+.pgQ { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; border-top: 1px solid #21333f; font-size: 13px; }
+.pgQ small { color: #e6a; white-space: nowrap; }
+.pgDim { color: #80a0b2; }
+#pqReportFoot { padding: 12px 16px; border-top: 1px solid #21333f; text-align: right; }
+#pqReportReset { background: #3a2330; color: #f3a; border: 1px solid #5a3343; border-radius: 8px; padding: 7px 12px; cursor: pointer; font-size: 13px; }
 #hint { bottom: 10px; font-size: 11px; color: #8fb3c6; padding: 0 14px; }
 /* On touch devices the on-screen gamepad fills the bottom, so the keyboard
    hint would just overlap the Select/Start buttons -- hide it there. */
@@ -1148,6 +1176,117 @@ VISUAL_JS = r"""
 """
 
 
+# Parent "Report Card": a player-side learning tracker. It reads the live quiz
+# state from RAM -- the answer streak (up = a correct answer, reset to 0 = a
+# miss), the question's subject id, the grade (from badge count), and the
+# question text -- and logs each answer to the device (localStorage). A
+# "Report Card" button in the menu shows per-subject and per-grade accuracy, the
+# toughest questions, and recent activity. Entirely in the browser layer; the
+# ROM is untouched.
+PROGRESS_JS = r"""
+(function () {
+  'use strict';
+  var KEY = 'pq_report_v1';
+  var SUBJ = ['English', 'Science', 'Gen. Knowledge', 'Shapes & Colors', 'Math'];
+  function blank() { return { subj: {}, grade: {}, q: {}, correct: 0, wrong: 0, best: 0, recent: [] }; }
+  var st; try { st = JSON.parse(localStorage.getItem(KEY)) || blank(); } catch (e) { st = blank(); }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
+  function rdfn() {
+    var em = window.__emulator;
+    if (!em || !em.module || em.e == null || typeof em.module._emulator_read_mem !== 'function') return null;
+    return function (a) { return em.module._emulator_read_mem(em.e, a) & 0xff; };
+  }
+  function dec(b) {
+    if (b === 0x7f) return ' ';
+    if (b >= 0x80 && b <= 0x99) return String.fromCharCode(65 + b - 0x80);
+    if (b >= 0xa0 && b <= 0xb9) return String.fromCharCode(97 + b - 0xa0);
+    if (b >= 0xf6 && b <= 0xff) return String.fromCharCode(48 + b - 0xf6);
+    return ({ 0xe6: '?', 0xe7: '!', 0xe8: '.' })[b] || '';
+  }
+  function popcount(x) { var n = 0; while (x) { n += x & 1; x >>= 1; } return n; }
+  function readQ(rd) { var s = ''; for (var i = 0; i < 18; i++) { var b = rd(0xda8e + i); if (b === 0x50) break; s += dec(b); } return s.trim(); }
+  function record(subj, grade, q, ok) {
+    st.subj[subj] = st.subj[subj] || { c: 0, w: 0 };
+    st.grade[grade] = st.grade[grade] || { c: 0, w: 0 };
+    if (ok) { st.subj[subj].c++; st.grade[grade].c++; st.correct++; }
+    else { st.subj[subj].w++; st.grade[grade].w++; st.wrong++; }
+    if (q && q.length >= 2) { st.q[q] = st.q[q] || { c: 0, w: 0 }; if (ok) st.q[q].c++; else st.q[q].w++; }
+    st.recent.unshift({ s: subj, g: grade, ok: ok, t: Date.now() });
+    if (st.recent.length > 40) st.recent.pop();
+    save();
+  }
+  var lastStreak = null;
+  function poll() {
+    var rd = rdfn(); if (!rd) return;
+    var streak = rd(0xdef0);                       // wQuizStreak
+    if (lastStreak === null) { lastStreak = streak; return; }
+    if (streak > st.best) st.best = streak;
+    if (streak > lastStreak || (streak === 0 && lastStreak > 0)) {
+      var ok = streak > lastStreak;
+      var subj = rd(0xdef4); if (subj > 4) subj = 4; // wQuizLastSubject
+      var grade = Math.min(5, (popcount(rd(0xd356)) >> 1) + 1); // wObtainedBadges -> grade
+      record(subj, grade, readQ(rd), ok);
+    }
+    lastStreak = streak;
+  }
+  setInterval(poll, 200);
+
+  // ---- Report Card UI ----
+  function pct(o) { var t = o.c + o.w; return t ? Math.round(100 * o.c / t) : 0; }
+  function bar(o, label) {
+    var t = o.c + o.w;
+    return '<div class="pgRow"><span class="pgLbl">' + label + '</span>'
+      + '<span class="pgBar"><i style="width:' + pct(o) + '%"></i></span>'
+      + '<span class="pgPct">' + pct(o) + '% <small>(' + t + ')</small></span></div>';
+  }
+  function render() {
+    var tot = st.correct + st.wrong, h = '';
+    if (!tot) return '<p class="pgDim">No answers yet. Play a few quiz battles, then check back here to see how your child is doing.</p>';
+    h += '<h4>Overall</h4><p class="pgBig">' + tot + ' answered &middot; <b>' + Math.round(100 * st.correct / tot)
+      + '%</b> correct &middot; best streak <b>' + st.best + '</b></p>';
+    h += '<h4>By subject</h4>';
+    for (var s = 0; s < 5; s++) if (st.subj[s]) h += bar(st.subj[s], SUBJ[s]);
+    h += '<h4>By grade</h4>';
+    for (var g = 1; g <= 5; g++) if (st.grade[g]) h += bar(st.grade[g], 'Grade ' + g);
+    h += '<h4>Toughest questions</h4>';
+    var qs = Object.keys(st.q).map(function (k) { return [k, st.q[k]]; })
+      .filter(function (x) { return x[1].w > 0; })
+      .sort(function (a, b) { return b[1].w - a[1].w || (b[1].w / (b[1].c + b[1].w)) - (a[1].w / (a[1].c + a[1].w)); })
+      .slice(0, 8);
+    if (qs.length) qs.forEach(function (x) { h += '<div class="pgQ"><span>' + x[0] + '</span><small>' + x[1].w + ' missed / ' + (x[1].c + x[1].w) + '</small></div>'; });
+    else h += '<p class="pgDim">No misses yet — great work!</p>';
+    return h;
+  }
+  function build() {
+    if (document.getElementById('pqReport')) return;
+    var m = document.createElement('div'); m.id = 'pqReport';
+    m.innerHTML = '<div id="pqReportCard"><div id="pqReportHead"><span>&#128202; Report Card</span>'
+      + '<button id="pqReportClose" title="Close">&#10005;</button></div>'
+      + '<div id="pqReportBody"></div>'
+      + '<div id="pqReportFoot"><button id="pqReportReset">Reset progress</button></div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click', function (e) { if (e.target === m) hide(); });
+    document.getElementById('pqReportClose').addEventListener('click', hide);
+    document.getElementById('pqReportReset').addEventListener('click', function () {
+      if (confirm('Clear all recorded progress?')) { st = blank(); save(); document.getElementById('pqReportBody').innerHTML = render(); }
+    });
+    // a button in the menu sheet (falls back to the top toolbar)
+    var host = document.getElementById('menu_body') || document.getElementById('toolbar');
+    if (host) {
+      var card = document.createElement('section'); card.className = 'card';
+      card.innerHTML = '<h3>Progress</h3><button id="pqReportOpen" class="pqOpenBtn">&#128202; Report Card</button>';
+      host.insertBefore(card, host.firstChild);
+      document.getElementById('pqReportOpen').addEventListener('click', show);
+    }
+  }
+  function show() { var b = document.getElementById('pqReportBody'); if (b) b.innerHTML = render(); document.getElementById('pqReport').classList.add('show'); }
+  function hide() { var r = document.getElementById('pqReport'); if (r) r.classList.remove('show'); }
+  if (document.readyState !== 'loading') build(); else document.addEventListener('DOMContentLoaded', build);
+  window.__report = { stats: function () { return st; }, render: render, poll: poll, record: record, reset: function () { st = blank(); save(); } };
+})();
+"""
+
+
 def read_text(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -1217,6 +1356,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -1237,6 +1377,7 @@ def main():
         MENU_JS,
         FS_JS,
         VISUAL_JS,
+        PROGRESS_JS,
     )
 
     with open(args.out, "w", encoding="utf-8") as f:
