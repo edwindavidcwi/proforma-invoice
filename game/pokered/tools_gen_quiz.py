@@ -184,7 +184,7 @@ def science(g):
            ("Bee home?","hive",["nest","den"]),("Bird home?","nest",["hive","web"])],
         4:[("Planet we live?","Earth",["Mars","Sun"]),("Star at center?","Sun",["Moon","Mars"]),
            ("We see with?","eyes",["ears","nose"]),("Heart pumps?","blood",["air","water"]),
-           ("Water is H?","H2O",["CO2","O2"]),("Closest star?","Sun",["Mars","Moon"]),
+           ("Water formula?","H2O",["CO2","O2"]),("Closest star?","Sun",["Mars","Moon"]),
            ("Bones make a?","body",["car","tree"]),("Fish breathe with?","gills",["lungs","skin"])],
         5:[("Largest planet?","Jupiter",["Mars","Earth"]),("Red planet?","Mars",["Earth","Sun"]),
            ("Sun is a?","star",["moon","planet"]),("Lungs are for?","air",["food","blood"]),
@@ -198,7 +198,7 @@ def science(g):
 def gk(g):
     facts = {
         1:[("Days in a week?",7,"Seven days"),("How many fingers?",10,"Ten"),
-           ("Colors in rainbow",7,"Seven"),("Eyes on a face?",2,"Two eyes"),
+           ("Colors in rainbow?",7,"Seven"),("Eyes on a face?",2,"Two eyes"),
            ("Legs on a person?",2,"Two legs"),("Wheels on a car?",4,"Four"),
            ("Thumbs on hands?",2,"One each")],
         2:[("Months in a year?",12,"Twelve"),("Days in weekend?",2,"Sat Sun"),
@@ -210,7 +210,7 @@ def gk(g):
         4:[("Days in a year?",365,"365"),("Seconds in min?",60,"Sixty"),
            ("Sides of a dice?",6,"A cube"),("Oceans on Earth?",5,"Five"),
            ("Continents?",7,"Seven"),("Days in leap yr?",366,"One more")],
-        5:[("Years in decade?",10,"Ten"),("Years in century",100,"Hundred"),
+        5:[("Years in decade?",10,"Ten"),("Years in century?",100,"Hundred"),
            ("Days in 2 weeks?",14,"7 and 7"),("Minutes half hr?",30,"Thirty"),
            ("Hours in 2 days?",48,"24 and 24"),("Sides on a cube?",6,"A box")],
     }[g]
@@ -222,9 +222,13 @@ def shapes(g):
     win = {1:(0,3),2:(0,6),3:(3,8),4:(5,10),5:(6,10)}[g]
     out = []
     for name, s in SIDES[win[0]:win[1]]:
-        q = f"Sides {name}?"
+        # Proper wording that still fits the 18-char box: prefer the full
+        # "Sides of a hexagon?"; fall back to "Hexagon sides?" for longer names.
+        q = f"Sides of a {name}?"
+        if not okstr(q, 18):
+            q = f"{name.capitalize()} sides?"
         if okstr(q, 18):
-            out.append(num(q, s, f"{name[:5]}..", spread(s)))
+            out.append(num(q, s, "Count the sides", spread(s)))
     COLORS = [("Red and blue?","purple",["green","pink"]),
               ("Blue and yellow?","green",["purple","brown"]),
               ("Red and yellow?","orange",["green","blue"]),

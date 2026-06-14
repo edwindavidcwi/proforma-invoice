@@ -31,11 +31,11 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
 - **General Knowledge** (7):
     - Days in a week?  ->  *7*   [7, 8, 12]   _hint: Seven days_
     - How many fingers?  ->  *10*   [10, 11, 15]   _hint: Ten_
-    - Colors in rainbow  ->  *7*   [7, 8, 12]   _hint: Seven_
+    - Colors in rainbow?  ->  *7*   [7, 8, 12]   _hint: Seven_
 - **Shapes & Colors** (5):
-    - Sides triangle?  ->  *3*   [3, 4, 8]   _hint: trian.._
-    - Sides square?  ->  *4*   [4, 5, 9]   _hint: squar.._
-    - Sides pentagon?  ->  *5*   [5, 6, 10]   _hint: penta.._
+    - Triangle sides?  ->  *3*   [3, 4, 8]   _hint: Count the sides_
+    - Sides of a square?  ->  *4*   [4, 5, 9]   _hint: Count the sides_
+    - Pentagon sides?  ->  *5*   [5, 6, 10]   _hint: Count the sides_
 
 ### Grade 2
 - **Math** (51):
@@ -55,9 +55,9 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
     - Days in weekend?  ->  *2*   [2, 3, 7]   _hint: Sat Sun_
     - Hours in a day?  ->  *24*   [24, 25, 29]   _hint: Twenty four_
 - **Shapes & Colors** (9):
-    - Sides triangle?  ->  *3*   [3, 4, 8]   _hint: trian.._
-    - Sides square?  ->  *4*   [4, 5, 9]   _hint: squar.._
-    - Sides pentagon?  ->  *5*   [5, 6, 10]   _hint: penta.._
+    - Triangle sides?  ->  *3*   [3, 4, 8]   _hint: Count the sides_
+    - Sides of a square?  ->  *4*   [4, 5, 9]   _hint: Count the sides_
+    - Pentagon sides?  ->  *5*   [5, 6, 10]   _hint: Count the sides_
 
 ### Grade 3
 - **Math** (51):
@@ -77,9 +77,9 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
     - Minutes in hour?  ->  *60*   [60, 61, 65]   _hint: Sixty_
     - Days in Sept?  ->  *30*   [30, 31, 35]   _hint: Thirty_
 - **Shapes & Colors** (9):
-    - Sides hexagon?  ->  *6*   [6, 7, 11]   _hint: hexag.._
-    - Sides rectangle?  ->  *4*   [4, 5, 9]   _hint: recta.._
-    - Sides octagon?  ->  *8*   [8, 9, 13]   _hint: octag.._
+    - Hexagon sides?  ->  *6*   [6, 7, 11]   _hint: Count the sides_
+    - Rectangle sides?  ->  *4*   [4, 5, 9]   _hint: Count the sides_
+    - Octagon sides?  ->  *8*   [8, 9, 13]   _hint: Count the sides_
 
 ### Grade 4
 - **Math** (49):
@@ -99,9 +99,9 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
     - Seconds in min?  ->  *60*   [60, 61, 65]   _hint: Sixty_
     - Sides of a dice?  ->  *6*   [6, 7, 11]   _hint: A cube_
 - **Shapes & Colors** (11):
-    - Sides octagon?  ->  *8*   [8, 9, 13]   _hint: octag.._
-    - Sides heptagon?  ->  *7*   [7, 8, 12]   _hint: hepta.._
-    - Sides nonagon?  ->  *9*   [9, 10, 14]   _hint: nonag.._
+    - Octagon sides?  ->  *8*   [8, 9, 13]   _hint: Count the sides_
+    - Heptagon sides?  ->  *7*   [7, 8, 12]   _hint: Count the sides_
+    - Nonagon sides?  ->  *9*   [9, 10, 14]   _hint: Count the sides_
 
 ### Grade 5
 - **Math** (49):
@@ -118,9 +118,9 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
     - Baby of a pig?  ->  *piglet*   [piglet, puppy, kitten]   _hint: Young animal_
 - **General Knowledge** (6):
     - Years in decade?  ->  *10*   [10, 11, 15]   _hint: Ten_
-    - Years in century  ->  *100*   [100, 101, 105]   _hint: Hundred_
+    - Years in century?  ->  *100*   [100, 101, 105]   _hint: Hundred_
     - Days in 2 weeks?  ->  *14*   [14, 15, 19]   _hint: 7 and 7_
 - **Shapes & Colors** (11):
-    - Sides heptagon?  ->  *7*   [7, 8, 12]   _hint: hepta.._
-    - Sides nonagon?  ->  *9*   [9, 10, 14]   _hint: nonag.._
-    - Sides decagon?  ->  *10*   [10, 11, 15]   _hint: decag.._
+    - Heptagon sides?  ->  *7*   [7, 8, 12]   _hint: Count the sides_
+    - Nonagon sides?  ->  *9*   [9, 10, 14]   _hint: Count the sides_
+    - Decagon sides?  ->  *10*   [10, 11, 15]   _hint: Count the sides_
