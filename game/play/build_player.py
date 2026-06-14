@@ -424,6 +424,7 @@ BODY_HTML = r"""
             <button class="spd on" data-spd="1">1&times;</button>
             <button class="spd" data-spd="2">2&times;</button>
             <button class="spd" data-spd="4">4&times;</button>
+            <button class="spd" data-spd="8">8&times;</button>
           </span>
         </section>
         <section class="card">
@@ -502,10 +503,13 @@ SPEED_JS = r"""
     window.__speed = s;
     btns.forEach(function (b) { b.classList.toggle('on', +b.getAttribute('data-spd') === s); });
     try { localStorage.setItem('pq_speed', String(s)); } catch (e) {}
+    // Fast-forward speeds the sound chip too (pitched-up, painful music), so
+    // mute audio whenever we're above 1x and restore it at 1x.
+    if (window.__applyVolume) window.__applyVolume();
   }
   btns.forEach(function (b) { b.addEventListener('click', function () { set(+b.getAttribute('data-spd')); }); });
   var saved = 1; try { saved = parseInt(localStorage.getItem('pq_speed'), 10) || 1; } catch (e) {}
-  set([1, 2, 4].indexOf(saved) >= 0 ? saved : 1);
+  set([1, 2, 4, 8].indexOf(saved) >= 0 ? saved : 1);
 })();
 """
 
@@ -705,13 +709,27 @@ SOUND_JS = r"""
   if (!btn) return;
   var on = true;
   try { if (localStorage.getItem('pq_sound') === '0') on = false; } catch (e) {}
+  // Effective volume depends on BOTH the sound toggle and the speed: at >1x the
+  // sound chip plays sped-up/screechy, so we force-mute above 1x.
+  window.__applyVolume = function () {
+    var fast = (window.__speed || 1) > 1;
+    var hear = on && !fast;
+    if (window.__vm) window.__vm.volume = hear ? 0.5 : 0;
+    if (hear && window.__resumeAudio) window.__resumeAudio();
+  };
   function apply() {
-    if (window.__vm) window.__vm.volume = on ? 0.5 : 0;
-    if (on && window.__resumeAudio) window.__resumeAudio();
-    btn.textContent = on ? '🔊 Sound: On' : '🔈 Sound: Off';
+    window.__applyVolume();
+    var fast = (window.__speed || 1) > 1;
+    btn.textContent = on ? (fast ? '🔈 Sound: On (fast=mute)' : '🔊 Sound: On') : '🔈 Sound: Off';
     btn.classList.toggle('on', on);
     try { localStorage.setItem('pq_sound', on ? '1' : '0'); } catch (e) {}
   }
+  // keep the label in sync when the speed changes
+  var prevFast = (window.__speed || 1) > 1;
+  setInterval(function () {
+    var fast = (window.__speed || 1) > 1;
+    if (fast !== prevFast) { prevFast = fast; apply(); }
+  }, 300);
   btn.addEventListener('click', function () { on = !on; apply(); });
   // vm is created when the ROM loads (async); apply once it's ready.
   var tries = 0, t = setInterval(function () {
