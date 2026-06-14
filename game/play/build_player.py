@@ -609,32 +609,51 @@ TTS_JS = r"""
     if (k === 'f') { if (vFemale) u.voice = vFemale; }
     else if (k === 'm') { if (vMale) u.voice = vMale; }
     else { if (vNote) u.voice = vNote; }
-    try { speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {}
+    // Queue (don't cancel) so consecutive sentences play in order, not cut off.
+    try { speechSynthesis.speak(u); } catch (e) {}
   }
-  var prevKey = '', recent = [], timer = null, on = false;
+  var prevKey = '', recent = [], buffer = '', prevStable = [], timer = null, on = false;
   try { on = localStorage.getItem('pq_read') === '1'; } catch (e) {}
   function inRecent(line) {
     for (var i = 0; i < recent.length; i++) if (recent[i] === line) return true;
     return false;
   }
-  // Read each line of dialogue ONCE. Game Boy text shows two lines at a time and
-  // scrolls up one line per page, so every line is visible across two pages --
-  // re-reading the whole box each time made it read everything roughly twice.
-  // De-duping per line (remembering the last several spoken lines) fixes that.
+  // Speak COMPLETE sentences. Game Boy text wraps one sentence across several
+  // lines/pages, so we accumulate the on-screen text (each line added once) into
+  // a buffer and only speak whole sentences (ending in . ! or ?), keeping any
+  // unfinished tail for when the next page reveals the rest. This keeps natural
+  // sentence flow instead of reading each line as if it were its own sentence.
+  function flushSentences(force) {
+    var re = /[\s\S]*?[.!?]+/g, m, idx = 0;
+    while ((m = re.exec(buffer)) !== null) {
+      var s = m[0].trim();
+      if (s) speak(s);
+      idx = re.lastIndex;
+    }
+    var rem = buffer.slice(idx);
+    if (force) { var t = rem.trim(); if (t) speak(t); rem = ''; }
+    buffer = rem;
+  }
   function poll() {
     var lines = readScreenLines();
-    if (lines.length === 0) { recent.length = 0; prevKey = ''; return; } // box closed: reset
+    if (lines.length === 0) {                 // box closed: finish the last sentence, reset
+      flushSentences(true); recent.length = 0; prevStable = []; prevKey = ''; return;
+    }
     var key = lines.join('|');
     if (key !== prevKey) { prevKey = key; return; }   // act only once the text settles
-    var fresh = [];
+    // A hard cut (a new screen sharing no line with the last) ends the old thought.
+    var overlap = false;
+    for (var i = 0; i < lines.length; i++) if (prevStable.indexOf(lines[i]) >= 0) overlap = true;
+    if (!overlap && prevStable.length) flushSentences(true);
     for (var i = 0; i < lines.length; i++) {
       var ln = lines[i];
       if (ln.length < 2 || /^ABCDEFGHIJKLMNOP/.test(ln) || inRecent(ln)) continue;
-      fresh.push(ln);
+      buffer += (buffer && !/\s$/.test(buffer) ? ' ' : '') + ln;   // append new line
       recent.push(ln);
       if (recent.length > 12) recent.shift();
     }
-    if (fresh.length) speak(fresh.join(' '));
+    flushSentences(false);
+    prevStable = lines;
   }
   function stopSpeaking() {
     if (nativeTTS && nativeTTS.stop) { try { nativeTTS.stop(); } catch (e) {} }
@@ -645,7 +664,7 @@ TTS_JS = r"""
     btn.classList.toggle('on', on);
     try { localStorage.setItem('pq_read', on ? '1' : '0'); } catch (e) {}
     if (on) { if (!timer) timer = setInterval(poll, 180); }
-    else { if (timer) { clearInterval(timer); timer = null; } stopSpeaking(); }
+    else { if (timer) { clearInterval(timer); timer = null; } stopSpeaking(); buffer = ''; recent.length = 0; prevStable = []; prevKey = ''; }
   }
   btn.addEventListener('click', function () { setOn(!on); });
   setOn(on);

@@ -166,7 +166,9 @@ public class MainActivity extends Activity {
             if (!ttsReady || text == null || text.length() == 0) return;
             tts.setPitch(pitch);
             tts.setSpeechRate(rate);
-            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, "pq");
+            // QUEUE_ADD so consecutive sentences play in order rather than cutting
+            // each other off; stop() (read toggled off) still clears the queue.
+            tts.speak(text, TextToSpeech.QUEUE_ADD, null, "pq");
         }
 
         @JavascriptInterface
