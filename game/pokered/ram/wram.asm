@@ -2227,6 +2227,7 @@ SECTION "Current Box Data", WRAM0
 
 wBoxDataStart::
 
+UNION
 wBoxCount:: db
 wBoxSpecies:: ds MONS_PER_BOX + 1
 
@@ -2251,6 +2252,19 @@ wBoxMonNicksEnd::
 
 wBoxDataEnd::
 
+NEXTU
+; Quiz Battle scratch: the chosen question (entry + its strings) is copied here
+; from its ROM bank before display. This overlays the PC box, which is never
+; touched during a battle, so no extra WRAM is needed.
+wQuizEntry:: ds 14
+wQuizQStr:: ds 20
+wQuizA0:: ds 20
+wQuizA1:: ds 20
+wQuizA2:: ds 20
+wQuizA3:: ds 20
+wQuizHStr:: ds 20
+ENDU
+
 
 SECTION "Quiz Battle RAM", WRAMX
 
@@ -2266,6 +2280,9 @@ wQuizSlot::         db  ; scratch: answer slot being drawn
 wQuizCorrectAnsPtr:: dw ; pointer to the correct answer's text (revealed on a miss)
 wQuizHintPtr::      dw  ; pointer to the current question's method hint (shown on a retry)
 wQuizStreak::       db  ; how many questions answered right in a row (resets on a miss)
+; Questions live in their own ROM bank(s); the chosen one is copied into RAM (the
+; large entry+strings buffers overlay the idle PC box, see "Current Box Data").
+wQuizDataBank::     db  ; ROM bank holding the chosen question's data
 
 
 SECTION "Stack", WRAM0

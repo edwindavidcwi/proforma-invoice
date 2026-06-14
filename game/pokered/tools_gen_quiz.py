@@ -1,206 +1,264 @@
 #!/usr/bin/env python3
-"""Generate engine/battle/quiz_data.asm with a large, correct question bank.
+"""Generate engine/battle/quiz_data.asm with a large, multi-subject question bank.
 
-Every question has: text (<=18 chars), 3 answers (<=9 chars each), the correct
-index, and a method hint (<=18 chars). Numeric questions get auto distractors;
-fraction/decimal/rounding questions are hand-authored. The on-screen answer
-order is randomized at runtime by the engine, so the data order is fine.
+Targets ~100 questions per grade with a balanced subject mix (Math, English,
+Science & Nature, General Knowledge, Shapes & Colors). Every question has text
+(<=18 chars), 3 answers (<=9 chars each), the correct index, and a method hint
+(<=18 chars). Each grade's data is emitted into its own ROM bank (floating ROMX
+section); the engine copies a chosen question into RAM before showing it.
+
+Font has NO = + % , > characters. Allowed: 0-9 A-Z a-z space - / x . : ? !
 """
 import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "engine", "battle", "quiz_data.asm")
+TARGET = 100
 
 ALLOWED = set("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "
               "-/x.:?!")
 
-def ok(s, n):
-    assert all(c in ALLOWED for c in s), f"bad char in {s!r}"
-    assert len(s) <= n, f"too long ({len(s)}>{n}): {s!r}"
-    return s
+def okstr(s, n):
+    return all(c in ALLOWED for c in s) and len(s) <= n
+
+class Bad(Exception):
+    pass
 
 class Q:
     def __init__(self, text, correct, distractors, hint):
-        self.text = ok(text, 18)
-        self.hint = ok(hint, 18)
-        ans = [str(correct)] + [str(d) for d in distractors]
+        text, hint = str(text), str(hint)
+        correct = str(correct)
+        ans = [correct] + [str(d) for d in distractors]
+        if not okstr(text, 18) or not okstr(hint, 18):
+            raise Bad()
         for a in ans:
-            ok(a, 9)
-        assert len(set(ans)) == len(ans), f"dup answers {ans} for {text!r}"
-        self.answers = ans          # answers[0] is the correct one
-        self.correct = str(correct)
+            if not okstr(a, 9):
+                raise Bad()
+        if len(set(ans)) != len(ans):
+            raise Bad()
+        self.text, self.hint, self.answers, self.correct = text, hint, ans, correct
+
+def mk(text, correct, distractors, hint):
+    try:
+        return Q(text, correct, distractors, hint)
+    except Bad:
+        return None
 
 def num(text, correct, hint, distractors=None):
-    """A whole-number question; auto distractors = correct +/- 1 (or +1,+2)."""
+    c = int(correct)
     if distractors is None:
-        c = int(correct)
         distractors = [c - 1, c + 1] if c >= 1 else [c + 1, c + 2]
-    return Q(text, correct, distractors, hint)
+    return mk(text, correct, distractors, hint)
 
-banks = {1: [], 2: [], 3: [], 4: [], 5: []}
+def pick2(correct, word, candidates):
+    out = []
+    for c in candidates:
+        c = str(c)
+        if c != correct and c != word and c not in out and okstr(c, 9):
+            out.append(c)
+        if len(out) == 2:
+            return out
+    return None
 
-# ---------------- Grade 1: add/sub within ~20, counting, doubles ----------
-seen = set()
-for a in range(1, 10):
-    for b in range(1, 10):
-        if a + b <= 10 and (a, b, '+') not in seen and len(banks[1]) < 40:
-            seen.add((a, b, '+'))
-            banks[1].append(num(f"{a} plus {b}?", a + b, f"Count on from {a}"))
-for a in range(3, 11):
-    for b in range(1, a):
-        banks[1].append(num(f"{a} - {b}?", a - b, f"{b} less than {a}"))
-for a in range(2, 6):
-    banks[1].append(num(f"{a} plus {a}?", a + a, f"Double of {a}"))
-banks[1] += [
-    num("Next: 1 2 3 ?", 4, "Count by 1"),
-    num("Next: 3 4 5 ?", 6, "Count by 1"),
-    num("Next: 2 4 6 ?", 8, "Skip count by 2"),
-    num("Next: 5 6 7 ?", 8, "Count by 1"),
-    num("1 more than 9?", 10, "Count on 1"),
-]
+# ===================== word / fact pools =====================
+OPP = [("big","small"),("hot","cold"),("up","down"),("in","out"),("day","night"),
+       ("fast","slow"),("happy","sad"),("full","empty"),("open","shut"),("wet","dry"),
+       ("tall","short"),("high","low"),("good","bad"),("hard","soft"),("old","new"),
+       ("light","dark"),("clean","dirty"),("near","far"),("loud","quiet"),("win","lose"),
+       ("rich","poor"),("early","late"),("buy","sell"),("true","false"),("weak","strong"),
+       ("thick","thin"),("wide","narrow"),("begin","end"),("push","pull"),("left","right"),
+       ("first","last"),("more","less"),("young","old"),("brave","afraid"),("wild","tame")]
+OPP_WORDS = [o for _, o in OPP] + [w for w, _ in OPP]
 
-# ---------------- Grade 2: add/sub within 100, place value ----------------
-g2_pairs = [(14, 8), (23, 9), (36, 7), (45, 6), (28, 14), (52, 19), (33, 27),
-            (40, 35), (17, 18), (60, 25)]
-for a, b in g2_pairs:
-    if a + b <= 99:
-        banks[2].append(num(f"{a} plus {b}?", a + b, "Add tens then ones"))
-for a, b in [(30, 12), (50, 25), (62, 17), (45, 19), (80, 36), (74, 8), (90, 45)]:
-    banks[2].append(num(f"{a} - {b}?", a - b, "Tens then ones"))
-for t in (2, 3, 4, 5, 6, 7, 8, 9):
-    banks[2].append(num(f"Tens in {t}0?", t, f"{t}0 is {t} tens"))
-for a in (6, 7, 8, 9):
-    banks[2].append(num(f"{a} plus {a}?", a + a, f"Double of {a}"))
-for n in (4, 5, 6):
-    banks[2].append(num(f"Add three {n}s", n * 3, f"{n} plus {n} plus {n}"))
+PLURALS = [("cat","cats"),("dog","dogs"),("pen","pens"),("hat","hats"),("cup","cups"),
+           ("box","boxes"),("bus","buses"),("fox","foxes"),("dish","dishes"),
+           ("baby","babies"),("city","cities"),("lady","ladies"),("pony","ponies"),
+           ("man","men"),("woman","women"),("child","children"),("mouse","mice"),
+           ("foot","feet"),("tooth","teeth"),("leaf","leaves"),("goose","geese")]
 
-# ---------------- Grade 3: x and / facts, halves -------------------------
-for a in range(2, 10):
-    for b in range(2, 10):
-        if a <= b and len(banks[3]) < 40:
-            banks[3].append(num(f"{a} x {b}?", a * b, f"{a} groups of {b}"))
-for a, b in [(24, 4), (36, 6), (42, 7), (48, 8), (54, 9), (63, 9), (40, 5), (56, 8)]:
-    banks[3].append(num(f"{a} / {b}?", a // b, f"{b} x what is {a}"))
-for n in (10, 12, 14, 16, 18, 20):
-    banks[3].append(num(f"Half of {n}?", n // 2, f"Split {n} in two"))
+PAST = [("run","ran"),("go","went"),("eat","ate"),("see","saw"),("come","came"),
+        ("give","gave"),("take","took"),("make","made"),("buy","bought"),
+        ("teach","taught"),("sing","sang"),("swim","swam"),("fly","flew"),
+        ("draw","drew"),("sit","sat"),("win","won"),("ride","rode"),("fall","fell")]
 
-# ---------------- Grade 4: bigger x and /, fractions, decimals -----------
-for a, b in [(11, 11), (12, 12), (13, 11), (11, 9), (12, 8), (15, 6), (14, 5), (11, 7)]:
-    banks[4].append(num(f"{a} x {b}?", a * b, f"Break {b} apart"))
-for a, b in [(144, 12), (100, 4), (121, 11), (90, 6), (96, 8), (132, 12)]:
-    banks[4].append(num(f"{a} / {b}?", a // b, f"{b} x what is {a}"))
-banks[4] += [
-    Q("2/4 equals?", "1/2", ["1/3", "1/4"], "Top and bottom /2"),
-    Q("3/6 equals?", "1/2", ["1/3", "2/6"], "Both halve to 1/2"),
-    Q("3/4 of 8?", 6, [5, 7], "8 /4 then x3"),
-    Q("1/2 of 10?", 5, [4, 6], "Split 10 in two"),
-    Q("Half of 1.0?", "0.5", ["0.2", "5.0"], "1.0 split in two"),
-    Q("Half of 5.0?", "2.5", ["2.0", "3.0"], "5.0 split in two"),
-    Q("0.5 plus 0.5?", "1.0", ["0.5", "1.5"], "Two halves make 1"),
-]
+RHYME_GROUPS = [["cat","hat","bat","mat","rat"],["star","car","far","jar"],
+                ["dog","log","fog"],["sun","fun","run","bun"],["tree","bee","see"],
+                ["cake","lake","make","bake"],["ball","wall","tall","fall"],
+                ["bell","well","tell"],["king","ring","sing","wing"],
+                ["bug","rug","mug","hug"],["nose","rose","hose"],["boat","coat","goat"]]
 
-# ---------------- Grade 5: order of ops, decimals, fractions, rounding ---
-for a, b, c in [(2, 3, 4), (5, 2, 3), (1, 6, 2), (4, 4, 2), (7, 2, 5)]:
-    banks[5].append(num(f"{a} plus {b} x {c}?", a + b * c, "Times before plus"))
-for a, b, c in [(10, 2, 3), (20, 3, 4), (15, 2, 2), (12, 1, 5)]:
-    banks[5].append(num(f"{a} - {b} x {c}?", a - b * c, "Times first"))
-banks[5] += [
-    Q("0.6 plus 0.7?", "1.3", ["1.2", "0.13"], "Add tenths 6 and 7"),
-    Q("0.4 plus 0.5?", "0.9", ["0.8", "1.0"], "Add the tenths"),
-    Q("0.8 plus 0.3?", "1.1", ["1.0", "0.11"], "Add tenths 8 and 3"),
-    Q("3/4 plus 1/4?", "1", ["4/8", "2"], "Add tops: 3 plus 1"),
-    Q("1/2 plus 1/4?", "3/4", ["1/4", "2/4"], "1/2 is 2/4"),
-    Q("2/5 plus 1/5?", "3/5", ["3/10", "1/5"], "Add tops: 2 plus 1"),
-    Q("Round 4.7?", 5, [4, 6], ".5 or more goes up"),
-    Q("Round 5.5?", 6, [5, 7], ".5 rounds up"),
-    Q("Round 3.2?", 3, [4, 2], "Under .5 stays"),
-    Q("Round 8.9?", 9, [8, 10], "Close to 9"),
-]
+BABIES = [("dog","puppy"),("cat","kitten"),("cow","calf"),("sheep","lamb"),
+          ("horse","foal"),("goat","kid"),("hen","chick"),("frog","tadpole"),
+          ("bear","cub"),("lion","cub"),("deer","fawn"),("pig","piglet"),
+          ("duck","duckling"),("kangaroo","joey"),("cat","kitten")]
+BABY_WORDS = list({b for _, b in BABIES})
 
-# ---------------- Other subjects (mixed into each grade, grade-scaled) ----
-def add(g, text, correct, distractors, hint):
-    banks[g].append(Q(text, correct, distractors, hint))
+# ===================== subject builders (per grade) =====================
+def english(g):
+    out = []
+    win = {1:(0,12),2:(6,20),3:(12,26),4:(18,32),5:(23,35)}[g]
+    for w, o in OPP[win[0]:win[1]]:
+        d = pick2(o, w, OPP_WORDS[(hash((g,w)) % 9):] + OPP_WORDS)
+        if d: out.append(mk(f"Opp of {w}?", o, d, "Think reverse"))
+    pl = {1:PLURALS[:6],2:PLURALS[4:12],3:PLURALS[9:16],4:PLURALS[13:20],5:PLURALS[15:]}[g]
+    for s, p in pl:
+        d = pick2(p, "", [s, s+"s", s+"es", s+"z"])
+        if d: out.append(mk(f"Many {s}?", p, d, "Plural form"))
+    if g >= 2:
+        pa = {2:PAST[:5],3:PAST[4:10],4:PAST[9:14],5:PAST[13:]}.get(g, [])
+        for v, pt in pa:
+            d = pick2(pt, "", [v+"ed", v+"s", v])
+            if d: out.append(mk(f"Past of {v}?", pt, d, "Past tense"))
+    # rhymes (easy grades)
+    if g <= 3:
+        for grp in RHYME_GROUPS:
+            w, r = grp[0], grp[1]
+            others = [x[0] for x in RHYME_GROUPS if x[0] != w]
+            d = pick2(r, w, others)
+            if d: out.append(mk(f"Rhymes {w}?", r, d, "Same end sound"))
+    return [q for q in out if q]
 
-# English / words
-add(1, "Opposite of big?", "small", ["tall", "fat"], "Tiny not big")
-add(1, "Opposite of hot?", "cold", ["warm", "wet"], "Think of ice")
-add(1, "Many cat?", "cats", ["cat", "cates"], "Add s")
-add(1, "Opposite of up?", "down", ["top", "in"], "Not up is down")
-add(1, "Rhymes with cat?", "hat", ["dog", "sun"], "Ends in -at")
-add(1, "Apple starts?", "A", ["B", "P"], "A is first")
-add(2, "Opposite of fast?", "slow", ["quick", "run"], "Not fast")
-add(2, "Many baby?", "babies", ["babys", "baby"], "y to ies")
-add(2, "Past of run?", "ran", ["runned", "runs"], "run to ran")
-add(2, "Opposite of happy?", "sad", ["glad", "mad"], "Feeling down")
-add(2, "Rhymes with star?", "car", ["sun", "cat"], "Ends in -ar")
-add(3, "Plural of mouse?", "mice", ["mouses", "mouse"], "mouse to mice")
-add(3, "Opposite of empty?", "full", ["open", "soft"], "Not empty")
-add(3, "Past of go?", "went", ["goed", "gone"], "go to went")
-add(4, "Plural of child?", "children", ["childs", "childes"], "Not childs")
-add(4, "Opp of old?", "new", ["big", "wet"], "Fresh and new")
-add(4, "Past of buy?", "bought", ["buyed", "buys"], "buy to bought")
-add(5, "Plural of leaf?", "leaves", ["leafs", "leaf"], "f to ves")
-add(5, "Opp of brave?", "afraid", ["bold", "strong"], "Not brave")
-add(5, "Past of teach?", "taught", ["teached", "teachs"], "teach to taught")
+def science(g):
+    out = []
+    for a, b in BABIES:
+        out.append(mk(f"Baby of {a}?", b, pick2(b, a, BABY_WORDS), "Animal baby"))
+    facts = {
+        1:[("Cow says?","moo",["baa","woof"]),("Dog says?","woof",["moo","oink"]),
+           ("Cat says?","meow",["moo","baa"]),("We breathe?","air",["sand","mud"]),
+           ("Fish live in?","water",["sand","air"]),("Bird can?","fly",["swim","dig"]),
+           ("Legs on a dog?","4",["2","6"]),("Sun gives?","light",["rain","snow"])],
+        2:[("Bees make?","honey",["milk","web"]),("Spider legs?","8",["6","4"]),
+           ("Birds lay?","eggs",["milk","cubs"]),("Cows give?","milk",["eggs","honey"]),
+           ("Ice is cold?","yes",["no","warm"]),("Plants need?","sun",["dark","snow"]),
+           ("Snail is?","slow",["fast","loud"]),("Bat flies at?","night",["noon","dawn"])],
+        3:[("Sun rises in?","east",["west","north"]),("Water freezes to?","ice",["steam","sand"]),
+           ("Insect legs?","6",["8","4"]),("Frog baby?","tadpole",["chick","cub"]),
+           ("Blood is?","red",["blue","green"]),("Trees give?","oxygen",["smoke","sand"]),
+           ("Bee home?","hive",["nest","den"]),("Bird home?","nest",["hive","web"])],
+        4:[("Planet we live?","Earth",["Mars","Sun"]),("Star at center?","Sun",["Moon","Mars"]),
+           ("We see with?","eyes",["ears","nose"]),("Heart pumps?","blood",["air","water"]),
+           ("Water is H?","H2O",["CO2","O2"]),("Closest star?","Sun",["Mars","Moon"]),
+           ("Bones make a?","body",["car","tree"]),("Fish breathe with?","gills",["lungs","skin"])],
+        5:[("Largest planet?","Jupiter",["Mars","Earth"]),("Red planet?","Mars",["Earth","Sun"]),
+           ("Plants make food?","yes",["no","never"]),("Lungs are for?","air",["food","blood"]),
+           ("Moon orbits?","Earth",["Sun","Mars"]),("Speed of?","light",["sound","wind"]),
+           ("Ice is frozen?","water",["milk","air"]),("Bee wings?","2",["4","6"])],
+    }[g]
+    for t in facts:
+        out.append(mk(t[0], t[1], t[2], "Nature fact"))
+    return [q for q in out if q]
 
-# Science & Nature
-add(1, "Baby of a dog?", "puppy", ["kitten", "calf"], "Dogs: puppies")
-add(1, "Baby of a cat?", "kitten", ["puppy", "cub"], "Cats: kittens")
-add(1, "Cow says?", "moo", ["baa", "woof"], "Moo!")
-add(1, "Legs on a dog?", 4, [2, 6], "Count: 4")
-add(1, "We breathe?", "air", ["water", "sand"], "In the air")
-add(2, "Legs on a spider?", 8, [6, 4], "Spiders: 8")
-add(2, "Bees make?", "honey", ["milk", "web"], "Sweet honey")
-add(2, "Baby of a frog?", "tadpole", ["puppy", "chick"], "Tadpole!")
-add(2, "Birds lay?", "eggs", ["milk", "cubs"], "Eggs in nests")
-add(3, "Sun rises in?", "east", ["west", "north"], "E for sunrise")
-add(3, "Plants need?", "sun", ["dark", "snow"], "Sunlight")
-add(3, "Ice melts to?", "water", ["steam", "snow"], "Melts to water")
-add(4, "Planet we live?", "Earth", ["Mars", "Sun"], "Our home")
-add(4, "Insect legs?", 6, [8, 4], "Insects: 6")
-add(4, "Blood is?", "red", ["blue", "green"], "Red blood")
-add(5, "Star at center?", "Sun", ["Moon", "Mars"], "The Sun")
-add(5, "Largest planet?", "Jupiter", ["Mars", "Earth"], "Giant Jupiter")
+def gk(g):
+    facts = {
+        1:[("Days in a week?",7,"Seven days"),("How many fingers?",10,"Ten"),
+           ("Colors in rainbow",7,"Seven"),("Eyes on a face?",2,"Two eyes"),
+           ("Legs on a person?",2,"Two legs"),("Wheels on a car?",4,"Four"),
+           ("Sides of a coin?",2,"Heads tails")],
+        2:[("Months in a year?",12,"Twelve"),("Days in weekend?",2,"Sat Sun"),
+           ("Hours in a day?",24,"Twenty four"),("Days in a week?",7,"Seven"),
+           ("Half of a dozen?",6,"Dozen is 12"),("Legs on 2 cats?",8,"4 and 4")],
+        3:[("Seasons in year?",4,"Four"),("Minutes in hour?",60,"Sixty"),
+           ("Days in Sept?",30,"Thirty"),("Weeks in a year?",52,"Fifty two"),
+           ("Months in year?",12,"Twelve"),("Hours half day?",12,"Twelve")],
+        4:[("Days in a year?",365,"365"),("Seconds in min?",60,"Sixty"),
+           ("Sides of a dice?",6,"A cube"),("Oceans on Earth?",5,"Five"),
+           ("Continents?",7,"Seven"),("Days in leap yr?",366,"One more")],
+        5:[("Years in decade?",10,"Ten"),("Years in century",100,"Hundred"),
+           ("Days in 2 weeks?",14,"7 and 7"),("Minutes half hr?",30,"Thirty"),
+           ("Hours in 2 days?",48,"24 and 24"),("Colors in flag?",3,"Often three")],
+    }[g]
+    return [q for q in (num(t, c, h) for t, c, h in facts) if q]
 
-# General Knowledge
-add(1, "Days in a week?", 7, [5, 10], "Seven days")
-add(1, "Colors in rainbow", 7, [5, 3], "Seven colors")
-add(1, "How many fingers?", 10, [8, 12], "Ten fingers")
-add(2, "Months in a year?", 12, [10, 7], "Twelve")
-add(2, "Days in weekend?", 2, [1, 3], "Sat and Sun")
-add(2, "Hours in a day?", 24, [12, 10], "Twenty four")
-add(3, "Seasons in year?", 4, [2, 3], "Four seasons")
-add(3, "Minutes in hour?", 60, [30, 100], "Sixty")
-add(4, "Days in a year?", 365, [360, 100], "365 days")
-add(4, "Seconds in min?", 60, [100, 30], "Sixty")
-add(5, "Years in decade?", 10, [5, 100], "Ten years")
-add(5, "Years in century", 100, [10, 50], "One hundred")
+def shapes(g):
+    SIDES = [("triangle",3),("square",4),("circle",0),("pentagon",5),("hexagon",6),
+             ("rectangle",4),("octagon",8),("heptagon",7),("nonagon",9),("decagon",10)]
+    win = {1:(0,3),2:(0,6),3:(3,8),4:(5,10),5:(6,10)}[g]
+    out = []
+    for name, s in SIDES[win[0]:win[1]]:
+        q = f"Sides {name}?"
+        if okstr(q, 18):
+            out.append(num(q, s, f"{name[:5]}..", [s-1, s+1] if s >= 1 else [s+1, s+2]))
+    COLORS = [("Red and blue?","purple",["green","pink"]),
+              ("Blue and yellow?","green",["purple","brown"]),
+              ("Red and yellow?","orange",["green","blue"]),
+              ("Red and white?","pink",["grey","blue"]),
+              ("Black and white?","grey",["pink","brown"])]
+    cwin = {1:2,2:3,3:4,4:5,5:5}[g]
+    for t in COLORS[:cwin]:
+        out.append(mk(t[0], t[1], t[2], "Mix colors"))
+    extra = {
+        4:[("Cube has faces?",6,"Six"),("Right angle deg?",90,"Ninety")],
+        5:[("Circle degrees?",360,"Full turn"),("Cube has edges?",12,"Twelve"),
+           ("Triangle angles?",3,"Three")],
+    }.get(g, [])
+    for t in extra:
+        out.append(num(t[0], t[1], t[2]))
+    return [q for q in out if q]
 
-# Shapes & Colors
-add(1, "Sides on triangle", 3, [4, 5], "Tri means 3")
-add(1, "Sides on square?", 4, [3, 5], "Four sides")
-add(1, "Red and blue make", "purple", ["green", "pink"], "Purple!")
-add(2, "Sides on hexagon?", 6, [5, 8], "Hexa means 6")
-add(2, "Blue and yellow?", "green", ["purple", "orange"], "Green!")
-add(2, "A ball is a?", "circle", ["square", "star"], "Round is circle")
-add(3, "Sides on pentagon", 5, [6, 4], "Penta means 5")
-add(3, "Red and yellow?", "orange", ["green", "purple"], "Orange!")
-add(3, "Sides on octagon?", 8, [6, 10], "Octa means 8")
-add(4, "Angles in triangle", 3, [4, 2], "Three angles")
-add(4, "A cube has faces?", 6, [4, 8], "Six faces")
-add(5, "Right angle deg?", 90, [45, 180], "Ninety deg")
-add(5, "Circle degrees?", 360, [180, 90], "360 round")
+# ===================== math builders (large pools) =====================
+def math(g):
+    out = []
+    def U(qs):
+        for q in qs:
+            if q: out.append(q)
+    if g == 1:
+        U(num(f"{a} plus {b}?", a+b, f"Count from {a}") for a in range(1,10) for b in range(1,10) if a+b<=12)
+        U(num(f"{a} - {b}?", a-b, f"{b} less than {a}") for a in range(2,13) for b in range(1,a) if a-b<=9)
+        U(num(f"{a} plus {a}?", a+a, f"Double {a}") for a in range(2,7))
+        U([num("Next: 1 2 3 ?",4,"Count by 1"),num("Next: 2 4 6 ?",8,"By 2s"),
+           num("Next: 5 6 7 ?",8,"Count by 1"),num("Next: 3 4 5 ?",6,"Count by 1")])
+    elif g == 2:
+        U(num(f"{a} plus {b}?", a+b, "Tens then ones") for a in range(11,60,7) for b in range(6,40,9) if a+b<=99)
+        U(num(f"{a} - {b}?", a-b, "Tens then ones") for a in range(20,95,8) for b in range(7,40,6) if a-b>0)
+        U(num(f"Tens in {t}0?", t, f"{t}0 is {t} tens") for t in range(2,10))
+        U(num(f"{a} plus {a}?", a+a, f"Double {a}") for a in range(6,15))
+    elif g == 3:
+        U(num(f"{a} x {b}?", a*b, f"{a} groups of {b}") for a in range(2,10) for b in range(2,10) if a<=b)
+        U(num(f"{a*b} / {b}?", a, f"{b} x what is {a*b}") for b in range(2,10) for a in range(2,7))
+        U(num(f"Half of {n}?", n//2, f"Split {n}") for n in range(10,31,2))
+    elif g == 4:
+        U(num(f"{a} x {b}?", a*b, "Break it up") for a in range(11,16) for b in range(4,10))
+        U(num(f"{a*b} / {b}?", a, f"{b} x what is {a*b}") for b in (6,8,9,11,12) for a in (9,11,12))
+        U([mk("2/4 equals?","1/2",["1/3","1/4"],"Halve both"),mk("3/6 equals?","1/2",["1/3","2/6"],"Halve both"),
+           mk("3/4 of 8?",6,[5,7],"8 /4 x3"),mk("1/2 of 10?",5,[4,6],"Split 10"),
+           mk("Half of 1.0?","0.5",["0.2","5.0"],"Split 1.0"),mk("0.5 plus 0.5?","1.0",["0.5","1.5"],"Two halves")])
+    else:
+        U(num(f"{a} plus {b} x {c}?", a+b*c, "Times before plus") for a in (2,5,1,4,7,3) for b in (2,3) for c in (3,4,5) if a+b*c<100)
+        U(num(f"{a} - {b} x {c}?", a-b*c, "Times first") for a in (10,20,15,12,18) for b in (2,3) for c in (2,3,4) if a-b*c>0)
+        U([mk("0.6 plus 0.7?","1.3",["1.2","0.13"],"Add tenths"),mk("0.4 plus 0.5?","0.9",["0.8","1.0"],"Add tenths"),
+           mk("3/4 plus 1/4?","1",["4/8","2"],"Add tops"),mk("1/2 plus 1/4?","3/4",["1/4","2/4"],"1/2 is 2/4"),
+           mk("Round 4.7?",5,[4,6],".5 goes up"),mk("Round 5.5?",6,[5,7],".5 goes up"),
+           mk("Round 3.2?",3,[4,2],"Under .5"),mk("Round 8.9?",9,[8,10],"Near 9")])
+    return out
+
+# ===================== assemble ~100/grade, balanced =====================
+def dedupe(qs):
+    seen, out = set(), []
+    for q in qs:
+        if q and q.text not in seen:
+            seen.add(q.text); out.append(q)
+    return out
+
+banks = {g: [] for g in range(1, 6)}
+for g in range(1, 6):
+    bucket = []
+    for builder, cap in ((english, 20), (science, 20), (gk, 20), (shapes, 20)):
+        bucket += dedupe(builder(g))[:cap]
+    bucket = dedupe(bucket)
+    need = TARGET - len(bucket)
+    bucket += dedupe(math(g))[:max(need, 0)]
+    banks[g] = dedupe(bucket)[:TARGET]
 
 
 def emit():
     L = []
     w = L.append
     w("; ============================================================================")
-    w("; Quiz Battle - question banks (grades 1-5)")
+    w("; Quiz Battle - multi-subject question banks (grades 1-5)")
     w("; ----------------------------------------------------------------------------")
     w("; GENERATED by tools_gen_quiz.py -- edit that script and re-run it, then `make`.")
-    w("; Font has NO =,+,% ; use words (\"plus\") and  - / x . : ? !  only.")
-    w("; Question text <= 18 chars, each answer <= 9, each hint <= 18.")
+    w("; Each grade's data lives in its own ROM bank; the engine copies a chosen")
+    w("; question into RAM before showing it (see QuizLoadQuestion).")
     w("; ============================================================================")
     w("")
     w("; One question entry (14 bytes):")
@@ -216,32 +274,8 @@ def emit():
     w("QuizGradeTable::")
     for g in range(1, 6):
         w(f"\tdw Grade{g}Questions")
-        if g < 5:
-            w(f"\tdb (Grade{g+1}Questions - Grade{g}Questions) / 14")
-        else:
-            w(f"\tdb (QuestionsEnd - Grade5Questions) / 14")
-    w("")
-    # entry tables
-    for g in range(1, 6):
-        w(f"Grade{g}Questions::")
-        for i, q in enumerate(banks[g], 1):
-            p = f"G{g}Q{i}"
-            # data order: correct first (index 0), then distractors; engine rotates
-            a = [f"{p}A", f"{p}B", f"{p}C"]
-            w(f"\tquizq {p}, 0, 3, {a[0]}, {a[1]}, {a[2]}, {a[2]}, {p}H")
-    w("QuestionsEnd::")
-    w("")
-    # strings
-    w("; ---- strings ----")
-    for g in range(1, 6):
-        w(f"; Grade {g}")
-        for i, q in enumerate(banks[g], 1):
-            p = f"G{g}Q{i}"
-            w(f'{p}: db "{q.text}@"')
-            w(f'{p}A: db "{q.answers[0]}@"')
-            w(f'{p}B: db "{q.answers[1]}@"')
-            w(f'{p}C: db "{q.answers[2]}@"')
-            w(f'{p}H: db "{q.hint}@"')
+        w(f"\tdb {len(banks[g])}")
+        w(f"\tdb BANK(Grade{g}Questions)")
     w("")
     w("; ---- result messages (shown via PrintText) ----")
     w("QuizCorrectText::")
@@ -264,11 +298,25 @@ def emit():
     w('\tcont "Now you know!"')
     w("\tprompt")
     w("")
+    for g in range(1, 6):
+        w(f'SECTION "Quiz Data G{g}", ROMX')
+        w(f"Grade{g}Questions::")
+        for i, q in enumerate(banks[g], 1):
+            p = f"G{g}Q{i}"
+            w(f"\tquizq {p}, 0, 3, {p}A, {p}B, {p}C, {p}C, {p}H")
+        for i, q in enumerate(banks[g], 1):
+            p = f"G{g}Q{i}"
+            w(f'{p}: db "{q.text}@"')
+            w(f'{p}A: db "{q.answers[0]}@"')
+            w(f'{p}B: db "{q.answers[1]}@"')
+            w(f'{p}C: db "{q.answers[2]}@"')
+            w(f'{p}H: db "{q.hint}@"')
+        w("")
     return "\n".join(L)
+
 
 text = emit()
 with open(OUT, "w") as f:
     f.write(text)
-total = sum(len(v) for v in banks.values())
 print("wrote", OUT)
-print("counts:", {g: len(v) for g, v in banks.items()}, "total", total)
+print("counts:", {g: len(v) for g, v in banks.items()}, "total", sum(len(v) for v in banks.values()))

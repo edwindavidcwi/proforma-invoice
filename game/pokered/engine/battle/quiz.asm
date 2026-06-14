@@ -16,7 +16,8 @@ INCLUDE "engine/battle/quiz_config.asm"
 ; Clobbers all registers (safe at the HandleIfPlayerMoveMissed hook).
 QuizPlayerAttack::
 	call SaveScreenTilesToBuffer2
-	call QuizSelectQuestion        ; hl = chosen question entry
+	call QuizSelectQuestion        ; a = bank, hl = entry (in that bank)
+	call QuizLoadQuestion          ; copy it into RAM -> hl = wQuizEntry
 	call QuizAsk                   ; carry set = answered correctly
 	push af
 	call LoadScreenTilesFromBuffer2
@@ -40,6 +41,7 @@ QuizEnemyDefense::
 	ret z                          ; status move: nothing to defend against
 	call SaveScreenTilesToBuffer2
 	call QuizSelectQuestion
+	call QuizLoadQuestion          ; copy chosen question into RAM
 	call QuizAsk                   ; carry set = answered correctly
 	push af
 	call LoadScreenTilesFromBuffer2
@@ -70,6 +72,7 @@ QuizEnemyDefense::
 QuizItemUse::
 	call SaveScreenTilesToBuffer2
 	call QuizSelectByLevel
+	call QuizLoadQuestion          ; copy chosen question into RAM
 	call QuizAsk
 	push af
 	call LoadScreenTilesFromBuffer2
@@ -117,17 +120,16 @@ QuizSelectByLevel::
 	; fall through
 
 ; Pick a random question from grade `a` (1-based, clamped to 5).
-; Returns hl -> 12-byte question entry.
+; QuizGradeTable entry is 4 bytes: dw listBase, db count, db bank.
+; Output: a = data bank, hl = entry address (within that bank).
 QuizPickGrade:
 	cp 6
 	jr c, .capped
 	ld a, 5
 .capped
 	dec a                          ; grade index 0-4
-	; entry in QuizGradeTable is 3 bytes: dw listPtr, db count -> offset = idx*3
-	ld c, a
-	add a                          ; idx*2
-	add c                          ; idx*3
+	add a
+	add a                          ; idx * 4
 	ld c, a
 	ld b, 0
 	ld hl, QuizGradeTable
@@ -135,28 +137,86 @@ QuizPickGrade:
 	ld a, [hli]
 	ld e, a
 	ld a, [hli]
-	ld d, a                        ; de = list base
-	ld a, [hl]                     ; a = number of questions in this grade
+	ld d, a                        ; de = list base (address in the data bank)
+	ld a, [hli]
 	ld c, a                        ; c = count
-	; pick a random index in [0, count)
+	ld a, [hl]
+	ld [wQuizDataBank], a          ; data bank
+	; pick a random index in [0, count) (guard de and count across Random)
+	push de
+	push bc
 	call Random                    ; a = random byte
+	pop bc                         ; c = count
+	pop de                         ; de = base
 .mod
 	cp c
 	jr c, .haveIndex
 	sub c
 	jr .mod
 .haveIndex
-	; hl = de + index*14
+	; hl = base + index*14
 	ld h, d
 	ld l, e
 	and a
-	ret z                          ; index 0 -> first entry
+	jr z, .gotEntry
 	ld b, a                        ; b = index
 	ld de, 14
 .addLoop
 	add hl, de
 	dec b
 	jr nz, .addLoop
+.gotEntry
+	ld a, [wQuizDataBank]
+	ret                            ; a = bank, hl = entry
+
+; Copy the chosen question (entry + all its strings) from the data bank into RAM,
+; rewriting the entry's pointers to the RAM copies. After this the display code
+; runs entirely on RAM and never switches banks. In: a = bank, hl = entry addr.
+; Out: hl = wQuizEntry.
+QuizLoadQuestion:
+	ld [wQuizDataBank], a
+	ld de, wQuizEntry
+	ld bc, 14
+	call FarCopyData               ; bank:hl(entry) -> wQuizEntry
+	ld hl, wQuizEntry              ; question text pointer (offset 0)
+	ld de, wQuizQStr
+	call QuizFixupStr
+	ld hl, wQuizEntry + 4          ; answer 0 (offset 4)
+	ld de, wQuizA0
+	call QuizFixupStr
+	ld hl, wQuizEntry + 6
+	ld de, wQuizA1
+	call QuizFixupStr
+	ld hl, wQuizEntry + 8
+	ld de, wQuizA2
+	call QuizFixupStr
+	ld hl, wQuizEntry + 10
+	ld de, wQuizA3
+	call QuizFixupStr
+	ld hl, wQuizEntry + 12         ; hint (offset 12)
+	ld de, wQuizHStr
+	call QuizFixupStr
+	ld hl, wQuizEntry
+	ret
+
+; Far-copy one string into RAM and repoint it. In: hl -> 2-byte source pointer
+; (inside wQuizEntry), de = RAM destination buffer. Copies a fixed 20 bytes
+; (every string is <=19 chars incl. terminator) then rewrites the pointer to de.
+QuizFixupStr:
+	push hl
+	ld a, [hli]
+	ld h, [hl]
+	ld l, a                        ; hl = source string address (in data bank)
+	ld bc, 20
+	ld a, [wQuizDataBank]
+	push de
+	call FarCopyData               ; bank:hl -> de
+	pop de                         ; de = destination
+	pop hl                         ; hl -> the pointer field
+	ld a, e
+	ld [hli], a
+	ld a, d
+	ld [hl], a
 	ret
 
 ; Ask the question pointed to by hl (14-byte entry).
