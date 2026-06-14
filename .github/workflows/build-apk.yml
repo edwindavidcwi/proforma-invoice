@@ -15,6 +15,13 @@ on:
       - "game/windows-app/**"
       - ".github/workflows/build-apk.yml"
 
+# Only one build per branch at a time. A newer push cancels an older in-flight
+# run so two runs can't race on deleting/recreating the shared release tag
+# (which 403s the loser). The latest commit always wins and publishes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   # 1. Build the ROM, the self-contained offline player HTML, and the Android APK.
   android:
