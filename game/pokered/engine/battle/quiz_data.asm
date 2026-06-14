@@ -34,25 +34,25 @@ QuizGradeTable::
 	db BANK(Grade5Questions)
 
 ; ---- result messages (shown via PrintText) ----
+; NOTE: a literal-text segment must end with '@' BEFORE a text_ram command,
+; otherwise the text engine runs past it and never prints the RAM string.
 QuizCorrectText::
 	text "Great job!"
-	line "Streak "
+	line "Streak @"
 	text_ram wStringBuffer
-	prompt
+	text "<PROMPT>"
 
 QuizTryAgainText::
 	text "Hint:"
-	line ""
+	line "@"
 	text_ram wStringBuffer
-	cont "Try once more!"
-	prompt
+	text "<PROMPT>"
 
 QuizMissText::
 	text "The answer was"
-	line ""
+	line "@"
 	text_ram wStringBuffer
-	cont "Now you know!"
-	prompt
+	text "<PROMPT>"
 
 ; Subject id per question (parallel to Grade{n}Questions); for cycling.
 QuizSubjectTable::
