@@ -74,6 +74,8 @@ RedisplayStartMenu::
 	jp z, StartMenu_SaveReset
 	cp 5
 	jp z, StartMenu_Option
+	cp 6
+	jp z, StartMenu_Study
 
 ; EXIT falls through to here
 CloseStartMenu::

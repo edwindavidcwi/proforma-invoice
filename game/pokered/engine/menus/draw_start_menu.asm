@@ -1,14 +1,14 @@
 ; function that displays the start menu
 DrawStartMenu::
 	CheckEvent EVENT_GOT_POKEDEX
-; menu with pokedex
+; menu with pokedex (one row taller for the STUDY item)
 	hlcoord 10, 0
-	ld b, $0e
+	ld b, $10
 	ld c, $08
 	jr nz, .drawTextBoxBorder
 ; shorter menu if the player doesn't have the pokedex
 	hlcoord 10, 0
-	ld b, $0c
+	ld b, $0e
 	ld c, $08
 .drawTextBoxBorder
 	call TextBoxBorder
@@ -27,13 +27,13 @@ DrawStartMenu::
 	set BIT_NO_TEXT_DELAY, [hl]
 	hlcoord 12, 2
 	CheckEvent EVENT_GOT_POKEDEX
-; case for not having pokedex
-	ld a, $06
+; case for not having pokedex (one more item for STUDY)
+	ld a, $07
 	jr z, .storeMenuItemCount
 ; case for having pokedex
 	ld de, StartMenuPokedexText
 	call PrintStartMenuItem
-	ld a, $07
+	ld a, $08
 .storeMenuItemCount
 	ld [wMaxMenuItem], a ; number of menu items
 	ld de, StartMenuPokemonText
@@ -52,6 +52,8 @@ DrawStartMenu::
 .printSaveOrResetText
 	call PrintStartMenuItem
 	ld de, StartMenuOptionText
+	call PrintStartMenuItem
+	ld de, StartMenuStudyText
 	call PrintStartMenuItem
 	ld de, StartMenuExitText
 	call PlaceString
@@ -79,6 +81,9 @@ StartMenuExitText:
 
 StartMenuOptionText:
 	db "OPTION@"
+
+StartMenuStudyText:
+	db "STUDY@"
 
 PrintStartMenuItem:
 	push hl

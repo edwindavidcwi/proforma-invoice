@@ -1,3 +1,8 @@
+StartMenu_Study::
+; Professor's Assistant lesson + practice, straight from the Start menu.
+	callfar Tutor
+	jp RedisplayStartMenu
+
 StartMenu_Pokedex::
 	predef ShowPokedexMenu
 	call LoadScreenTilesFromBuffer2
