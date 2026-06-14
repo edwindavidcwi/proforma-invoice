@@ -32,13 +32,14 @@ QuizPlayerAttack::
 	ld [wMoveMissed], a
 	ret
 
-; Enemy is attacking: ask a grade-scaled question to defend.
-; Correct -> the enemy hits normally.  Wrong -> force a doubled critical hit.
+; Enemy is attacking: optionally ask a grade-scaled question to defend.
+; Behaviour is set in quiz_config.asm (QUIZ_ASK_ON_DEFENSE / QUIZ_SOFT_DEFENSE).
 ; Only triggers for damaging moves (power > 0).
 QuizEnemyDefense::
 	ld a, [wEnemyMovePower]
 	and a
 	ret z                          ; status move: nothing to defend against
+IF QUIZ_ASK_ON_DEFENSE != 0
 	call SaveScreenTilesToBuffer2
 	call QuizSelectQuestion
 	call QuizLoadQuestion          ; copy chosen question into RAM
@@ -47,8 +48,24 @@ QuizEnemyDefense::
 	call LoadScreenTilesFromBuffer2
 	call Delay3
 	pop af
-	ret c                          ; correct -> leave damage as the game rolled it
-	; wrong -> make sure the hit lands, flag a critical hit, and double the damage
+	jr nc, .wrong
+	; correct
+IF QUIZ_SOFT_DEFENSE != 0
+	; reward a good defence: halve the incoming damage (16-bit, high byte first)
+	ld hl, wDamage
+	ld a, [hl]
+	srl a
+	ld [hli], a
+	ld a, [hl]
+	rra
+	ld [hl], a
+ENDC
+	ret                            ; (otherwise leave damage as the game rolled it)
+.wrong
+IF QUIZ_SOFT_DEFENSE != 0
+	ret                            ; soft: a wrong answer just takes normal damage
+ELSE
+	; make sure the hit lands, flag a critical hit, and double the damage
 	xor a
 	ld [wMoveMissed], a
 	ld a, $01
@@ -65,6 +82,9 @@ QuizEnemyDefense::
 	ld [hli], a
 	ld [hl], a
 	ret
+ENDC
+ENDC
+	ret                            ; QUIZ_ASK_ON_DEFENSE == 0: normal damage, no quiz
 
 ; Player wants to use a bag item in battle: ask a question scaled to the
 ; active Pokemon's level.  Sets wQuizResult to 1 (allow) or 0 (deny).

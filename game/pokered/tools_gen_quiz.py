@@ -60,6 +60,38 @@ def pick2(correct, word, candidates):
             return out
     return None
 
+def _two(c, cands):
+    """Pick 2 distinct, non-negative distractors != c from cands (then pad)."""
+    out = []
+    for d in cands:
+        d = int(d)
+        if d >= 0 and d != c and d not in out:
+            out.append(d)
+        if len(out) == 2:
+            return out
+    i = 1
+    while len(out) < 2:
+        for d in (c + i, c - i, c + 10 * i):
+            if d >= 0 and d != c and d not in out:
+                out.append(d)
+            if len(out) == 2:
+                break
+        i += 1
+    return out[:2]
+
+def smart(op, a, b, c):
+    """Plausible, common-mistake distractors instead of the trivial c +/- 1."""
+    if op == '+':   cands = [abs(a - b), c + 1, c + 10, c - 2]   # subtracted; near; place-value
+    elif op == '-': cands = [a + b, c + 1, c + 10, c - 1]        # added instead; near
+    elif op == 'x': cands = [a * (b - 1), a + b, a * (b + 1), c + 1]  # a group off; added
+    elif op == '/': cands = [c + 1, b, c + 2, c - 1]             # near; confuse with divisor
+    else:           cands = [c + 1, c + 5, c - 2, c * 2, c + 10]
+    return _two(c, cands)
+
+def spread(c):
+    """A near miss plus a wider miss (so the 3 options aren't just consecutive)."""
+    return _two(c, [c + 1, c + 5, c - 3, c * 2 if c <= 20 else c + 10, c + 10, c - 1])
+
 # ===================== word / fact pools =====================
 OPP = [("big","small"),("hot","cold"),("up","down"),("in","out"),("day","night"),
        ("fast","slow"),("happy","sad"),("full","empty"),("open","shut"),("wet","dry"),
@@ -94,34 +126,40 @@ BABIES = [("dog","puppy"),("cat","kitten"),("cow","calf"),("sheep","lamb"),
 BABY_WORDS = list({b for _, b in BABIES})
 
 # ===================== subject builders (per grade) =====================
+def fit(long, short):
+    """Use the clearer wording when it fits the 18-char screen, else the short one."""
+    return long if okstr(long, 18) else short
+
 def english(g):
     out = []
     win = {1:(0,12),2:(6,20),3:(12,26),4:(18,32),5:(23,35)}[g]
     for w, o in OPP[win[0]:win[1]]:
         d = pick2(o, w, OPP_WORDS[(hash((g,w)) % 9):] + OPP_WORDS)
-        if d: out.append(mk(f"Opp of {w}?", o, d, "Think reverse"))
+        if d: out.append(mk(fit(f"Opposite of {w}?", f"Opp of {w}?"), o, d, "The opposite word"))
     pl = {1:PLURALS[:6],2:PLURALS[4:12],3:PLURALS[9:16],4:PLURALS[13:20],5:PLURALS[15:]}[g]
     for s, p in pl:
         d = pick2(p, "", [s, s+"s", s+"es", s+"z"])
-        if d: out.append(mk(f"Many {s}?", p, d, "Plural form"))
+        if d: out.append(mk(fit(f"Plural of {s}?", f"Many {s}?"), p, d, "More than one"))
     if g >= 2:
         pa = {2:PAST[:5],3:PAST[4:10],4:PAST[9:14],5:PAST[13:]}.get(g, [])
         for v, pt in pa:
             d = pick2(pt, "", [v+"ed", v+"s", v])
-            if d: out.append(mk(f"Past of {v}?", pt, d, "Past tense"))
+            if d: out.append(mk(f"Past of {v}?", pt, d, "Yesterday word"))
     # rhymes (easy grades)
     if g <= 3:
         for grp in RHYME_GROUPS:
             w, r = grp[0], grp[1]
             others = [x[0] for x in RHYME_GROUPS if x[0] != w]
             d = pick2(r, w, others)
-            if d: out.append(mk(f"Rhymes {w}?", r, d, "Same end sound"))
+            if d: out.append(mk(fit(f"Rhymes with {w}?", f"Rhymes {w}?"), r, d, "Same end sound"))
     return [q for q in out if q]
 
 def science(g):
     out = []
-    for a, b in BABIES:
-        out.append(mk(f"Baby of {a}?", b, pick2(b, a, BABY_WORDS), "Animal baby"))
+    # different animals per grade (these used to repeat in every grade)
+    babies = {1:BABIES[0:5], 2:BABIES[2:8], 3:BABIES[5:11], 4:BABIES[8:14], 5:BABIES[9:15]}[g]
+    for a, b in babies:
+        out.append(mk(fit(f"Baby of a {a}?", f"Baby of {a}?"), b, pick2(b, a, BABY_WORDS), "Young animal"))
     facts = {
         1:[("Cow says?","moo",["baa","woof"]),("Dog says?","woof",["moo","oink"]),
            ("Cat says?","meow",["moo","baa"]),("We breathe?","air",["sand","mud"]),
@@ -167,7 +205,7 @@ def gk(g):
            ("Days in 2 weeks?",14,"7 and 7"),("Minutes half hr?",30,"Thirty"),
            ("Hours in 2 days?",48,"24 and 24"),("Sides on a cube?",6,"A box")],
     }[g]
-    return [q for q in (num(t, c, h) for t, c, h in facts) if q]
+    return [q for q in (num(t, c, h, spread(c)) for t, c, h in facts) if q]
 
 def shapes(g):
     SIDES = [("triangle",3),("square",4),("pentagon",5),("hexagon",6),
@@ -177,7 +215,7 @@ def shapes(g):
     for name, s in SIDES[win[0]:win[1]]:
         q = f"Sides {name}?"
         if okstr(q, 18):
-            out.append(num(q, s, f"{name[:5]}..", [s-1, s+1] if s >= 1 else [s+1, s+2]))
+            out.append(num(q, s, f"{name[:5]}..", spread(s)))
     COLORS = [("Red and blue?","purple",["green","pink"]),
               ("Blue and yellow?","green",["purple","brown"]),
               ("Red and yellow?","orange",["green","blue"]),
@@ -192,7 +230,7 @@ def shapes(g):
            ("Triangle angles?",3,"Three")],
     }.get(g, [])
     for t in extra:
-        out.append(num(t[0], t[1], t[2]))
+        out.append(num(t[0], t[1], t[2], spread(t[1])))
     return [q for q in out if q]
 
 # ===================== math builders (large pools) =====================
@@ -202,29 +240,29 @@ def math(g):
         for q in qs:
             if q: out.append(q)
     if g == 1:
-        U(num(f"{a} plus {b}?", a+b, f"Count from {a}") for a in range(1,10) for b in range(1,10) if a+b<=12)
-        U(num(f"{a} - {b}?", a-b, f"{b} less than {a}") for a in range(2,13) for b in range(1,a) if a-b<=9)
-        U(num(f"{a} plus {a}?", a+a, f"Double {a}") for a in range(2,7))
-        U([num("Next: 1 2 3 ?",4,"Count by 1"),num("Next: 2 4 6 ?",8,"By 2s"),
-           num("Next: 5 6 7 ?",8,"Count by 1"),num("Next: 3 4 5 ?",6,"Count by 1")])
+        U(num(f"{a} plus {b}?", a+b, f"Count from {a}", smart('+',a,b,a+b)) for a in range(1,10) for b in range(1,10) if a+b<=12)
+        U(num(f"{a} - {b}?", a-b, f"{b} less than {a}", smart('-',a,b,a-b)) for a in range(2,13) for b in range(1,a) if a-b<=9)
+        U(num(f"{a} plus {a}?", a+a, f"Double {a}", smart('+',a,a,a+a)) for a in range(2,7))
+        U([num("Next: 1 2 3 ?",4,"Count by 1",[5,3]),num("Next: 2 4 6 ?",8,"By 2s",[10,7]),
+           num("Next: 5 6 7 ?",8,"Count by 1",[9,6]),num("Next: 3 4 5 ?",6,"Count by 1",[7,4])])
     elif g == 2:
-        U(num(f"{a} plus {b}?", a+b, "Tens then ones") for a in range(11,60,7) for b in range(6,40,9) if a+b<=99)
-        U(num(f"{a} - {b}?", a-b, "Tens then ones") for a in range(20,95,8) for b in range(7,40,6) if a-b>0)
-        U(num(f"Tens in {t}0?", t, f"{t}0 is {t} tens") for t in range(2,10))
-        U(num(f"{a} plus {a}?", a+a, f"Double {a}") for a in range(6,15))
+        U(num(f"{a} plus {b}?", a+b, "Tens then ones", smart('+',a,b,a+b)) for a in range(11,60,7) for b in range(6,40,9) if a+b<=99)
+        U(num(f"{a} - {b}?", a-b, "Tens then ones", smart('-',a,b,a-b)) for a in range(20,95,8) for b in range(7,40,6) if a-b>0)
+        U(num(f"Tens in {t}0?", t, f"{t}0 is {t} tens", spread(t)) for t in range(2,10))
+        U(num(f"{a} plus {a}?", a+a, f"Double {a}", smart('+',a,a,a+a)) for a in range(6,15))
     elif g == 3:
-        U(num(f"{a} x {b}?", a*b, f"{a} groups of {b}") for a in range(2,10) for b in range(2,10) if a<=b)
-        U(num(f"{a*b} / {b}?", a, f"{b} x what is {a*b}") for b in range(2,10) for a in range(2,7))
-        U(num(f"Half of {n}?", n//2, f"Split {n}") for n in range(10,31,2))
+        U(num(f"{a} x {b}?", a*b, f"{a} groups of {b}", smart('x',a,b,a*b)) for a in range(2,10) for b in range(2,10) if a<=b)
+        U(num(f"{a*b} / {b}?", a, f"{b} x what is {a*b}", smart('/',a*b,b,a)) for b in range(2,10) for a in range(2,7))
+        U(num(f"Half of {n}?", n//2, f"Split {n}", spread(n//2)) for n in range(10,31,2))
     elif g == 4:
-        U(num(f"{a} x {b}?", a*b, "Break it up") for a in range(11,16) for b in range(4,10))
-        U(num(f"{a*b} / {b}?", a, f"{b} x what is {a*b}") for b in (6,8,9,11,12) for a in (9,11,12))
+        U(num(f"{a} x {b}?", a*b, "Break it up", smart('x',a,b,a*b)) for a in range(11,16) for b in range(4,10))
+        U(num(f"{a*b} / {b}?", a, f"{b} x what is {a*b}", smart('/',a*b,b,a)) for b in (6,8,9,11,12) for a in (9,11,12))
         U([mk("2/4 equals?","1/2",["1/3","1/4"],"Halve both"),mk("3/6 equals?","1/2",["1/3","2/6"],"Halve both"),
            mk("3/4 of 8?",6,[5,7],"8 /4 x3"),mk("1/2 of 10?",5,[4,6],"Split 10"),
            mk("Half of 1.0?","0.5",["0.2","5.0"],"Split 1.0"),mk("0.5 plus 0.5?","1.0",["0.5","1.5"],"Two halves")])
     else:
-        U(num(f"{a} plus {b} x {c}?", a+b*c, "Times before plus") for a in (2,5,1,4,7,3) for b in (2,3) for c in (3,4,5) if a+b*c<100)
-        U(num(f"{a} - {b} x {c}?", a-b*c, "Times first") for a in (10,20,15,12,18) for b in (2,3) for c in (2,3,4) if a-b*c>0)
+        U(num(f"{a} plus {b} x {c}?", a+b*c, "Times before plus", _two(a+b*c, [(a+b)*c, a+b+c, a+b*c+1])) for a in (2,5,1,4,7,3) for b in (2,3) for c in (3,4,5) if a+b*c<100)
+        U(num(f"{a} - {b} x {c}?", a-b*c, "Times first", _two(a-b*c, [(a-b)*c, a-b-c, a-b*c+1])) for a in (10,20,15,12,18) for b in (2,3) for c in (2,3,4) if a-b*c>0)
         U([mk("0.6 plus 0.7?","1.3",["1.2","0.13"],"Add tenths"),mk("0.4 plus 0.5?","0.9",["0.8","1.0"],"Add tenths"),
            mk("3/4 plus 1/4?","1",["4/8","2"],"Add tops"),mk("1/2 plus 1/4?","3/4",["1/4","2/4"],"1/2 is 2/4"),
            mk("Round 4.7?",5,[4,6],".5 goes up"),mk("Round 5.5?",6,[5,7],".5 goes up"),
