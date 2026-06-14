@@ -112,6 +112,8 @@ QuizItemUse::
 ; hint/answer/streak feedback, then restores the screen. No hit/miss effect.
 QuizPractice::
 	call SaveScreenTilesToBuffer2
+	call ClearSprites              ; hide overworld sprites (player/NPCs) during the quiz
+	call ClearScreen               ; blank the background so the quiz box sits on a clean screen
 	call QuizSelectQuestion
 	call QuizLoadQuestion
 	call QuizAsk
