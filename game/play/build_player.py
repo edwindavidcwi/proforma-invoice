@@ -289,6 +289,18 @@ body { display: flex; flex-direction: column; }
   border: 8px solid #0c161d; border-radius: 10px; background: #0b1418;
   box-shadow: inset 0 0 0 2px #1d2c38, 0 6px 18px rgba(0,0,0,.5);
 }
+/* ---- learning visual aid: real shapes & colours drawn over the empty top
+   band of the battle screen during shape/colour questions ---- */
+#visualAid { position: fixed; z-index: 22; display: none; pointer-events: none; }
+#visualAid.show { display: block; }
+#visualAid .vaCard { display: flex; align-items: center; justify-content: center;
+  gap: 8%; width: 100%; height: 100%; box-sizing: border-box; padding: 4%;
+  background: rgba(255,255,255,.92); border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0,0,0,.45); }
+#visualAid svg { width: auto; height: 100%; max-width: 100%; }
+#visualAid .swatch { flex: 1 1 0; min-width: 0; height: 88%; border-radius: 8px;
+  border: 2px solid rgba(0,0,0,.4); }
+#visualAid .op { flex: 0 0 auto; font: 700 100% / 1 system-ui, sans-serif; color: #222; }
 #hint { bottom: 10px; font-size: 11px; color: #8fb3c6; padding: 0 14px; }
 /* On touch devices the on-screen gamepad fills the bottom, so the keyboard
    hint would just overlap the Select/Start buttons -- hide it there. */
@@ -402,6 +414,7 @@ BODY_HTML = r"""
     </div>
     <div id="hint">Arrows move &middot; Z = A &middot; X = B &middot; Enter = Start &middot; hold Space = fast-forward &middot; tap &#9776; Menu for saves &amp; settings</div>
     <div id="overlay"><div id="overlay_msg"></div></div>
+    <div id="visualAid" aria-hidden="true"></div>
   </div>
 
   <div id="controller">
@@ -1038,6 +1051,103 @@ FS_JS = r"""
 """
 
 
+# Learning visual aid: while a shape or colour question is on screen during a
+# battle, draw the real shape (or colour swatches) over the empty top band of
+# the Game Boy screen. The Game Boy itself is monochrome, so the colours/shapes
+# are rendered here in the browser layer -- it reads the live tilemap (what is
+# actually drawn on screen) and keyword-matches it, so it only appears for the
+# relevant question and never interferes with the game.
+VISUAL_JS = r"""
+(function () {
+  'use strict';
+  var el = null;
+  // Region of the 160x144 GB screen used for the aid (the empty top band; the
+  // question box occupies rows 6-17). Tweak here to reposition.
+  var GB = { x: 46, y: 3, w: 68, h: 40 };
+  function dec(b) {
+    if (b >= 0x80 && b <= 0x99) return String.fromCharCode(97 + (b - 0x80)); // A-Z
+    if (b >= 0xa0 && b <= 0xb9) return String.fromCharCode(97 + (b - 0xa0)); // a-z
+    if (b >= 0xf6 && b <= 0xff) return String.fromCharCode(48 + (b - 0xf6)); // 0-9
+    return ' ';
+  }
+  function screenText() {
+    var em = window.__emulator;
+    if (!em || !em.module || em.e == null) return null;
+    var m = em.module;
+    if (typeof m._emulator_read_mem !== 'function') return null;
+    // Only while in a battle -- that's where the quiz lives. Avoids matching
+    // shape/colour words that happen to appear in the overworld.
+    if ((m._emulator_read_mem(em.e, 0xd057) & 0xff) === 0) return null;
+    // Read ONLY the question lines (tilemap rows 7-8). The answers live on rows
+    // 9+, so this both ignores them and never reveals the answer (e.g. "Sun is
+    // a?" whose answer is "star").
+    var s = '';
+    for (var i = 140; i < 180; i++) s += dec(m._emulator_read_mem(em.e, 0xc3a0 + i) & 0xff);
+    return s;
+  }
+  var SHAPES = [['triangle', 3], ['rectangle', 'rect'], ['square', 4],
+    ['pentagon', 5], ['hexagon', 6], ['octagon', 8], ['diamond', 'diamond'],
+    ['circle', 'circle'], ['oval', 'oval'], ['star', 'star']];
+  var COLORS = { red: '#e23b3b', orange: '#f3922b', yellow: '#f4d534',
+    green: '#3fa950', blue: '#2f6fd6', purple: '#8a3fc0', pink: '#ef82b6',
+    brown: '#8a5a2b', black: '#222', white: '#fafafa', gray: '#9aa0a6',
+    grey: '#9aa0a6' };
+  function shapeSVG(kind) {
+    var poly = { 3: '50,8 92,88 8,88', 4: '14,14 86,14 86,86 14,86',
+      rect: '6,26 94,26 94,74 6,74', 5: '50,6 92,38 76,92 24,92 8,38',
+      6: '28,7 72,7 95,50 72,93 28,93 5,50',
+      8: '34,6 66,6 92,30 92,66 66,92 34,92 8,66 8,30',
+      diamond: '50,6 92,50 50,94 8,50' };
+    if (kind === 'circle') return '<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="42" fill="#dbeafe" stroke="#1b65c4" stroke-width="8"/></svg>';
+    if (kind === 'oval') return '<svg viewBox="0 0 100 100"><ellipse cx="50" cy="50" rx="45" ry="30" fill="#dbeafe" stroke="#1b65c4" stroke-width="8"/></svg>';
+    if (kind === 'star') return '<svg viewBox="0 0 100 100"><polygon points="50,5 61,38 96,38 68,59 79,94 50,72 21,94 32,59 4,38 39,38" fill="#f7d44b" stroke="#c79a16" stroke-width="5" stroke-linejoin="round"/></svg>';
+    return '<svg viewBox="0 0 100 100"><polygon points="' + poly[kind] + '" fill="#dbeafe" stroke="#1b65c4" stroke-width="8" stroke-linejoin="round"/></svg>';
+  }
+  function has(txt, word) { return new RegExp('\\b' + word + '\\b').test(txt); }
+  function detect(txt) {
+    if (/\b(rhyme|rhymes|spell|spelled|letter)\b/.test(txt)) return null; // word puzzles, not shapes
+    if (/\b(mix|mixed|makes|make|made|plus|combine|combined|together|and)\b/.test(txt)) {
+      var found = [];
+      for (var k in COLORS) { var p = txt.search(new RegExp('\\b' + k + '\\b'));
+        if (p >= 0) found.push([k, p]); }
+      found.sort(function (a, b) { return a[1] - b[1]; });
+      if (found.length >= 2) return { type: 'color', a: found[0][0], b: found[1][0] };
+    }
+    for (var i = 0; i < SHAPES.length; i++)
+      if (has(txt, SHAPES[i][0])) return { type: 'shape', kind: SHAPES[i][1] };
+    return null;
+  }
+  function render(d) {
+    if (d.type === 'shape') { el.innerHTML = '<div class="vaCard">' + shapeSVG(d.kind) + '</div>'; return; }
+    el.innerHTML = '<div class="vaCard"><span class="swatch" style="background:' + COLORS[d.a]
+      + '"></span><span class="op">+</span><span class="swatch" style="background:' + COLORS[d.b] + '"></span></div>';
+  }
+  function place() {
+    var c = document.getElementById('mainCanvas'); if (!c || !el) return;
+    var r = c.getBoundingClientRect(), sx = r.width / 160, sy = r.height / 144;
+    el.style.left = (r.left + GB.x * sx) + 'px';
+    el.style.top = (r.top + GB.y * sy) + 'px';
+    el.style.width = (GB.w * sx) + 'px';
+    el.style.height = (GB.h * sy) + 'px';
+  }
+  var lastKey = '';
+  function tick() {
+    if (!el) el = document.getElementById('visualAid');
+    if (!el) return;
+    var d = null;
+    try { var t = screenText(); d = t ? detect(t) : null; } catch (e) { d = null; }
+    var key = d ? JSON.stringify(d) : '';
+    if (key !== lastKey) { lastKey = key; if (d) render(d); }
+    if (d) { place(); el.classList.add('show'); } else el.classList.remove('show');
+  }
+  setInterval(tick, 250);
+  window.addEventListener('resize', place);
+  window.addEventListener('scroll', place, true);
+  window.__visualAid = { tick: tick, detect: detect };
+})();
+"""
+
+
 def read_text(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -1106,6 +1216,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -1125,6 +1236,7 @@ def main():
         PAUSE_JS,
         MENU_JS,
         FS_JS,
+        VISUAL_JS,
     )
 
     with open(args.out, "w", encoding="utf-8") as f:
