@@ -107,6 +107,18 @@ QuizItemUse::
 	ld [wQuizResult], a
 	ret
 
+; A no-stakes practice question for the Professor's Assistant tutor (reached from
+; the overworld, not a battle). Shows one grade-scaled question with the normal
+; hint/answer/streak feedback, then restores the screen. No hit/miss effect.
+QuizPractice::
+	call SaveScreenTilesToBuffer2
+	call QuizSelectQuestion
+	call QuizLoadQuestion
+	call QuizAsk
+	call LoadScreenTilesFromBuffer2
+	call Delay3
+	ret
+
 ; Choose a question scaled to the player's badges (used by battle attack/defense).
 ; Grade = min(5, badgeCount / 2 + 1).  Returns hl -> 12-byte question entry.
 QuizSelectQuestion::
