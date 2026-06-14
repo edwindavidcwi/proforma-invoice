@@ -503,8 +503,6 @@ SPEED_JS = r"""
     window.__speed = s;
     btns.forEach(function (b) { b.classList.toggle('on', +b.getAttribute('data-spd') === s); });
     try { localStorage.setItem('pq_speed', String(s)); } catch (e) {}
-    // Fast-forward speeds the sound chip too (pitched-up, painful music), so
-    // mute audio whenever we're above 1x and restore it at 1x.
     if (window.__applyVolume) window.__applyVolume();
   }
   btns.forEach(function (b) { b.addEventListener('click', function () { set(+b.getAttribute('data-spd')); }); });
@@ -709,27 +707,17 @@ SOUND_JS = r"""
   if (!btn) return;
   var on = true;
   try { if (localStorage.getItem('pq_sound') === '0') on = false; } catch (e) {}
-  // Effective volume depends on BOTH the sound toggle and the speed: at >1x the
-  // sound chip plays sped-up/screechy, so we force-mute above 1x.
+  // Sound behaves the same at every speed -- it just follows the Sound toggle.
   window.__applyVolume = function () {
-    var fast = (window.__speed || 1) > 1;
-    var hear = on && !fast;
-    if (window.__vm) window.__vm.volume = hear ? 0.5 : 0;
-    if (hear && window.__resumeAudio) window.__resumeAudio();
+    if (window.__vm) window.__vm.volume = on ? 0.5 : 0;
+    if (on && window.__resumeAudio) window.__resumeAudio();
   };
   function apply() {
     window.__applyVolume();
-    var fast = (window.__speed || 1) > 1;
-    btn.textContent = on ? (fast ? '🔈 Sound: On (fast=mute)' : '🔊 Sound: On') : '🔈 Sound: Off';
+    btn.textContent = on ? '🔊 Sound: On' : '🔈 Sound: Off';
     btn.classList.toggle('on', on);
     try { localStorage.setItem('pq_sound', on ? '1' : '0'); } catch (e) {}
   }
-  // keep the label in sync when the speed changes
-  var prevFast = (window.__speed || 1) > 1;
-  setInterval(function () {
-    var fast = (window.__speed || 1) > 1;
-    if (fast !== prevFast) { prevFast = fast; apply(); }
-  }, 300);
   btn.addEventListener('click', function () { on = !on; apply(); });
   // vm is created when the ROM loads (async); apply once it's ready.
   var tries = 0, t = setInterval(function () {
