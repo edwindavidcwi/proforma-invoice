@@ -122,7 +122,8 @@ RHYME_GROUPS = [["cat","hat","bat","mat","rat"],["star","car","far","jar"],
 BABIES = [("dog","puppy"),("cat","kitten"),("cow","calf"),("sheep","lamb"),
           ("horse","foal"),("goat","kid"),("hen","chick"),("frog","tadpole"),
           ("bear","cub"),("lion","cub"),("deer","fawn"),("pig","piglet"),
-          ("duck","duckling"),("kangaroo","joey"),("cat","kitten")]
+          ("duck","duckling"),("kangaroo","joey"),("owl","owlet"),
+          ("swan","cygnet"),("goose","gosling"),("eagle","eaglet")]
 # dict.fromkeys dedupes while preserving order (a plain set is hash-randomized
 # per run, which would make the generated distractors non-deterministic).
 BABY_WORDS = list(dict.fromkeys(b for _, b in BABIES))
@@ -166,9 +167,12 @@ def english(g):
 def science(g):
     out = []
     # different animals per grade (these used to repeat in every grade)
-    babies = {1:BABIES[0:5], 2:BABIES[2:8], 3:BABIES[5:11], 4:BABIES[8:14], 5:BABIES[9:15]}[g]
+    babies = {1:BABIES[0:6], 2:BABIES[3:9], 3:BABIES[6:12], 4:BABIES[9:15], 5:BABIES[12:18]}[g]
     for a, b in babies:
-        out.append(mk(fit(f"Baby of a {a}?", f"Baby of {a}?"), b, pick2(b, a, BABY_WORDS), "Young animal"))
+        # Rotate the distractor pool per (grade, animal) so it isn't always the
+        # same two baby words (e.g. puppy/kitten) on every question.
+        pool = BABY_WORDS[stable_rot(g, a):] + BABY_WORDS
+        out.append(mk(fit(f"Baby of a {a}?", f"Baby of {a}?"), b, pick2(b, a, pool), "Young animal"))
     facts = {
         1:[("Cow says?","moo",["baa","woof"]),("Dog says?","woof",["moo","oink"]),
            ("Cat says?","meow",["moo","baa"]),("We breathe?","air",["sand","mud"]),

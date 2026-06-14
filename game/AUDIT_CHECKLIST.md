@@ -61,7 +61,10 @@ CI builds these but can't run them on a real device:
 - [ ] **Speed 1×–8×**, fullscreen/immersive, and read-aloud all work on the device.
 
 ## Known follow-ups / watch-list
-- Science "Baby of a ___?" questions reuse the same two distractors (puppy/kitten)
-  across many questions — candidate for more varied distractors.
-- Some animals (lion/deer) repeat across adjacent grades by design (overlapping
-  difficulty windows); fine, but a source of variety if expanded.
+- [resolved] Science "Baby of a ___?" distractors now rotate per question
+  (no longer always puppy/kitten); animal pool expanded (owl/swan/goose/eagle).
+- Subject mix is math-heavy in early grades (≈50/grade) — appropriate for G1–G2,
+  worth a teacher's eye for G4–G5. Rebalancing means authoring more
+  grade-appropriate non-math questions (a curriculum decision).
+- Remaining audits that scripts can't do: curriculum alignment, child play-test,
+  on-device APK/EXE smoke test, and an ear check on the new music/SFX.

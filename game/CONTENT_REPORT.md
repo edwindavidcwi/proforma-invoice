@@ -4,7 +4,7 @@ Total questions: **500**  |  Grades: 1, 2, 3, 4, 5
 
 | Grade | Math | English | Science & Nature | General Knowledge | Shapes & Colors | Total |
 |---|---|---|---|---|---|---|
-| G1 | 55 | 20 | 13 | 7 | 5 | 100 |
+| G1 | 54 | 20 | 14 | 7 | 5 | 100 |
 | G2 | 51 | 20 | 14 | 6 | 9 | 100 |
 | G3 | 51 | 20 | 14 | 6 | 9 | 100 |
 | G4 | 49 | 20 | 14 | 6 | 11 | 100 |
@@ -16,7 +16,7 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
 ## Samples (correct answer first)
 
 ### Grade 1
-- **Math** (55):
+- **Math** (54):
     - 1 plus 1?  ->  *2*   [2, 0, 3]   _hint: Count from 1_
     - 1 plus 2?  ->  *3*   [3, 1, 4]   _hint: Count from 1_
     - 1 plus 3?  ->  *4*   [4, 2, 5]   _hint: Count from 1_
@@ -24,10 +24,10 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
     - Opposite of big?  ->  *small*   [small, down, out]   _hint: The opposite word_
     - Opposite of hot?  ->  *cold*   [cold, small, down]   _hint: The opposite word_
     - Opposite of up?  ->  *down*   [down, sad, empty]   _hint: The opposite word_
-- **Science & Nature** (13):
+- **Science & Nature** (14):
     - Baby of a dog?  ->  *puppy*   [puppy, kitten, calf]   _hint: Young animal_
-    - Baby of a cat?  ->  *kitten*   [kitten, puppy, calf]   _hint: Young animal_
-    - Baby of a cow?  ->  *calf*   [calf, puppy, kitten]   _hint: Young animal_
+    - Baby of a cat?  ->  *kitten*   [kitten, cub, fawn]   _hint: Young animal_
+    - Baby of a cow?  ->  *calf*   [calf, tadpole, cub]   _hint: Young animal_
 - **General Knowledge** (7):
     - Days in a week?  ->  *7*   [7, 8, 12]   _hint: Seven days_
     - How many fingers?  ->  *10*   [10, 11, 15]   _hint: Ten_
@@ -47,9 +47,9 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
     - Opposite of full?  ->  *empty*   [empty, sad, shut]   _hint: The opposite word_
     - Opposite of open?  ->  *shut*   [shut, slow, sad]   _hint: The opposite word_
 - **Science & Nature** (14):
-    - Baby of a cow?  ->  *calf*   [calf, puppy, kitten]   _hint: Young animal_
-    - Baby of a sheep?  ->  *lamb*   [lamb, puppy, kitten]   _hint: Young animal_
-    - Baby of a horse?  ->  *foal*   [foal, puppy, kitten]   _hint: Young animal_
+    - Baby of a sheep?  ->  *lamb*   [lamb, kid, chick]   _hint: Young animal_
+    - Baby of a horse?  ->  *foal*   [foal, cub, fawn]   _hint: Young animal_
+    - Baby of a goat?  ->  *kid*   [kid, tadpole, cub]   _hint: Young animal_
 - **General Knowledge** (6):
     - Months in a year?  ->  *12*   [12, 13, 17]   _hint: Twelve_
     - Days in weekend?  ->  *2*   [2, 3, 7]   _hint: Sat Sun_
@@ -69,9 +69,9 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
     - Opposite of hard?  ->  *soft*   [soft, slow, sad]   _hint: The opposite word_
     - Opposite of old?  ->  *new*   [new, shut, dry]   _hint: The opposite word_
 - **Science & Nature** (14):
-    - Baby of a goat?  ->  *kid*   [kid, puppy, kitten]   _hint: Young animal_
-    - Baby of a hen?  ->  *chick*   [chick, puppy, kitten]   _hint: Young animal_
-    - Baby of a frog?  ->  *tadpole*   [tadpole, puppy, kitten]   _hint: Young animal_
+    - Baby of a hen?  ->  *chick*   [chick, foal, kid]   _hint: Young animal_
+    - Baby of a frog?  ->  *tadpole*   [tadpole, calf, lamb]   _hint: Young animal_
+    - Baby of a bear?  ->  *cub*   [cub, puppy, kitten]   _hint: Young animal_
 - **General Knowledge** (6):
     - Seasons in year?  ->  *4*   [4, 5, 9]   _hint: Four_
     - Minutes in hour?  ->  *60*   [60, 61, 65]   _hint: Sixty_
@@ -91,9 +91,9 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
     - Opposite of win?  ->  *lose*   [lose, sad, empty]   _hint: The opposite word_
     - Opposite of rich?  ->  *poor*   [poor, night, slow]   _hint: The opposite word_
 - **Science & Nature** (14):
-    - Baby of a bear?  ->  *cub*   [cub, puppy, kitten]   _hint: Young animal_
-    - Baby of a lion?  ->  *cub*   [cub, puppy, kitten]   _hint: Young animal_
-    - Baby of a deer?  ->  *fawn*   [fawn, puppy, kitten]   _hint: Young animal_
+    - Baby of a lion?  ->  *cub*   [cub, tadpole, fawn]   _hint: Young animal_
+    - Baby of a deer?  ->  *fawn*   [fawn, tadpole, cub]   _hint: Young animal_
+    - Baby of a pig?  ->  *piglet*   [piglet, kitten, calf]   _hint: Young animal_
 - **General Knowledge** (6):
     - Days in a year?  ->  *365*   [365, 366, 370]   _hint: 365_
     - Seconds in min?  ->  *60*   [60, 61, 65]   _hint: Sixty_
@@ -113,9 +113,9 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
     - Opposite of weak?  ->  *strong*   [strong, empty, shut]   _hint: The opposite word_
     - Opposite of thick?  ->  *thin*   [thin, sad, empty]   _hint: The opposite word_
 - **Science & Nature** (14):
-    - Baby of a lion?  ->  *cub*   [cub, puppy, kitten]   _hint: Young animal_
-    - Baby of a deer?  ->  *fawn*   [fawn, puppy, kitten]   _hint: Young animal_
-    - Baby of a pig?  ->  *piglet*   [piglet, puppy, kitten]   _hint: Young animal_
+    - Baby of a duck?  ->  *duckling*   [duckling, chick, tadpole]   _hint: Young animal_
+    - Baby of kangaroo?  ->  *joey*   [joey, kitten, calf]   _hint: Young animal_
+    - Baby of a owl?  ->  *owlet*   [owlet, calf, lamb]   _hint: Young animal_
 - **General Knowledge** (6):
     - Years in decade?  ->  *10*   [10, 11, 15]   _hint: Ten_
     - Years in century?  ->  *100*   [100, 101, 105]   _hint: Hundred_
