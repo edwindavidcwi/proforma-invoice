@@ -107,6 +107,20 @@ QuizItemUse::
 	ld [wQuizResult], a
 	ret
 
+; Player wants to flee a wild battle: ask a grade-scaled question.
+; Returns carry set = answered correctly (allow the escape attempt),
+; carry clear = wrong (caller makes the escape fail and spends the turn).
+QuizRun::
+	call SaveScreenTilesToBuffer2
+	call QuizSelectQuestion
+	call QuizLoadQuestion           ; copy chosen question into RAM
+	call QuizAsk                    ; carry set = answered correctly
+	push af
+	call LoadScreenTilesFromBuffer2
+	call Delay3
+	pop af
+	ret
+
 ; A no-stakes practice question for the Professor's Assistant tutor (reached from
 ; the overworld, not a battle). Shows one grade-scaled question with the normal
 ; hint/answer/streak feedback, then restores the screen. No hit/miss effect.

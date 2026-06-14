@@ -2448,6 +2448,16 @@ AlreadyOutText:
 	text_end
 
 BattleMenu_RunWasSelected:
+	ld a, [wIsInBattle]
+	dec a                          ; 1 (wild) -> 0; trainer (2) -> 1
+	jr nz, .runAllowed             ; trainer battle: no quiz (TryRunning prints "can't run")
+	callfar QuizRun                ; Quiz Battle: answer a question to flee
+	jr c, .runAllowed              ; correct -> proceed with the normal escape attempt
+	ld a, 1                        ; wrong -> escape fails AND the turn is spent
+	ld [wActionResultOrTookBattleTurn], a
+	and a                          ; clear carry (did not escape)
+	ret
+.runAllowed:
 	call LoadScreenTilesFromBuffer1
 	ld a, $3
 	ld [wCurrentMenuItem], a
