@@ -382,6 +382,20 @@ def emit():
     w('\tcont "Now you know!"')
     w("\tprompt")
     w("")
+    # Subject id per question, in parallel arrays kept in THIS bank (alongside
+    # QuizGradeTable) so the selector reads them without a bank switch. Used for
+    # subject cycling: avoid two questions of the same subject in a row.
+    SUBJECT_ID = {"English": 0, "Science & Nature": 1, "General Knowledge": 2,
+                  "Shapes & Colors": 3, "Math": 4}
+    w("; Subject id per question (parallel to Grade{n}Questions); for cycling.")
+    w("QuizSubjectTable::")
+    for g in range(1, 6):
+        w(f"\tdw Grade{g}Subjects")
+    w("")
+    for g in range(1, 6):
+        ids = [str(SUBJECT_ID.get(subject_of[(g, q.text)], 4)) for q in banks[g]]
+        w(f"Grade{g}Subjects:: db " + ", ".join(ids))
+    w("")
     for g in range(1, 6):
         w(f'SECTION "Quiz Data G{g}", ROMX')
         w(f"Grade{g}Questions::")

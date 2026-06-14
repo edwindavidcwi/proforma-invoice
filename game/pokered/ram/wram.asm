@@ -2285,6 +2285,14 @@ wQuizStreak::       db  ; how many questions answered right in a row (resets on 
 wQuizDataBank::     db  ; ROM bank holding the chosen question's data
 wQuizCapNeed::      db  ; capture challenge: correct answers needed in a row (3 or 5)
 wQuizCapCount::     db  ; capture challenge: current correct-in-a-row count
+; Subject cycling: pick a question whose subject differs from the previous one.
+wQuizLastSubject::  db  ; subject id (0-4) of the previous question
+wQuizGradeIdx::     db  ; scratch: grade index 0-4 during selection
+wQuizPickBase::     dw  ; scratch: this grade's question-list base address
+wQuizPickCount::    db  ; scratch: this grade's question count
+wQuizSubjBase::     dw  ; scratch: this grade's subject-array base address
+wQuizPickTries::    db  ; scratch: remaining re-roll attempts
+wQuizPickIdx::      db  ; scratch: chosen question index
 
 
 SECTION "Stack", WRAM0

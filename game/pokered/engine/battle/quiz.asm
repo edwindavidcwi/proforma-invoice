@@ -219,6 +219,7 @@ QuizPickGrade:
 	ld a, 5
 .capped
 	dec a                          ; grade index 0-4
+	ld [wQuizGradeIdx], a
 	add a
 	add a                          ; idx * 4
 	ld c, a
@@ -226,31 +227,65 @@ QuizPickGrade:
 	ld hl, QuizGradeTable
 	add hl, bc
 	ld a, [hli]
-	ld e, a
+	ld [wQuizPickBase], a
 	ld a, [hli]
-	ld d, a                        ; de = list base (address in the data bank)
+	ld [wQuizPickBase + 1], a       ; list base (address in the data bank)
 	ld a, [hli]
-	ld c, a                        ; c = count
+	ld [wQuizPickCount], a          ; count
 	ld a, [hl]
-	ld [wQuizDataBank], a          ; data bank
-	; pick a random index in [0, count) (guard de and count across Random)
-	push de
-	push bc
-	call Random                    ; a = random byte
-	pop bc                         ; c = count
-	pop de                         ; de = base
+	ld [wQuizDataBank], a           ; data bank
+	; this grade's subject-array base (in this same bank as QuizGradeTable)
+	ld a, [wQuizGradeIdx]
+	add a                           ; idx * 2
+	ld e, a
+	ld d, 0
+	ld hl, QuizSubjectTable
+	add hl, de
+	ld a, [hli]
+	ld [wQuizSubjBase], a
+	ld a, [hl]
+	ld [wQuizSubjBase + 1], a
+	; pick an index whose subject differs from the previous question (<=4 tries)
+	ld a, 4
+	ld [wQuizPickTries], a
+.pick
+	ld a, [wQuizPickCount]
+	ld b, a                         ; b = count
+	call Random                     ; a = random byte
 .mod
-	cp c
+	cp b
 	jr c, .haveIndex
-	sub c
+	sub b
 	jr .mod
 .haveIndex
+	ld [wQuizPickIdx], a
+	; subject id of this candidate = [wQuizSubjBase + index]
+	ld a, [wQuizSubjBase]
+	ld l, a
+	ld a, [wQuizSubjBase + 1]
+	ld h, a
+	ld a, [wQuizPickIdx]
+	ld e, a
+	ld d, 0
+	add hl, de
+	ld a, [hl]                      ; a = candidate subject id
+	ld hl, wQuizLastSubject
+	cp [hl]
+	jr nz, .accept                  ; different subject -> take it
+	ld hl, wQuizPickTries
+	dec [hl]
+	jr nz, .pick                    ; same subject, retry
+.accept
+	ld [wQuizLastSubject], a        ; a still holds the chosen subject id
 	; hl = base + index*14
-	ld h, d
-	ld l, e
+	ld a, [wQuizPickBase]
+	ld l, a
+	ld a, [wQuizPickBase + 1]
+	ld h, a
+	ld a, [wQuizPickIdx]
 	and a
 	jr z, .gotEntry
-	ld b, a                        ; b = index
+	ld b, a                         ; b = index
 	ld de, 14
 .addLoop
 	add hl, de
