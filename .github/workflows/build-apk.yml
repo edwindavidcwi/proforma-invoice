@@ -41,6 +41,7 @@ jobs:
           node play_capture.js     ../pokered/pokered.gbc   # cross-bank render, all 5 grades
           node audit_render.js     ../pokered/pokered.gbc   # ~1200 live renders + shuffle bias
           node audit_outcome.js    ../pokered/pokered.gbc   # hit / miss / half-damage behaviour
+          node test_music.js       ../pokered/pokered.gbc   # context-aware music track selection
           python3 audit_facts.py   ../pokered/pokered.gbc   # independent answer-key check
 
       - name: Set up Python

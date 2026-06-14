@@ -731,54 +731,209 @@ SOUND_JS = r"""
 
 
 # Original, royalty-free 8-bit background music that ALWAYS plays at normal tempo,
-# independent of the emulator's speed (the game's own audio is muted). A tiny
-# Web Audio sequencer loops a cheerful original tune written for this app.
+# independent of the emulator's speed (the game's own audio is muted).
+#
+# It is CONTEXT-AWARE: a tiny poller reads the live game state out of the
+# emulator's memory every ~200ms (no ROM changes needed) and crossfades between
+# eight original looping tracks, the same way the real game switches music by
+# region/battle/person:
+#
+#   Region (overworld)         Battle                 Person (overrides battle)
+#   ------------------         ----------------       -------------------------
+#   town    Town theme         wild    Wild battle    rival  Rival theme
+#   route   Route/overworld    trainer Trainer battle boss   Gym Leader / Boss
+#   cave    Cave/dungeon
+#   centre  Poke Center/indoor                        + one-shot Victory jingle
+#
+# Priority: a person-specific battle theme (rival / leader) beats the generic
+# battle theme, which beats the region theme. All melodies are original
+# compositions written for this app -- no copyrighted game music is reproduced.
+#
+# State addresses are the stock pokered WRAM symbols (verified against
+# pokered.sym): wIsInBattle d057, wTrainerClass d031, wCurOpponent d059,
+# wGymLeaderNo d05c, wBattleResult cf0b, wCurMap d35e, wCurMapTileset d367.
 MUSIC_JS = r"""
 (function () {
   var AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return;
-  var ctx = null, master = null, playing = false, timer = null, step = 0, nextTime = 0;
-  var TEMPO = 120, spb = 60 / TEMPO / 2;              // seconds per 8th-note step
-  // Original loop in C major (I-V-vi-IV). 0 = rest. Melody (square) + bass (triangle).
-  var MEL = [72,0,76,0,79,0,76,0, 74,0,79,0,74,0,0,0,
-             69,0,72,0,76,0,72,0, 65,0,69,0,72,0,0,0,
-             72,0,76,0,79,0,83,0, 81,0,79,0,76,0,74,0,
-             72,0,71,0,74,0,71,0, 72,0,0,0, 0,0,0,0];
-  var BASS = [48,0,0,0,0,0,0,0, 43,0,0,0,0,0,0,0,
-              45,0,0,0,0,0,0,0, 41,0,0,0,0,0,0,0,
-              48,0,0,0,0,0,0,0, 43,0,0,0,0,0,0,0,
-              45,0,0,0,0,0,0,0, 43,0,0,0,0,0,0,0];
+  var ctx = null, master = null, trackGain = null;
+  var playing = false, timer = null, poller = null, step = 0, nextTime = 0;
+  var cur = 'town', pending = null, jingleUntil = 0, lastInBattle = 0;
+
+  // --- Original looping tracks. 0 = rest; numbers are MIDI notes on an 8th-note
+  // grid. mel = lead (square), bass = low pulse (triangle). Each was composed to
+  // give its setting a distinct mood (calm towns, driving battles, etc.). ---
+  var TRACKS = {
+    town: { tempo: 116, mel:
+      [67,0,64,0,72,0,64,0, 74,0,72,0,67,0,0,0, 69,0,72,0,76,0,72,0, 74,0,71,0,72,0,0,0],
+      bass:
+      [48,0,0,0,55,0,0,0, 43,0,0,0,50,0,0,0, 45,0,0,0,52,0,0,0, 41,0,0,0,48,0,0,0] },
+    route: { tempo: 132, mel:
+      [72,76,79,76,72,76,79,81, 79,77,76,74,72,74,76,0, 76,79,84,79,76,79,84,86, 79,81,79,77,76,74,72,0],
+      bass:
+      [48,0,55,0,48,0,55,0, 43,0,50,0,43,0,50,0, 45,0,52,0,45,0,52,0, 41,0,48,0,43,0,55,0] },
+    cave: { tempo: 100, melVol: 0.14, mel:
+      [69,0,0,0,72,0,71,0, 69,0,0,0,64,0,0,0, 65,0,0,0,67,0,69,0, 64,0,0,0,0,0,0,0],
+      bass:
+      [33,0,0,0,0,0,0,0, 33,0,0,0,40,0,0,0, 29,0,0,0,0,0,0,0, 28,0,0,0,0,0,0,0] },
+    centre: { tempo: 92, melVol: 0.15, mel:
+      [76,0,74,0,72,0,0,0, 74,0,76,0,79,0,0,0, 81,0,79,0,76,0,74,0, 72,0,0,0,0,0,0,0],
+      bass:
+      [48,0,0,0,52,0,0,0, 50,0,0,0,53,0,0,0, 45,0,0,0,52,0,0,0, 48,0,0,0,0,0,0,0] },
+    wild: { tempo: 150, melVol: 0.15, bassVol: 0.20, mel:
+      [69,69,72,69,76,0,74,0, 72,0,69,0,71,0,67,0, 69,69,72,76,81,0,79,0, 76,0,72,0,69,0,0,0],
+      bass:
+      [45,45,45,45,40,40,40,40, 41,41,41,41,40,40,40,40, 45,45,45,45,40,40,40,40, 43,43,43,43,40,40,40,40] },
+    trainer: { tempo: 144, melVol: 0.15, mel:
+      [67,72,76,79,76,72,67,0, 65,69,72,77,72,69,65,0, 67,71,74,79,74,71,67,0, 72,76,79,84,0,79,0,0],
+      bass:
+      [48,0,48,0,48,0,48,0, 41,0,41,0,41,0,41,0, 43,0,43,0,43,0,43,0, 48,0,48,0,55,0,48,0] },
+    boss: { tempo: 138, melVol: 0.15, bassVol: 0.20, mel:
+      [74,0,74,72,74,0,77,0, 76,0,74,72,69,0,0,0, 74,77,81,77,74,0,72,0, 74,0,69,0,74,0,0,0],
+      bass:
+      [38,38,38,38,38,38,38,38, 36,36,36,36,36,36,36,36, 41,41,41,41,41,41,41,41, 38,38,38,38,45,45,45,45] },
+    rival: { tempo: 140, melVol: 0.15, mel:
+      [74,0,74,76,74,0,71,0, 79,0,77,0,74,0,0,0, 76,0,79,0,81,0,79,76, 74,0,72,71,67,0,0,0],
+      bass:
+      [43,0,43,0,50,0,43,0, 41,0,41,0,48,0,41,0, 45,0,45,0,52,0,45,0, 43,0,43,0,38,0,43,0] }
+  };
+  // Short triumphant fanfare played once after a won battle, then music resumes.
+  var VICTORY = [[72,0.18],[76,0.18],[79,0.18],[84,0.5],[0,0.1],[79,0.22],[84,0.75]];
+
   function midi(n){ return 440 * Math.pow(2, (n - 69) / 12); }
-  function blip(freq, t, dur, type, vol){
+  function blip(dest, freq, t, dur, type, vol){
     var o = ctx.createOscillator(), g = ctx.createGain();
     o.type = type; o.frequency.value = freq;
     g.gain.setValueAtTime(0.0001, t);
     g.gain.linearRampToValueAtTime(vol, t + 0.012);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g); g.connect(master);
+    o.connect(g); g.connect(dest);
     o.start(t); o.stop(t + dur + 0.03);
   }
   function schedule(){
+    var tr = TRACKS[cur] || TRACKS.town;
+    var spb = 60 / tr.tempo / 2, len = tr.mel.length;
     while (nextTime < ctx.currentTime + 0.3) {
-      var i = step % MEL.length;
-      if (MEL[i])  blip(midi(MEL[i]),  nextTime, spb * 0.95, 'square',   0.16);
-      if (BASS[i]) blip(midi(BASS[i]), nextTime, spb * 3.6,  'triangle', 0.22);
+      var i = step % len;
+      if (tr.mel[i])  blip(trackGain, midi(tr.mel[i]),  nextTime, spb * 0.95, 'square',   tr.melVol  || 0.16);
+      if (tr.bass[i]) blip(trackGain, midi(tr.bass[i]), nextTime, spb * 3.6,  'triangle', tr.bassVol || 0.22);
       nextTime += spb; step++;
     }
   }
+
+  // Crossfade to a new track: dip trackGain, swap arrays, ramp back up. Notes
+  // already queued from the old track fade out as the new track fades in (~0.3s).
+  function setTrack(key){
+    if (!TRACKS[key] || key === cur || key === pending) return;
+    pending = key;
+    var t0 = ctx.currentTime;
+    trackGain.gain.cancelScheduledValues(t0);
+    trackGain.gain.setValueAtTime(trackGain.gain.value, t0);
+    trackGain.gain.linearRampToValueAtTime(0.0001, t0 + 0.15);
+    setTimeout(function () {
+      if (!playing) { pending = null; return; }
+      cur = pending; pending = null; step = 0; nextTime = ctx.currentTime + 0.05;
+      var t1 = ctx.currentTime;
+      trackGain.gain.cancelScheduledValues(t1);
+      trackGain.gain.setValueAtTime(0.0001, t1);
+      trackGain.gain.linearRampToValueAtTime(1.0, t1 + 0.15);
+    }, 160);
+  }
+
+  function playVictory(){
+    var t0 = ctx.currentTime + 0.04, dur = 0;
+    // Hush the loop while the fanfare rings out, through master (bypasses fade).
+    trackGain.gain.cancelScheduledValues(t0);
+    trackGain.gain.setValueAtTime(trackGain.gain.value, t0);
+    trackGain.gain.linearRampToValueAtTime(0.0001, t0 + 0.1);
+    var beat = 0.14;
+    VICTORY.forEach(function (nv) {
+      if (nv[0]) blip(master, midi(nv[0]), t0 + dur, nv[1] * beat * 0.95, 'square', 0.20);
+      dur += nv[1] * beat;
+    });
+    blip(master, midi(48), t0, dur, 'triangle', 0.18);          // sustained tonic
+    jingleUntil = performance.now() + dur * 1000 + 350;
+    // After the jingle, bring the loop back in.
+    setTimeout(function () {
+      if (!playing) return;
+      var t1 = ctx.currentTime;
+      trackGain.gain.cancelScheduledValues(t1);
+      trackGain.gain.setValueAtTime(0.0001, t1);
+      trackGain.gain.linearRampToValueAtTime(1.0, t1 + 0.2);
+    }, dur * 1000 + 120);
+  }
+
+  // --- Read the live game state straight out of emulator RAM. ---
+  function readState(){
+    var em = window.__emulator;
+    if (!em || !em.module || em.e == null) return null;
+    var m = em.module;
+    if (typeof m._emulator_read_mem !== 'function') return null;
+    var rd = function (a) { return m._emulator_read_mem(em.e, a) & 0xff; };
+    return { inBattle: rd(0xd057), trClass: rd(0xd031), curOpp: rd(0xd059),
+             gym: rd(0xd05c), result: rd(0xcf0b), map: rd(0xd35e), tileset: rd(0xd367) };
+  }
+  function isBoss(c){
+    // Gym leaders (Brock..Sabrina), Giovanni, and the Elite Four / Champion.
+    return (c >= 0x22 && c <= 0x28) || c === 0x1d ||
+           c === 0x2c || c === 0x21 || c === 0x2e || c === 0x2f;
+  }
+  function pickTrack(s){
+    if (!s) return cur;
+    if (s.inBattle === 1 || s.inBattle === 2) {
+      // wCurOpponent = OPP_ID_OFFSET(200) + class for trainers; species (<200) for wild.
+      if (s.inBattle === 2 || s.curOpp >= 200) {
+        var cls = s.trClass || (s.curOpp >= 200 ? s.curOpp - 200 : 0);
+        if (cls === 0x19 || cls === 0x2a || cls === 0x2b) return 'rival'; // RIVAL1/2/3
+        if (s.gym !== 0 || isBoss(cls)) return 'boss';
+        return 'trainer';
+      }
+      return 'wild';
+    }
+    var t = s.tileset;
+    if (t === 6 || t === 18) return 'centre';              // POKECENTER, LOBBY
+    if (t === 17 || t === 11 || t === 15) return 'cave';   // CAVERN, UNDERGROUND, CEMETERY
+    if (t === 0 || t === 23) return (s.map <= 0x0a) ? 'town' : 'route'; // OVERWORLD/PLATEAU
+    if (t === 3 || t === 9) return 'route';                // FOREST(_GATE)
+    return 'centre';                                       // all other indoor tilesets
+  }
+  function poll(){
+    if (!playing) return;
+    var s = readState();
+    if (!s) return;
+    // Victory: was battling, now back to the field, and we won (result 0).
+    if ((lastInBattle === 1 || lastInBattle === 2) && s.inBattle === 0 && s.result === 0) {
+      playVictory();
+    }
+    lastInBattle = s.inBattle;
+    if (performance.now() < jingleUntil) return;           // let the fanfare finish
+    setTrack(pickTrack(s));
+  }
+
   window.__musicStart = function () {
-    if (!ctx) { ctx = new AC(); master = ctx.createGain(); master.connect(ctx.destination); }
+    if (!ctx) {
+      ctx = new AC();
+      master = ctx.createGain(); master.connect(ctx.destination);
+      trackGain = ctx.createGain(); trackGain.gain.value = 1; trackGain.connect(master);
+    }
     if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
     master.gain.value = 0.5;
     if (playing) return;
     playing = true; nextTime = ctx.currentTime + 0.1;
     timer = setInterval(schedule, 60);
+    if (!poller) poller = setInterval(poll, 200);
   };
   window.__musicStop = function () {
     playing = false;
     if (timer) { clearInterval(timer); timer = null; }
+    if (poller) { clearInterval(poller); poller = null; }
     if (master) master.gain.value = 0;
   };
+  // Small inspection hook (handy for debugging which theme is picked, and used
+  // by the headless music test). Does nothing on its own.
+  window.__music = { pick: pickTrack, read: readState, victory: playVictory,
+                     get track(){ return cur; } };
+
   // Browsers block audio until a user gesture; start on the first tap/key if on.
   function kick(){ if (window.__soundOn !== false) window.__musicStart(); }
   ['pointerdown', 'keydown', 'touchend'].forEach(function (ev) {
