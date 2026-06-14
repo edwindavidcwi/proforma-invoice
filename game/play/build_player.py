@@ -127,6 +127,8 @@ body {
 }
 #controller_start  { position: absolute; bottom: 20px; right: 15px; }
 #controller_select { position: absolute; bottom: 20px; right: 100px; }
+#btnFF { position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%); }
+#btnFF.btnPressed { transform: translateX(-50%) translateY(3px); }
 .btnPressed { opacity: 0.5; }
 @media only screen and (max-width: 500px) and (max-height: 400px) {
   #controller { display: none; }
@@ -388,7 +390,8 @@ BODY_HTML = r"""
   <div id="toolbar">
     <span class="title"><span id="led"></span>{title}</span>
     <div class="quick">
-      <button id="btnPause" title="Pause or resume (or press Space)">&#10073;&#10073; Pause</button>
+      <button id="btnPause" title="Pause or resume">&#10073;&#10073; Pause</button>
+      <button id="btnFullTop" title="Fill the screen (big screen)">&#9974; Full</button>
       <button id="btnMenu" title="Open the menu (saves &amp; settings)">&#9776; Menu</button>
     </div>
   </div>
@@ -397,7 +400,7 @@ BODY_HTML = r"""
     <div id="screenwrap">
       <canvas id="mainCanvas" width="160" height="144">No Canvas Support</canvas>
     </div>
-    <div id="hint">Arrows move &middot; X = A &middot; Z = B &middot; Enter = Start &middot; Space = pause &middot; tap &#9776; Menu for saves &amp; settings</div>
+    <div id="hint">Arrows move &middot; X = A &middot; Z = B &middot; Enter = Start &middot; hold Space = fast-forward &middot; tap &#9776; Menu for saves &amp; settings</div>
     <div id="overlay"><div id="overlay_msg"></div></div>
   </div>
 
@@ -410,6 +413,7 @@ BODY_HTML = r"""
     </div>
     <div id="controller_select" class="capsuleBtn">Select</div>
     <div id="controller_start" class="capsuleBtn">Start</div>
+    <div id="btnFF" class="capsuleBtn" title="Hold to fast-forward">&#9193;</div>
     <div id="controller_b" class="roundBtn">B</div>
     <div id="controller_a" class="roundBtn">A</div>
   </div>
@@ -419,11 +423,11 @@ BODY_HTML = r"""
       <div id="menu_head"><span>&#9776; Menu</span><button id="btnMenuClose" title="Close">&#10005;</button></div>
       <div id="menu_body">
         <section class="card">
-          <h3>Speed</h3>
-          <span class="seg" title="Game speed">
-            <button class="spd on" data-spd="1">1&times;</button>
-            <button class="spd" data-spd="2">2&times;</button>
-            <button class="spd" data-spd="4">4&times;</button>
+          <h3>Fast-forward speed <small>(normal play is 2&times;; hold Space to boost)</small></h3>
+          <span class="seg" title="Speed while holding Space">
+            <button class="spd" data-spd="3">3&times;</button>
+            <button class="spd on" data-spd="4">4&times;</button>
+            <button class="spd" data-spd="6">6&times;</button>
             <button class="spd" data-spd="8">8&times;</button>
           </span>
         </section>
@@ -436,10 +440,9 @@ BODY_HTML = r"""
           <button id="btnFilter" title="Cycle display filter (HD / Smooth / Crisp / LCD)">&#128444; HD</button>
         </section>
         <section class="card">
-          <h3>Audio &amp; reading</h3>
+          <h3>Audio</h3>
           <div class="btnrow">
-            <button id="btnSound" title="Music / sound on or off">&#128266; Sound</button>
-            <button id="btnRead" title="Read dialogue aloud (text-to-speech)">&#128483; Read: Off</button>
+            <button id="btnSound" title="Music &amp; sound effects on or off">&#128266; Sound</button>
           </div>
         </section>
         <section class="card">
@@ -493,21 +496,56 @@ FILTER_JS = r"""
 """
 
 
-# Game-speed control (1x / 2x / 4x). Sets window.__speed, which player.js reads
-# in its run loop to advance more emulated ticks per real frame.
+# Game-speed control. Normal play runs at 2x (BASE). Holding Space "fast-forwards"
+# to the boost speed chosen in the menu (default 4x). window.__speed is what
+# player.js reads in its run loop; the background music ignores it (own clock).
 SPEED_JS = r"""
 (function () {
+  var BASE = 2;                                   // normal play speed
   var btns = Array.prototype.slice.call(document.querySelectorAll('.spd'));
-  if (!btns.length) return;
-  function set(s) {
-    window.__speed = s;
-    btns.forEach(function (b) { b.classList.toggle('on', +b.getAttribute('data-spd') === s); });
-    try { localStorage.setItem('pq_speed', String(s)); } catch (e) {}
-    if (window.__applyVolume) window.__applyVolume();
+  var boost = 4;
+  try { var v = parseInt(localStorage.getItem('pq_boost'), 10); if ([3,4,6,8].indexOf(v) >= 0) boost = v; } catch (e) {}
+  var boosting = false;
+
+  function applySpeed() {
+    window.__speed = boosting ? boost : BASE;
+    if (window.__applyVolume) window.__applyVolume();  // keep game audio muted / music running
   }
-  btns.forEach(function (b) { b.addEventListener('click', function () { set(+b.getAttribute('data-spd')); }); });
-  var saved = 1; try { saved = parseInt(localStorage.getItem('pq_speed'), 10) || 1; } catch (e) {}
-  set([1, 2, 4, 8].indexOf(saved) >= 0 ? saved : 1);
+  function setBoost(s) {
+    boost = s;
+    btns.forEach(function (b) { b.classList.toggle('on', +b.getAttribute('data-spd') === s); });
+    try { localStorage.setItem('pq_boost', String(s)); } catch (e) {}
+    applySpeed();
+  }
+  btns.forEach(function (b) { b.addEventListener('click', function () { setBoost(+b.getAttribute('data-spd')); }); });
+  setBoost(boost);
+  applySpeed();
+
+  // Hold Space to fast-forward; release to return to normal 2x. (Typing in a
+  // text field, if any ever exists, is left alone.)
+  function isTyping(e) { var t = e.target; return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA'); }
+  window.addEventListener('keydown', function (e) {
+    if (e.code !== 'Space' || isTyping(e)) return;
+    e.preventDefault();
+    if (!boosting) { boosting = true; applySpeed(); }
+  }, true);
+  window.addEventListener('keyup', function (e) {
+    if (e.code !== 'Space' || isTyping(e)) return;
+    e.preventDefault();
+    if (boosting) { boosting = false; applySpeed(); }
+  }, true);
+  // If focus is lost mid-hold (alt-tab), drop the boost so it can't get stuck on.
+  window.addEventListener('blur', function () { if (boosting) { boosting = false; applySpeed(); } });
+
+  // On-screen fast-forward for touch devices: hold the dedicated button if present.
+  var ffBtn = document.getElementById('btnFF');
+  if (ffBtn) {
+    var press = function (on) { return function (ev) { ev.preventDefault(); boosting = on; ffBtn.classList.toggle('btnPressed', on); applySpeed(); }; };
+    ffBtn.addEventListener('pointerdown', press(true));
+    ffBtn.addEventListener('pointerup', press(false));
+    ffBtn.addEventListener('pointerleave', press(false));
+    ffBtn.addEventListener('pointercancel', press(false));
+  }
 })();
 """
 
@@ -541,136 +579,6 @@ PWA_JS = r"""
   var theme = document.createElement("meta"); theme.name = "theme-color"; theme.content = "#06141c"; head(theme);
   var apple = document.createElement("link"); apple.rel = "apple-touch-icon"; apple.href = icon; head(apple);
   var cap = document.createElement("meta"); cap.name = "apple-mobile-web-app-capable"; cap.content = "yes"; head(cap);
-})();
-"""
-
-
-# Read-aloud (text-to-speech). Scrapes the on-screen text from the emulator's
-# tile buffer (wTileMap @ 0xC3A0), converts Game Boy tiles to text via the
-# pokered charmap, and speaks new dialogue. Major named characters get male /
-# female voices (by keyword); system "notices" use a third voice; everyone else
-# a neutral narrator. Voices differ by pitch/rate so it works on any device.
-TTS_JS = r"""
-(function () {
-  var btn = document.getElementById('btnRead');
-  var nativeTTS = window.AndroidTTS && window.AndroidTTS.speak ? window.AndroidTTS : null;
-  if (!btn || (!window.speechSynthesis && !nativeTTS)) { if (btn) btn.style.display = 'none'; return; }
-  var TILE = 0xC3A0, W = 20;
-  function ch(t) {
-    if (t === 0x7f) return ' ';
-    if (t >= 0x80 && t <= 0x99) return String.fromCharCode(65 + t - 0x80);
-    if (t >= 0xa0 && t <= 0xb9) return String.fromCharCode(97 + t - 0xa0);
-    if (t >= 0xf6 && t <= 0xff) return String.fromCharCode(48 + t - 0xf6);
-    var m = {0x9a:'(',0x9b:')',0x9c:':',0x9d:';',0x9e:'[',0x9f:']',0xe0:"'",0xe3:'-',
-      0xe6:'?',0xe7:'!',0xe8:'.',0xba:'e',0xbb:"'d",0xbc:"'l",0xbd:"'s",0xbe:"'t",
-      0xbf:"'v",0xe4:"'r",0xe5:"'m",0x75:'...',0x54:'Poke',0xe1:'Poke',0xe2:'mon',
-      0x70:"'",0x71:"'",0x72:'"',0x73:'"'};
-    return (t in m) ? m[t] : '';
-  }
-  function readScreenLines() {
-    var em = window.__emulator;
-    if (!em || !em.module || !em.e) return [];
-    var rd = function (a) { return em.module._emulator_read_mem(em.e, a); };
-    var rows = [];
-    for (var r = 1; r <= 16; r++) {
-      var line = '', letters = 0;
-      for (var c = 1; c <= 18; c++) {
-        var t = rd(TILE + r * W + c); line += ch(t);
-        if (t >= 0x80 && t <= 0xb9) letters++;
-      }
-      line = line.replace(/\s+/g, ' ').trim();
-      if (letters >= 2) rows.push(line);
-    }
-    return rows;
-  }
-  var vMale = null, vFemale = null, vNote = null;
-  function pickVoices() {
-    var all = speechSynthesis.getVoices() || [];
-    var en = all.filter(function (v) { return /^en/i.test(v.lang) || /english/i.test(v.name); });
-    var pool = en.length ? en : all;
-    function f(re) { for (var i = 0; i < pool.length; i++) if (re.test(pool[i].name)) return pool[i]; return null; }
-    vFemale = f(/female|samantha|victoria|zira|fiona|tessa|karen|moira|susan|woman/i) || pool[0] || null;
-    vMale = f(/male|david|daniel|fred|alex|george|james|arthur|man\b/i) || pool[1] || pool[0] || null;
-    vNote = f(/google|en-US|en-GB|english/i) || pool[2] || pool[0] || null;
-  }
-  pickVoices(); speechSynthesis.onvoiceschanged = pickVoices;
-  var FEM = /\b(MOM|MOTHER|NURSE|JOY|MISTY|ERIKA|SABRINA|LORELEI|DAISY|JESSIE|LASS|BEAUTY|LADY|GIRL|SISTER|GRANNY|NIDORINA|CLEFAIRY)\b/;
-  var MAL = /\b(OAK|PROF|GARY|BLUE|BROCK|SURGE|KOGA|BLAINE|GIOVANNI|BRUNO|LANCE|YOUNGSTER|BUG|CATCHER|GENTLEMAN|BOY|MAN|FATHER|DAD|SAILOR|BIKER|ROCKET|GRAMPS|JR)\b/;
-  function kindOf(text) { var U = text.toUpperCase(); if (FEM.test(U)) return 'f'; if (MAL.test(U)) return 'm'; return 'n'; }
-  function speak(text) {
-    var k = kindOf(text);
-    var pitch = k === 'f' ? 1.5 : k === 'm' ? 0.6 : 1.05;
-    var rate = k === 'm' ? 0.95 : 1.0;
-    // Prefer the native Android engine (reliable voices in a WebView); fall back
-    // to the browser's Web Speech API everywhere else (desktop, real browsers).
-    if (nativeTTS) {
-      try { nativeTTS.speak(text, pitch, rate); return; } catch (e) {}
-    }
-    var u = new SpeechSynthesisUtterance(text);
-    u.pitch = pitch; u.rate = rate;
-    if (k === 'f') { if (vFemale) u.voice = vFemale; }
-    else if (k === 'm') { if (vMale) u.voice = vMale; }
-    else { if (vNote) u.voice = vNote; }
-    // Queue (don't cancel) so consecutive sentences play in order, not cut off.
-    try { speechSynthesis.speak(u); } catch (e) {}
-  }
-  var prevKey = '', recent = [], buffer = '', prevStable = [], timer = null, on = false;
-  try { on = localStorage.getItem('pq_read') === '1'; } catch (e) {}
-  function inRecent(line) {
-    for (var i = 0; i < recent.length; i++) if (recent[i] === line) return true;
-    return false;
-  }
-  // Speak COMPLETE sentences. Game Boy text wraps one sentence across several
-  // lines/pages, so we accumulate the on-screen text (each line added once) into
-  // a buffer and only speak whole sentences (ending in . ! or ?), keeping any
-  // unfinished tail for when the next page reveals the rest. This keeps natural
-  // sentence flow instead of reading each line as if it were its own sentence.
-  function flushSentences(force) {
-    // Sentence end = . ! ? NOT inside a number (so "4.7?" / "1.0?" stay whole).
-    var re = /[\s\S]*?[.!?]+(?=\s|$|["')\]])/g, m, idx = 0;
-    while ((m = re.exec(buffer)) !== null) {
-      var s = m[0].trim();
-      if (s) speak(s);
-      idx = re.lastIndex;
-    }
-    var rem = buffer.slice(idx);
-    if (force) { var t = rem.trim(); if (t) speak(t); rem = ''; }
-    buffer = rem;
-  }
-  function poll() {
-    var lines = readScreenLines();
-    if (lines.length === 0) {                 // box closed: finish the last sentence, reset
-      flushSentences(true); recent.length = 0; prevStable = []; prevKey = ''; return;
-    }
-    var key = lines.join('|');
-    if (key !== prevKey) { prevKey = key; return; }   // act only once the text settles
-    // A hard cut (a new screen sharing no line with the last) ends the old thought.
-    var overlap = false;
-    for (var i = 0; i < lines.length; i++) if (prevStable.indexOf(lines[i]) >= 0) overlap = true;
-    if (!overlap && prevStable.length) flushSentences(true);
-    for (var i = 0; i < lines.length; i++) {
-      var ln = lines[i];
-      if (ln.length < 2 || /^ABCDEFGHIJKLMNOP/.test(ln) || inRecent(ln)) continue;
-      buffer += (buffer && !/\s$/.test(buffer) ? ' ' : '') + ln;   // append new line
-      recent.push(ln);
-      if (recent.length > 12) recent.shift();
-    }
-    flushSentences(false);
-    prevStable = lines;
-  }
-  function stopSpeaking() {
-    if (nativeTTS && nativeTTS.stop) { try { nativeTTS.stop(); } catch (e) {} }
-    if (window.speechSynthesis) { try { speechSynthesis.cancel(); } catch (e) {} }
-  }
-  function setOn(v) {
-    on = v; btn.textContent = '🗣 Read: ' + (on ? 'On' : 'Off');
-    btn.classList.toggle('on', on);
-    try { localStorage.setItem('pq_read', on ? '1' : '0'); } catch (e) {}
-    if (on) { if (!timer) timer = setInterval(poll, 180); }
-    else { if (timer) { clearInterval(timer); timer = null; } stopSpeaking(); buffer = ''; recent.length = 0; prevStable = []; prevKey = ''; }
-  }
-  btn.addEventListener('click', function () { setOn(!on); });
-  setOn(on);
 })();
 """
 
@@ -717,7 +625,7 @@ SOUND_JS = r"""
   function apply() {
     window.__soundOn = on;
     window.__applyVolume();
-    btn.textContent = on ? '🔊 Music: On' : '🔈 Music: Off';
+    btn.textContent = on ? '🔊 Sound: On' : '🔈 Sound: Off';
     btn.classList.toggle('on', on);
     try { localStorage.setItem('pq_sound', on ? '1' : '0'); } catch (e) {}
   }
@@ -730,100 +638,135 @@ SOUND_JS = r"""
 """
 
 
-# Original, royalty-free 8-bit background music that ALWAYS plays at normal tempo,
-# independent of the emulator's speed (the game's own audio is muted).
-#
-# It is CONTEXT-AWARE: a tiny poller reads the live game state out of the
-# emulator's memory every ~200ms (no ROM changes needed) and crossfades between
-# eight original looping tracks, the same way the real game switches music by
-# region/battle/person:
-#
-#   Region (overworld)         Battle                 Person (overrides battle)
-#   ------------------         ----------------       -------------------------
-#   town    Town theme         wild    Wild battle    rival  Rival theme
-#   route   Route/overworld    trainer Trainer battle boss   Gym Leader / Boss
-#   cave    Cave/dungeon
-#   centre  Poke Center/indoor                        + one-shot Victory jingle
-#
-# Priority: a person-specific battle theme (rival / leader) beats the generic
-# battle theme, which beats the region theme. All melodies are original
-# compositions written for this app -- no copyrighted game music is reproduced.
-#
-# State addresses are the stock pokered WRAM symbols (verified against
-# pokered.sym): wIsInBattle d057, wTrainerClass d031, wCurOpponent d059,
-# wGymLeaderNo d05c, wBattleResult cf0b, wCurMap d35e, wCurMapTileset d367.
+# Original, royalty-free chiptune that ALWAYS plays at normal tempo, independent
+# of the emulator's speed (the game's own audio stays muted). Inspired by the
+# original Pokemon Red soundtrack but built to sound fuller: a 4-voice engine
+# (two variable-duty pulse leads + a triangle bass + a noise-channel drum kit,
+# with an arpeggio shimmer) modelled on the Game Boy's APU. It is CONTEXT-AWARE
+# -- a poller reads the live game state from emulator RAM and crossfades between
+# eight tracks (town / route / cave / centre / wild / trainer / boss / rival),
+# plus a victory jingle. A separate SFX bus adds UI blips and correct/wrong
+# answer feedback. No copyrighted game audio is reproduced.
 MUSIC_JS = r"""
 (function () {
   var AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return;
-  var ctx = null, master = null, trackGain = null;
-  var playing = false, timer = null, poller = null, step = 0, nextTime = 0;
-  var cur = 'town', pending = null, jingleUntil = 0, lastInBattle = 0;
+  var ctx = null, master = null, musicGain = null, trackGain = null, sfxGain = null, NOISE = null;
+  var playing = false, timer = null, poller = null, step = 0, nextTime = 0, lastRoot = 0;
+  var cur = 'town', pending = null, jingleUntil = 0, lastInBattle = 0, lastStreak = null;
 
-  // --- Original looping tracks. 0 = rest; numbers are MIDI notes on an 8th-note
-  // grid. mel = lead (square), bass = low pulse (triangle). Each was composed to
-  // give its setting a distinct mood (calm towns, driving battles, etc.). ---
+  // Variable-duty pulse waves (12.5% / 25% / 50%) give the classic bright,
+  // hollow chiptune lead timbres instead of a single plain square.
+  var pulseCache = {};
+  function pulse(duty) {
+    if (pulseCache[duty]) return pulseCache[duty];
+    var n = 28, real = new Float32Array(n), imag = new Float32Array(n);
+    for (var k = 1; k < n; k++) imag[k] = (2 / (k * Math.PI)) * Math.sin(Math.PI * k * duty);
+    var w = ctx.createPeriodicWave(real, imag);
+    pulseCache[duty] = w; return w;
+  }
+  function makeNoise() {
+    var len = Math.floor(ctx.sampleRate * 0.5), buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+    return buf;
+  }
+
+  // tempo, key mode, lead melody (MIDI; 0 = rest), bass roots, drum style, lead duty.
   var TRACKS = {
-    town: { tempo: 116, mel:
+    town: { tempo: 120, minor: false, drums: 'soft', duty: 0.5, mel:
       [67,0,64,0,72,0,64,0, 74,0,72,0,67,0,0,0, 69,0,72,0,76,0,72,0, 74,0,71,0,72,0,0,0],
       bass:
       [48,0,0,0,55,0,0,0, 43,0,0,0,50,0,0,0, 45,0,0,0,52,0,0,0, 41,0,0,0,48,0,0,0] },
-    route: { tempo: 132, mel:
+    route: { tempo: 132, minor: false, drums: 'beat', duty: 0.5, mel:
       [72,76,79,76,72,76,79,81, 79,77,76,74,72,74,76,0, 76,79,84,79,76,79,84,86, 79,81,79,77,76,74,72,0],
       bass:
       [48,0,55,0,48,0,55,0, 43,0,50,0,43,0,50,0, 45,0,52,0,45,0,52,0, 41,0,48,0,43,0,55,0] },
-    cave: { tempo: 100, melVol: 0.14, mel:
+    cave: { tempo: 100, minor: true, drums: 'none', duty: 0.25, melVol: 0.13, mel:
       [69,0,0,0,72,0,71,0, 69,0,0,0,64,0,0,0, 65,0,0,0,67,0,69,0, 64,0,0,0,0,0,0,0],
       bass:
       [33,0,0,0,0,0,0,0, 33,0,0,0,40,0,0,0, 29,0,0,0,0,0,0,0, 28,0,0,0,0,0,0,0] },
-    centre: { tempo: 92, melVol: 0.15, mel:
+    centre: { tempo: 96, minor: false, drums: 'none', duty: 0.5, melVol: 0.14, arpVol: 0.03, mel:
       [76,0,74,0,72,0,0,0, 74,0,76,0,79,0,0,0, 81,0,79,0,76,0,74,0, 72,0,0,0,0,0,0,0],
       bass:
       [48,0,0,0,52,0,0,0, 50,0,0,0,53,0,0,0, 45,0,0,0,52,0,0,0, 48,0,0,0,0,0,0,0] },
-    wild: { tempo: 150, melVol: 0.15, bassVol: 0.20, mel:
+    wild: { tempo: 152, minor: true, drums: 'drive', duty: 0.25, melVol: 0.15, mel:
       [69,69,72,69,76,0,74,0, 72,0,69,0,71,0,67,0, 69,69,72,76,81,0,79,0, 76,0,72,0,69,0,0,0],
       bass:
       [45,45,45,45,40,40,40,40, 41,41,41,41,40,40,40,40, 45,45,45,45,40,40,40,40, 43,43,43,43,40,40,40,40] },
-    trainer: { tempo: 144, melVol: 0.15, mel:
+    trainer: { tempo: 146, minor: false, drums: 'beat', duty: 0.25, melVol: 0.15, mel:
       [67,72,76,79,76,72,67,0, 65,69,72,77,72,69,65,0, 67,71,74,79,74,71,67,0, 72,76,79,84,0,79,0,0],
       bass:
       [48,0,48,0,48,0,48,0, 41,0,41,0,41,0,41,0, 43,0,43,0,43,0,43,0, 48,0,48,0,55,0,48,0] },
-    boss: { tempo: 138, melVol: 0.15, bassVol: 0.20, mel:
+    boss: { tempo: 140, minor: true, drums: 'drive', duty: 0.25, melVol: 0.15, mel:
       [74,0,74,72,74,0,77,0, 76,0,74,72,69,0,0,0, 74,77,81,77,74,0,72,0, 74,0,69,0,74,0,0,0],
       bass:
       [38,38,38,38,38,38,38,38, 36,36,36,36,36,36,36,36, 41,41,41,41,41,41,41,41, 38,38,38,38,45,45,45,45] },
-    rival: { tempo: 140, melVol: 0.15, mel:
+    rival: { tempo: 142, minor: false, drums: 'drive', duty: 0.25, melVol: 0.15, mel:
       [74,0,74,76,74,0,71,0, 79,0,77,0,74,0,0,0, 76,0,79,0,81,0,79,76, 74,0,72,71,67,0,0,0],
       bass:
       [43,0,43,0,50,0,43,0, 41,0,41,0,48,0,41,0, 45,0,45,0,52,0,45,0, 43,0,43,0,38,0,43,0] }
   };
-  // Short triumphant fanfare played once after a won battle, then music resumes.
+  // 8-step drum patterns (k kick, s snare, h hat, o open hat, . rest).
+  var DRUMS = {
+    none:  null,
+    soft:  ['k', '.', '.', '.', 's', '.', '.', 'h'],
+    beat:  ['k', '.', 'h', '.', 's', '.', 'h', '.'],
+    drive: ['k', 'h', 's', 'h', 'k', 'h', 's', 'o']
+  };
+  var MAJ = [0, 4, 7, 12], MIN = [0, 3, 7, 12];
   var VICTORY = [[72,0.18],[76,0.18],[79,0.18],[84,0.5],[0,0.1],[79,0.22],[84,0.75]];
 
-  function midi(n){ return 440 * Math.pow(2, (n - 69) / 12); }
-  function blip(dest, freq, t, dur, type, vol){
+  function midi(n) { return 440 * Math.pow(2, (n - 69) / 12); }
+
+  function tone(dest, freq, t, dur, wave, vol) {
     var o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = type; o.frequency.value = freq;
+    if (typeof wave === 'string') o.type = wave; else o.setPeriodicWave(wave);
+    o.frequency.value = freq;
     g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(vol, t + 0.012);
+    g.gain.linearRampToValueAtTime(vol, t + 0.01);
     g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     o.connect(g); g.connect(dest);
     o.start(t); o.stop(t + dur + 0.03);
   }
-  function schedule(){
+  function drum(kind, t) {
+    if (kind === 'k') {                                   // kick: pitch-drop sine
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sine';
+      o.frequency.setValueAtTime(150, t);
+      o.frequency.exponentialRampToValueAtTime(48, t + 0.11);
+      g.gain.setValueAtTime(0.45, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+      o.connect(g); g.connect(trackGain); o.start(t); o.stop(t + 0.2);
+      return;
+    }
+    var src = ctx.createBufferSource(); src.buffer = NOISE;       // snare / hats: noise
+    var f = ctx.createBiquadFilter(), g2 = ctx.createGain(), dur, vol;
+    if (kind === 's')      { f.type = 'bandpass'; f.frequency.value = 1800; dur = 0.16; vol = 0.22; }
+    else if (kind === 'o') { f.type = 'highpass'; f.frequency.value = 6000; dur = 0.12; vol = 0.11; }
+    else                   { f.type = 'highpass'; f.frequency.value = 7500; dur = 0.035; vol = 0.11; }
+    g2.gain.setValueAtTime(vol, t);
+    g2.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    src.connect(f); f.connect(g2); g2.connect(trackGain);
+    src.start(t); src.stop(t + dur + 0.05);
+  }
+
+  function schedule() {
     var tr = TRACKS[cur] || TRACKS.town;
-    var spb = 60 / tr.tempo / 2, len = tr.mel.length;
-    while (nextTime < ctx.currentTime + 0.3) {
+    var spb = 60 / tr.tempo / 2, len = tr.mel.length, dp = DRUMS[tr.drums];
+    while (nextTime < ctx.currentTime + 0.25) {
       var i = step % len;
-      if (tr.mel[i])  blip(trackGain, midi(tr.mel[i]),  nextTime, spb * 0.95, 'square',   tr.melVol  || 0.16);
-      if (tr.bass[i]) blip(trackGain, midi(tr.bass[i]), nextTime, spb * 3.6,  'triangle', tr.bassVol || 0.22);
+      if (tr.mel[i])  tone(trackGain, midi(tr.mel[i]), nextTime, spb * 0.9, pulse(tr.duty || 0.5), tr.melVol || 0.16);
+      if (tr.bass[i]) { lastRoot = tr.bass[i]; tone(trackGain, midi(tr.bass[i]), nextTime, spb * 1.8, 'triangle', tr.bassVol || 0.2); }
+      if (lastRoot) {                                     // arpeggio shimmer (a third pulse voice)
+        var off = (tr.minor ? MIN : MAJ)[step % 4];
+        tone(trackGain, midi(lastRoot + 12 + off), nextTime, spb * 0.45, pulse(0.125), tr.arpVol || 0.05);
+      }
+      if (dp) { var d = dp[step % dp.length]; if (d !== '.') drum(d, nextTime); }
       nextTime += spb; step++;
     }
   }
 
-  // Crossfade to a new track: dip trackGain, swap arrays, ramp back up. Notes
-  // already queued from the old track fade out as the new track fades in (~0.3s).
-  function setTrack(key){
+  function setTrack(key) {
     if (!TRACKS[key] || key === cur || key === pending) return;
     pending = key;
     var t0 = ctx.currentTime;
@@ -832,7 +775,7 @@ MUSIC_JS = r"""
     trackGain.gain.linearRampToValueAtTime(0.0001, t0 + 0.15);
     setTimeout(function () {
       if (!playing) { pending = null; return; }
-      cur = pending; pending = null; step = 0; nextTime = ctx.currentTime + 0.05;
+      cur = pending; pending = null; step = 0; lastRoot = 0; nextTime = ctx.currentTime + 0.05;
       var t1 = ctx.currentTime;
       trackGain.gain.cancelScheduledValues(t1);
       trackGain.gain.setValueAtTime(0.0001, t1);
@@ -840,20 +783,18 @@ MUSIC_JS = r"""
     }, 160);
   }
 
-  function playVictory(){
+  function playVictory() {
     var t0 = ctx.currentTime + 0.04, dur = 0;
-    // Hush the loop while the fanfare rings out, through master (bypasses fade).
     trackGain.gain.cancelScheduledValues(t0);
     trackGain.gain.setValueAtTime(trackGain.gain.value, t0);
     trackGain.gain.linearRampToValueAtTime(0.0001, t0 + 0.1);
     var beat = 0.14;
     VICTORY.forEach(function (nv) {
-      if (nv[0]) blip(master, midi(nv[0]), t0 + dur, nv[1] * beat * 0.95, 'square', 0.20);
+      if (nv[0]) { tone(musicGain, midi(nv[0]), t0 + dur, nv[1] * beat * 0.95, pulse(0.5), 0.2);
+                   tone(musicGain, midi(nv[0] - 12), t0 + dur, nv[1] * beat * 0.95, 'triangle', 0.14); }
       dur += nv[1] * beat;
     });
-    blip(master, midi(48), t0, dur, 'triangle', 0.18);          // sustained tonic
     jingleUntil = performance.now() + dur * 1000 + 350;
-    // After the jingle, bring the loop back in.
     setTimeout(function () {
       if (!playing) return;
       var t1 = ctx.currentTime;
@@ -863,63 +804,100 @@ MUSIC_JS = r"""
     }, dur * 1000 + 120);
   }
 
-  // --- Read the live game state straight out of emulator RAM. ---
-  function readState(){
+  // ---- live game state from emulator RAM ----
+  function readState() {
     var em = window.__emulator;
     if (!em || !em.module || em.e == null) return null;
     var m = em.module;
     if (typeof m._emulator_read_mem !== 'function') return null;
     var rd = function (a) { return m._emulator_read_mem(em.e, a) & 0xff; };
     return { inBattle: rd(0xd057), trClass: rd(0xd031), curOpp: rd(0xd059),
-             gym: rd(0xd05c), result: rd(0xcf0b), map: rd(0xd35e), tileset: rd(0xd367) };
+             gym: rd(0xd05c), result: rd(0xcf0b), map: rd(0xd35e), tileset: rd(0xd367),
+             streak: rd(0xdef0) };
   }
-  function isBoss(c){
-    // Gym leaders (Brock..Sabrina), Giovanni, and the Elite Four / Champion.
+  function isBoss(c) {
     return (c >= 0x22 && c <= 0x28) || c === 0x1d ||
            c === 0x2c || c === 0x21 || c === 0x2e || c === 0x2f;
   }
-  function pickTrack(s){
+  function pickTrack(s) {
     if (!s) return cur;
     if (s.inBattle === 1 || s.inBattle === 2) {
-      // wCurOpponent = OPP_ID_OFFSET(200) + class for trainers; species (<200) for wild.
       if (s.inBattle === 2 || s.curOpp >= 200) {
         var cls = s.trClass || (s.curOpp >= 200 ? s.curOpp - 200 : 0);
-        if (cls === 0x19 || cls === 0x2a || cls === 0x2b) return 'rival'; // RIVAL1/2/3
+        if (cls === 0x19 || cls === 0x2a || cls === 0x2b) return 'rival';
         if (s.gym !== 0 || isBoss(cls)) return 'boss';
         return 'trainer';
       }
       return 'wild';
     }
     var t = s.tileset;
-    if (t === 6 || t === 18) return 'centre';              // POKECENTER, LOBBY
-    if (t === 17 || t === 11 || t === 15) return 'cave';   // CAVERN, UNDERGROUND, CEMETERY
-    if (t === 0 || t === 23) return (s.map <= 0x0a) ? 'town' : 'route'; // OVERWORLD/PLATEAU
-    if (t === 3 || t === 9) return 'route';                // FOREST(_GATE)
-    return 'centre';                                       // all other indoor tilesets
+    if (t === 6 || t === 18) return 'centre';
+    if (t === 17 || t === 11 || t === 15) return 'cave';
+    if (t === 0 || t === 23) return (s.map <= 0x0a) ? 'town' : 'route';
+    if (t === 3 || t === 9) return 'route';
+    return 'centre';
   }
-  function poll(){
+  function poll() {
     if (!playing) return;
     var s = readState();
     if (!s) return;
-    // Victory: was battling, now back to the field, and we won (result 0).
-    if ((lastInBattle === 1 || lastInBattle === 2) && s.inBattle === 0 && s.result === 0) {
-      playVictory();
-    }
+    // Answer feedback: streak rises on a correct answer, resets to 0 on a miss.
+    if (lastStreak === null) lastStreak = s.streak;
+    else if (s.streak > lastStreak) sfx('correct');
+    else if (s.streak === 0 && lastStreak > 0) sfx('wrong');
+    lastStreak = s.streak;
+    // Victory jingle when a battle ends in a win.
+    if ((lastInBattle === 1 || lastInBattle === 2) && s.inBattle === 0 && s.result === 0) playVictory();
     lastInBattle = s.inBattle;
-    if (performance.now() < jingleUntil) return;           // let the fanfare finish
+    if (performance.now() < jingleUntil) return;
     setTrack(pickTrack(s));
   }
 
-  window.__musicStart = function () {
-    if (!ctx) {
-      ctx = new AC();
-      master = ctx.createGain(); master.connect(ctx.destination);
-      trackGain = ctx.createGain(); trackGain.gain.value = 1; trackGain.connect(master);
+  // ---- SFX bus (independent of the music loop) ----
+  function ensure() {
+    if (ctx) return;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = (window.__soundOn === false ? 0 : 0.5); master.connect(ctx.destination);
+    musicGain = ctx.createGain(); musicGain.connect(master);
+    trackGain = ctx.createGain(); trackGain.gain.value = 1; trackGain.connect(musicGain);
+    sfxGain = ctx.createGain(); sfxGain.gain.value = 0.85; sfxGain.connect(master);
+    NOISE = makeNoise();
+  }
+  function sfx(name) {
+    if (window.__soundOn === false) return;
+    ensure();
+    if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
+    var t = ctx.currentTime + 0.01;
+    if (name === 'ui') {
+      tone(sfxGain, 880, t, 0.05, pulse(0.5), 0.16);
+    } else if (name === 'correct') {
+      [0, 4, 7, 12].forEach(function (o, i) { tone(sfxGain, midi(72 + o), t + i * 0.06, 0.13, pulse(0.5), 0.2); });
+    } else if (name === 'wrong') {
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = 'sawtooth';
+      o.frequency.setValueAtTime(220, t);
+      o.frequency.exponentialRampToValueAtTime(85, t + 0.26);
+      g.gain.setValueAtTime(0.22, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.3);
+      o.connect(g); g.connect(sfxGain); o.start(t); o.stop(t + 0.32);
     }
+  }
+  window.__sfx = sfx;
+  // A subtle blip when the player taps our overlay chrome (toolbar / menu), so
+  // the UI feels responsive even though the game's own audio is muted.
+  if (typeof document !== 'undefined') {
+    document.addEventListener('click', function (e) {
+      var t = e.target; if (!t || !t.closest) return;
+      if (t.closest('#toolbar button, #menu button, .slot button')) sfx('ui');
+    }, true);
+  }
+
+  window.__musicStart = function () {
+    ensure();
     if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
     master.gain.value = 0.5;
     if (playing) return;
-    playing = true; nextTime = ctx.currentTime + 0.1;
+    playing = true; step = 0; lastRoot = 0; nextTime = ctx.currentTime + 0.1;
     timer = setInterval(schedule, 60);
     if (!poller) poller = setInterval(poll, 200);
   };
@@ -929,13 +907,13 @@ MUSIC_JS = r"""
     if (poller) { clearInterval(poller); poller = null; }
     if (master) master.gain.value = 0;
   };
-  // Small inspection hook (handy for debugging which theme is picked, and used
-  // by the headless music test). Does nothing on its own.
+
+  // Inspection hook (also used by the headless music test).
   window.__music = { pick: pickTrack, read: readState, victory: playVictory,
-                     get track(){ return cur; } };
+                     get track() { return cur; } };
 
   // Browsers block audio until a user gesture; start on the first tap/key if on.
-  function kick(){ if (window.__soundOn !== false) window.__musicStart(); }
+  function kick() { if (window.__soundOn !== false) window.__musicStart(); }
   ['pointerdown', 'keydown', 'touchend'].forEach(function (ev) {
     window.addEventListener(ev, kick);
   });
@@ -1019,7 +997,8 @@ MENU_JS = r"""
 # real fullscreen when allowed. Exit via the floating button, Esc, or Back.
 FS_JS = r"""
 (function () {
-  var btn = document.getElementById('btnFull');
+  var btn = document.getElementById('btnFull');        // in the menu sheet
+  var topBtn = document.getElementById('btnFullTop');  // in the top toolbar
   var exitBtn = document.getElementById('btnExitFs');
   var menu = document.getElementById('menu');
   function nativeOn() {
@@ -1046,6 +1025,7 @@ FS_JS = r"""
     if (document.body.classList.contains('immersive')) exit(); else enter();
   }
   if (btn) btn.addEventListener('click', toggle);
+  if (topBtn) topBtn.addEventListener('click', toggle);
   if (exitBtn) exitBtn.addEventListener('click', exit);
   window.addEventListener('keydown', function (e) { if (e.key === 'Escape') exit(); });
   // If the user leaves native fullscreen (system gesture/Back), drop immersive too.
@@ -1126,7 +1106,6 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
-        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -1141,7 +1120,6 @@ def main():
         FILTER_JS,
         SPEED_JS,
         PWA_JS,
-        TTS_JS,
         MUSIC_JS,
         SOUND_JS,
         PAUSE_JS,

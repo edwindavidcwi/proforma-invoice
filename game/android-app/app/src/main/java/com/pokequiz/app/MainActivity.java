@@ -4,18 +4,14 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.speech.tts.TextToSpeech;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
-import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.widget.FrameLayout;
-
-import java.util.Locale;
 
 /**
  * Full-screen WebView that loads the self-contained Pokemon Quiz player
@@ -24,9 +20,7 @@ import java.util.Locale;
  *
  * A WebChromeClient is attached so the in-page controls actually work inside a
  * WebView: the "Open ROM" file picker (onShowFileChooser) and HTML fullscreen
- * (onShowCustomView). A small native TextToSpeech bridge is exposed to the page
- * as window.AndroidTTS so the "Read aloud" feature has reliable voices (the
- * WebView's own speechSynthesis often has none).
+ * (onShowCustomView).
  */
 public class MainActivity extends Activity {
 
@@ -39,10 +33,6 @@ public class MainActivity extends Activity {
     private View customView;
     private WebChromeClient.CustomViewCallback customViewCallback;
 
-    // Native text-to-speech, exposed to the page as window.AndroidTTS.
-    private TextToSpeech tts;
-    private boolean ttsReady = false;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -50,20 +40,10 @@ public class MainActivity extends Activity {
         // Keep the screen on while playing.
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
-        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status == TextToSpeech.SUCCESS) {
-                    tts.setLanguage(Locale.US);
-                    ttsReady = true;
-                }
-            }
-        });
-
         web = new WebView(this);
         WebSettings s = web.getSettings();
         s.setJavaScriptEnabled(true);          // emulator is JS/WASM
-        s.setDomStorageEnabled(true);          // localStorage (filter/speed/voice prefs)
+        s.setDomStorageEnabled(true);          // localStorage (filter/speed prefs)
         s.setMediaPlaybackRequiresUserGesture(false); // allow sound to start
         s.setAllowFileAccess(true);
         web.setBackgroundColor(0xFF06141C);
@@ -114,8 +94,6 @@ public class MainActivity extends Activity {
             }
         });
 
-        web.addJavascriptInterface(new TtsBridge(), "AndroidTTS");
-
         setContentView(web);
         hideSystemBars();
 
@@ -159,24 +137,6 @@ public class MainActivity extends Activity {
         hideSystemBars();
     }
 
-    /** Exposed to the page as window.AndroidTTS.{speak,stop}. */
-    private class TtsBridge {
-        @JavascriptInterface
-        public void speak(String text, float pitch, float rate) {
-            if (!ttsReady || text == null || text.length() == 0) return;
-            tts.setPitch(pitch);
-            tts.setSpeechRate(rate);
-            // QUEUE_ADD so consecutive sentences play in order rather than cutting
-            // each other off; stop() (read toggled off) still clears the queue.
-            tts.speak(text, TextToSpeech.QUEUE_ADD, null, "pq");
-        }
-
-        @JavascriptInterface
-        public void stop() {
-            if (ttsReady) tts.stop();
-        }
-    }
-
     private void hideSystemBars() {
         View d = getWindow().getDecorView();
         d.setSystemUiVisibility(
@@ -197,22 +157,11 @@ public class MainActivity extends Activity {
     protected void onPause() {
         super.onPause();
         if (web != null) web.onPause();
-        if (tts != null) tts.stop();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         if (web != null) web.onResume();
-    }
-
-    @Override
-    protected void onDestroy() {
-        if (tts != null) {
-            tts.stop();
-            tts.shutdown();
-            tts = null;
-        }
-        super.onDestroy();
     }
 }

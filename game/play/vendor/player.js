@@ -605,7 +605,7 @@ class Emulator {
       'Enter': this.setJoypStart.bind(this),
       'Tab': this.setJoypSelect.bind(this),
       'Backspace': this.keyRewind.bind(this),
-      'Space': this.keyPause.bind(this),
+      // Space is handled by the page's speed control (hold = fast-forward), not pause.
       'BracketLeft': this.keyPrevPalette.bind(this),
       'BracketRight': this.keyNextPalette.bind(this),
       'ShiftLeft': this.setFastForward.bind(this),
