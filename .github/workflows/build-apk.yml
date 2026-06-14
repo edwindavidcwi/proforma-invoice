@@ -115,7 +115,14 @@ jobs:
         shell: bash
         run: |
           mkdir -p win-out
-          cp game/windows-app/dist/PokemonQuiz-Windows.exe "win-out/PokemonQuiz-Windows.exe"
+          # Prefer the configured name; fall back to whatever single .exe got built
+          # (portable target emits one top-level .exe under dist/).
+          if [ -f game/windows-app/dist/PokemonQuiz-Windows.exe ]; then
+            cp game/windows-app/dist/PokemonQuiz-Windows.exe "win-out/PokemonQuiz-Windows.exe"
+          else
+            cp "$(ls game/windows-app/dist/*.exe | head -n1)" "win-out/PokemonQuiz-Windows.exe"
+          fi
+          ls -la win-out/
 
       - name: Upload the Windows app (artifact)
         uses: actions/upload-artifact@v4
