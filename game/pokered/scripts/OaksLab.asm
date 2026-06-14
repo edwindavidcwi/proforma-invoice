@@ -948,6 +948,36 @@ OaksLabReceivedMonText:
 	text_end
 
 OaksLabLastMonScript:
+; Educational build: once the Parcel is delivered (Pokedex received), Oak's
+; lonely leftover ball is yours -- give that starter (the ball is in
+; wCurPartySpecies here), then hide it so it can't be taken twice.
+	CheckEvent EVENT_GOT_POKEDEX
+	jr z, .justLook                ; not earned yet -> the original "last POKeMON!" line
+	ld a, [wCurPartySpecies]
+	ld b, a                        ; b = leftover starter species
+	ld c, 5                        ; level 5
+	call GivePokemon               ; carry set = added to party/box
+	jr nc, .justLook               ; party AND box full -> come back later
+	; hide the leftover ball (which one depends on the player's own starter)
+	ld a, [wPlayerStarter]
+	cp BULBASAUR
+	jr z, .hideSquirtleBall        ; took Bulbasaur -> leftover was Squirtle's ball
+	cp CHARMANDER
+	jr z, .hideBulbaBall           ; took Charmander -> leftover was Bulbasaur's ball
+	ld a, TOGGLE_STARTER_BALL_1    ; took Squirtle -> leftover was Charmander's ball
+	jr .hideIt
+.hideSquirtleBall
+	ld a, TOGGLE_STARTER_BALL_2
+	jr .hideIt
+.hideBulbaBall
+	ld a, TOGGLE_STARTER_BALL_3
+.hideIt
+	ld [wToggleableObjectIndex], a
+	predef HideObject
+	ld hl, OaksLabGiftMonText
+	call PrintText
+	jp TextScriptEnd
+.justLook
 	ld a, OAKSLAB_OAK1
 	ldh [hSpriteIndex], a
 	ld a, SPRITESTATEDATA1_FACINGDIRECTION
@@ -960,6 +990,10 @@ OaksLabLastMonScript:
 
 OaksLabLastMonText:
 	text_far _OaksLabLastMonText
+	text_end
+
+OaksLabGiftMonText:
+	text_far _OaksLabGiftMonText
 	text_end
 
 OaksLabOak1Text:

@@ -60,6 +60,13 @@ _OaksLabLastMonText::
 	line "last #MON!"
 	done
 
+_OaksLabGiftMonText::
+	text "OAK: You earned"
+	line "it! This last"
+	para "#MON is yours."
+	line "Raise it well!"
+	done
+
 _OaksLabOak1WhichPokemonDoYouWantText::
 	text "OAK: Now, <PLAYER>,"
 	line "which #MON do"
