@@ -400,7 +400,7 @@ BODY_HTML = r"""
     <div id="screenwrap">
       <canvas id="mainCanvas" width="160" height="144">No Canvas Support</canvas>
     </div>
-    <div id="hint">Arrows move &middot; X = A &middot; Z = B &middot; Enter = Start &middot; hold Space = fast-forward &middot; tap &#9776; Menu for saves &amp; settings</div>
+    <div id="hint">Arrows move &middot; Z = A &middot; X = B &middot; Enter = Start &middot; hold Space = fast-forward &middot; tap &#9776; Menu for saves &amp; settings</div>
     <div id="overlay"><div id="overlay_msg"></div></div>
   </div>
 

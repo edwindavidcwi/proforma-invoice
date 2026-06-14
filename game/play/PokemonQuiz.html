@@ -383,7 +383,7 @@ body.immersive #game canvas { width: min(98vw, calc((100vh - 30px) * 1.1111)); }
     <div id="screenwrap">
       <canvas id="mainCanvas" width="160" height="144">No Canvas Support</canvas>
     </div>
-    <div id="hint">Arrows move &middot; X = A &middot; Z = B &middot; Enter = Start &middot; hold Space = fast-forward &middot; tap &#9776; Menu for saves &amp; settings</div>
+    <div id="hint">Arrows move &middot; Z = A &middot; X = B &middot; Enter = Start &middot; hold Space = fast-forward &middot; tap &#9776; Menu for saves &amp; settings</div>
     <div id="overlay"><div id="overlay_msg"></div></div>
   </div>
 
@@ -1056,8 +1056,8 @@ class Emulator {
       'ArrowLeft': this.setJoypLeft.bind(this),
       'ArrowRight': this.setJoypRight.bind(this),
       'ArrowUp': this.setJoypUp.bind(this),
-      'KeyZ': this.setJoypB.bind(this),
-      'KeyX': this.setJoypA.bind(this),
+      'KeyZ': this.setJoypA.bind(this),
+      'KeyX': this.setJoypB.bind(this),
       'Enter': this.setJoypStart.bind(this),
       'Tab': this.setJoypSelect.bind(this),
       'Backspace': this.keyRewind.bind(this),
