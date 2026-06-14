@@ -383,6 +383,10 @@ QuizAsk::
 	ld [wQuizCorrectIndex], a      ; correct index, now in display space
 	ld a, QUIZ_MAX_ATTEMPTS
 	ld [wQuizAttemptsLeft], a
+	; The overworld/battle flow may leave "don't wait after text" set; clear it so
+	; the hint and the answer-reveal always pause for the player to read them.
+	xor a
+	ld [wDoNotWaitForButtonPressAfterDisplayingText], a
 .attempt
 	call QuizDrawScreen
 	call HandleMenuInput           ; only A is watched; selection -> wCurrentMenuItem
