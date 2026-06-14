@@ -425,7 +425,7 @@ Correct answer is shown in **bold**; other options follow; _hint_ shows on a wro
 3. Baby of a pig?  ->  **piglet**   (also: kitten, calf)   _Young animal_
 4. Baby of a duck?  ->  **duckling**   (also: kid, chick)   _Young animal_
 5. Baby of kangaroo?  ->  **joey**   (also: puppy, kitten)   _Young animal_
-6. Baby of a owl?  ->  **owlet**   (also: kitten, calf)   _Young animal_
+6. Baby of an owl?  ->  **owlet**   (also: kitten, calf)   _Young animal_
 7. Planet we live?  ->  **Earth**   (also: Mars, Sun)   _Nature fact_
 8. Star at center?  ->  **Sun**   (also: Moon, Mars)   _Nature fact_
 9. We see with?  ->  **eyes**   (also: ears, nose)   _Nature fact_
@@ -540,10 +540,10 @@ Correct answer is shown in **bold**; other options follow; _hint_ shows on a wro
 
 1. Baby of a duck?  ->  **duckling**   (also: chick, tadpole)   _Young animal_
 2. Baby of kangaroo?  ->  **joey**   (also: kitten, calf)   _Young animal_
-3. Baby of a owl?  ->  **owlet**   (also: calf, lamb)   _Young animal_
+3. Baby of an owl?  ->  **owlet**   (also: calf, lamb)   _Young animal_
 4. Baby of a swan?  ->  **cygnet**   (also: chick, tadpole)   _Young animal_
 5. Baby of a goose?  ->  **gosling**   (also: tadpole, cub)   _Young animal_
-6. Baby of a eagle?  ->  **eaglet**   (also: lamb, foal)   _Young animal_
+6. Baby of an eagle?  ->  **eaglet**   (also: lamb, foal)   _Young animal_
 7. Largest planet?  ->  **Jupiter**   (also: Mars, Earth)   _Nature fact_
 8. Red planet?  ->  **Mars**   (also: Earth, Sun)   _Nature fact_
 9. Sun is a?  ->  **star**   (also: moon, planet)   _Nature fact_

@@ -172,7 +172,8 @@ def science(g):
         # Rotate the distractor pool per (grade, animal) so it isn't always the
         # same two baby words (e.g. puppy/kitten) on every question.
         pool = BABY_WORDS[stable_rot(g, a):] + BABY_WORDS
-        out.append(mk(fit(f"Baby of a {a}?", f"Baby of {a}?"), b, pick2(b, a, pool), "Young animal"))
+        art = "an" if a[0] in "aeiou" else "a"        # "an owl", not "a owl"
+        out.append(mk(fit(f"Baby of {art} {a}?", f"Baby of {a}?"), b, pick2(b, a, pool), "Young animal"))
     facts = {
         1:[("Cow says?","moo",["baa","woof"]),("Dog says?","woof",["moo","oink"]),
            ("Cat says?","meow",["moo","baa"]),("We breathe?","air",["sand","mud"]),

@@ -115,7 +115,7 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
 - **Science & Nature** (20):
     - Baby of a duck?  ->  *duckling*   [duckling, chick, tadpole]   _hint: Young animal_
     - Baby of kangaroo?  ->  *joey*   [joey, kitten, calf]   _hint: Young animal_
-    - Baby of a owl?  ->  *owlet*   [owlet, calf, lamb]   _hint: Young animal_
+    - Baby of an owl?  ->  *owlet*   [owlet, calf, lamb]   _hint: Young animal_
 - **General Knowledge** (14):
     - Years in decade?  ->  *10*   [10, 11, 15]   _hint: Ten_
     - Years in century?  ->  *100*   [100, 101, 105]   _hint: Hundred_
