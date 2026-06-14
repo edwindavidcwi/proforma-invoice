@@ -18,12 +18,20 @@ const Binjgb = require("./vendor/binjgb.js");
 const ROM = process.argv[2] || path.join(__dirname, "..", "pokered", "pokered.gbc");
 const TICKS_PER_FRAME = 70224;
 
-// pokered symbol addresses (from pokered.sym)
-const PlaceMenuCursor = 0x3b7c;
-const wTileMap = 0xc3a0, SCREEN_W = 20;
-const wTopMenuItemY = 0xcc24, wTopMenuItemX = 0xcc25, wCurrentMenuItem = 0xcc26;
-const wTileBehindCursor = 0xcc27, wMaxMenuItem = 0xcc28, wLastMenuItem = 0xcc2a;
-const wMenuCursorLocation = 0xcc30, hUILayoutFlags = 0xfff6;
+// Read symbol addresses from pokered.sym next to the ROM, so the harness never
+// breaks when unrelated code shifts a routine's address (e.g. a new menu item).
+const SYM = ROM.replace(/\.gb[c]?$/, ".sym");
+const _sym = {};
+for (const line of fs.readFileSync(SYM, "utf8").split("\n")) {
+  const m = line.trim().match(/^([0-9a-fA-F]+):([0-9a-fA-F]+)\s+(\S+)$/);
+  if (m) _sym[m[3]] = parseInt(m[2], 16);
+}
+const S = (n) => { if (_sym[n] === undefined) throw new Error("missing symbol " + n); return _sym[n]; };
+const PlaceMenuCursor = S("PlaceMenuCursor");
+const wTileMap = S("wTileMap"), SCREEN_W = 20;
+const wTopMenuItemY = S("wTopMenuItemY"), wTopMenuItemX = S("wTopMenuItemX"), wCurrentMenuItem = S("wCurrentMenuItem");
+const wTileBehindCursor = S("wTileBehindCursor"), wMaxMenuItem = S("wMaxMenuItem"), wLastMenuItem = S("wLastMenuItem");
+const wMenuCursorLocation = S("wMenuCursorLocation"), hUILayoutFlags = S("hUILayoutFlags");
 const BIT_DOUBLE_SPACED_MENU = 1; // bit index 1 -> mask 0x02
 
 let failures = 0;
