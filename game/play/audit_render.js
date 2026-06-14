@@ -43,8 +43,10 @@ for (let g = 1; g <= 5; g++) {
     const eo = off(bank, base) + i * 14;
     const q = romStr(bank, rom[eo] | (rom[eo + 1] << 8));
     const ci = rom[eo + 2];
-    const ans = [0, 1, 2].map(k => romStr(bank, rom[eo + 4 + 2 * k] | (rom[eo + 5 + 2 * k] << 8)));
-    map.set(q, { correct: ans[ci], answers: new Set(ans) });
+    const n = rom[eo + 3];                 // 3 or 4 answers
+    const ans = [];
+    for (let k = 0; k < n; k++) ans.push(romStr(bank, rom[eo + 4 + 2 * k] | (rom[eo + 5 + 2 * k] << 8)));
+    map.set(q, { correct: ans[ci], answers: new Set(ans), n });
   }
   expected[g] = map;
 }
@@ -55,7 +57,7 @@ for (let g = 1; g <= 5; g++) {
   let totalChecked = 0, mismatches = 0;
   console.log(`Sampling the live loader ${RUNS}x per grade (${RUNS * 5} loads)...\n`);
   for (let g = 1; g <= 5; g++) {
-    const seen = new Set(), slot = [0, 0, 0];
+    const seen = new Set(), slot = [0, 0, 0, 0];
     let badRender = 0, examples = [];
     for (let r = 0; r < RUNS; r++) {
       const rp = module._malloc(size);
@@ -70,22 +72,23 @@ for (let g = 1; g <= 5; g++) {
       module._emulator_set_PC(e, QPA.addr); run(60);
       let q = ""; for (let i = 0; i < 20; i++) { const b = rd(wQStr + i); if (b === 0x50) break; q += tile(b); }
       const ansRow = rr => { let s = ""; for (let c = 2; c < 19; c++) s += tile(rd(wTileMap + rr * 20 + c)); return s.trim(); };
-      const ans = [ansRow(9), ansRow(11), ansRow(13)];
+      const allRows = [ansRow(9), ansRow(11), ansRow(13), ansRow(15)]; // up to 4 answer rows
       module._emulator_delete(e); module._free(rp);
       if (!q || q.indexOf('~') >= 0 || q.trim().length < 2) { module._emulator_delete; continue; } // box not drawn this run; skip
       totalChecked++;
       const exp = expected[g].get(q);
-      if (!exp) { badRender++; mismatches++; if (examples.length < 3) examples.push(`unknown Q "${q}" ans=${ans}`); continue; }
+      if (!exp) { badRender++; mismatches++; if (examples.length < 3) examples.push(`unknown Q "${q}" ans=${allRows}`); continue; }
+      const ans = allRows.slice(0, exp.n);    // this question shows exp.n answers
       // every rendered answer must belong to the expected set (rotated order)
-      const okSet = ans.every(a => exp.answers.has(a)) && new Set(ans).size === 3;
+      const okSet = ans.every(a => exp.answers.has(a)) && new Set(ans).size === exp.n;
       const cs = ans.indexOf(exp.correct);
       if (!okSet || cs < 0) { badRender++; mismatches++; if (examples.length < 3) examples.push(`mismatch "${q}" got=${ans} expect∈${[...exp.answers]}`); continue; }
       seen.add(q); slot[cs]++;
     }
-    const cov = seen.size, total = slot[0] + slot[1] + slot[2];
-    const pct = total ? slot.map(s => Math.round(100 * s / total)) : [0, 0, 0];
+    const cov = seen.size, total = slot.reduce((a, b) => a + b, 0);
+    const pct = total ? slot.map(s => Math.round(100 * s / total)) : [0, 0, 0, 0];
     console.log(`Grade ${g}: render OK ${total}/${RUNS}, coverage ${cov}/100 distinct, ` +
-      `correct-answer slot split ${pct[0]}/${pct[1]}/${pct[2]}%  ${badRender ? "FAIL " + badRender : "OK"}`);
+      `correct-answer slot split ${pct.join("/")}%  ${badRender ? "FAIL " + badRender : "OK"}`);
     examples.forEach(x => console.log("    " + x));
   }
   console.log(`\n${mismatches === 0 ? "PASS" : "FAIL"}: ${totalChecked} live renders checked, ${mismatches} mismatches`);

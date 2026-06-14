@@ -47,50 +47,58 @@ def mk(text, correct, distractors, hint):
 def num(text, correct, hint, distractors=None):
     c = int(correct)
     if distractors is None:
-        distractors = [c - 1, c + 1] if c >= 1 else [c + 1, c + 2]
+        distractors = _three(c, [c - 1, c + 1, c + 2, c + 5, c - 2])  # 4th option where it fits
     return mk(text, correct, distractors, hint)
 
 def pick2(correct, word, candidates):
+    """Pick up to 3 distinct distractors from the pool (a 4th answer option where
+    the pool allows); falls back to 2, or None if fewer than 2 are available."""
     out = []
     for c in candidates:
         c = str(c)
         if c != correct and c != word and c not in out and okstr(c, 9):
             out.append(c)
-        if len(out) == 2:
+        if len(out) == 3:
             return out
-    return None
+    return out if len(out) >= 2 else None
 
-def _two(c, cands):
-    """Pick 2 distinct, non-negative distractors != c from cands (then pad)."""
+def _npick(c, cands, n):
+    """Pick n distinct, non-negative distractors != c from cands (then pad)."""
     out = []
     for d in cands:
         d = int(d)
         if d >= 0 and d != c and d not in out:
             out.append(d)
-        if len(out) == 2:
+        if len(out) == n:
             return out
     i = 1
-    while len(out) < 2:
-        for d in (c + i, c - i, c + 10 * i):
+    while len(out) < n:
+        for d in (c + i, c - i, c + 10 * i, c + 5 * i):
             if d >= 0 and d != c and d not in out:
                 out.append(d)
-            if len(out) == 2:
+            if len(out) == n:
                 break
         i += 1
-    return out[:2]
+    return out[:n]
+
+def _two(c, cands):
+    return _npick(c, cands, 2)
+
+def _three(c, cands):
+    return _npick(c, cands, 3)
 
 def smart(op, a, b, c):
     """Plausible, common-mistake distractors instead of the trivial c +/- 1."""
-    if op == '+':   cands = [abs(a - b), c + 1, c + 10, c - 2]   # subtracted; near; place-value
-    elif op == '-': cands = [a + b, c + 1, c + 10, c - 1]        # added instead; near
-    elif op == 'x': cands = [a * (b - 1), a + b, a * (b + 1), c + 1]  # a group off; added
-    elif op == '/': cands = [c + 1, b, c + 2, c - 1]             # near; confuse with divisor
+    if op == '+':   cands = [abs(a - b), c + 1, c + 10, c - 2, c + 2]  # subtracted; near; place-value
+    elif op == '-': cands = [a + b, c + 1, c + 10, c - 1, c + 2]       # added instead; near
+    elif op == 'x': cands = [a * (b - 1), a + b, a * (b + 1), c + 1, c - 1]  # a group off; added
+    elif op == '/': cands = [c + 1, b, c + 2, c - 1, c + 3]            # near; confuse with divisor
     else:           cands = [c + 1, c + 5, c - 2, c * 2, c + 10]
-    return _two(c, cands)
+    return _three(c, cands)            # 3 distractors -> a 4th answer option
 
 def spread(c):
-    """A near miss plus a wider miss (so the 3 options aren't just consecutive)."""
-    return _two(c, [c + 1, c + 5, c - 3, c * 2 if c <= 20 else c + 10, c + 10, c - 1])
+    """Three misses (a near one and wider ones) so the 4 options aren't consecutive."""
+    return _three(c, [c + 1, c + 5, c - 3, c * 2 if c <= 20 else c + 10, c + 10, c - 1, c + 2, c - 2])
 
 # ===================== word / fact pools =====================
 OPP = [("big","small"),("hot","cold"),("up","down"),("in","out"),("day","night"),
@@ -401,13 +409,17 @@ def emit():
         w(f"Grade{g}Questions::")
         for i, q in enumerate(banks[g], 1):
             p = f"G{g}Q{i}"
-            w(f"\tquizq {p}, 0, 3, {p}A, {p}B, {p}C, {p}C, {p}H")
+            n = len(q.answers)                       # 3 or 4 answers
+            slot3 = f"{p}D" if n >= 4 else f"{p}C"    # 4th slot (real D, or C as filler)
+            w(f"\tquizq {p}, 0, {n}, {p}A, {p}B, {p}C, {slot3}, {p}H")
         for i, q in enumerate(banks[g], 1):
             p = f"G{g}Q{i}"
             w(f'{p}: db "{q.text}@"')
             w(f'{p}A: db "{q.answers[0]}@"')
             w(f'{p}B: db "{q.answers[1]}@"')
             w(f'{p}C: db "{q.answers[2]}@"')
+            if len(q.answers) >= 4:
+                w(f'{p}D: db "{q.answers[3]}@"')
             w(f'{p}H: db "{q.hint}@"')
         w("")
     return "\n".join(L)

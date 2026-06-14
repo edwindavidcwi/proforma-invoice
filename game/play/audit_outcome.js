@@ -60,7 +60,8 @@ const HMI = A("HandleMenuInput"), PT = A("PrintText"), RND = A("Random");
 
   // 2) wrong attack -> MISS
   o = runHook(QPA, 1, wr => wr(A("wMoveMissed"), 0xff));
-  check("wrong attack -> MISS (wMoveMissed=1)", o.missed === 1 && o.cs === 2, `wMoveMissed=${o.missed}, correctSlot=${o.cs}`);
+  // correct lands in a non-zero slot (2 with 3 answers, 3 with 4) while the cursor sits at 0 -> wrong
+  check("wrong attack -> MISS (wMoveMissed=1)", o.missed === 1 && o.cs !== 0, `wMoveMissed=${o.missed}, correctSlot=${o.cs}`);
 
   // 3) correct defence -> damage HALVED (100 -> 50)
   o = runHook(QED, 0, wr => { wr(A("wEnemyMovePower"), 40); wr(A("wDamage"), 0); wr(A("wDamage") + 1, 100); });
