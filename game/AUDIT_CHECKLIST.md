@@ -63,8 +63,11 @@ CI builds these but can't run them on a real device:
 ## Known follow-ups / watch-list
 - [resolved] Science "Baby of a ___?" distractors now rotate per question
   (no longer always puppy/kitten); animal pool expanded (owl/swan/goose/eagle).
-- Subject mix is math-heavy in early grades (≈50/grade) — appropriate for G1–G2,
-  worth a teacher's eye for G4–G5. Rebalancing means authoring more
-  grade-appropriate non-math questions (a curriculum decision).
-- Remaining audits that scripts can't do: curriculum alignment, child play-test,
+- [resolved] Teacher review: fixed a factual error ("Bee wings?" 2 -> 4) and the
+  vague "Speed of?" -> "Fastest is?".
+- [resolved] G4-G5 rebalanced: math share cut from ~49% to ~32% by adding
+  grade-appropriate Science / GK / geometry (each fact verified correct).
+- Numeric GK/geometry distractors are near-misses (+1/+5 via spread()); a bit
+  guessable for older grades -- candidate for more concept-based distractors.
+- Remaining audits that scripts can't do: child play-test on a real device,
   on-device APK/EXE smoke test, and an ear check on the new music/SFX.

@@ -189,11 +189,17 @@ def science(g):
         4:[("Planet we live?","Earth",["Mars","Sun"]),("Star at center?","Sun",["Moon","Mars"]),
            ("We see with?","eyes",["ears","nose"]),("Heart pumps?","blood",["air","water"]),
            ("Water formula?","H2O",["CO2","O2"]),("Closest star?","Sun",["Mars","Moon"]),
-           ("Bones make a?","body",["car","tree"]),("Fish breathe with?","gills",["lungs","skin"])],
+           ("Bones make a?","body",["car","tree"]),("Fish breathe with?","gills",["lungs","skin"]),
+           ("We hear with?","ears",["eyes","nose"]),("We smell with?","nose",["ears","eyes"]),
+           ("Ice melts to?","water",["steam","gas"]),("Sun sets in?","west",["east","north"]),
+           ("Largest organ?","skin",["heart","lung"]),("Earth spins in?","day",["week","year"])],
         5:[("Largest planet?","Jupiter",["Mars","Earth"]),("Red planet?","Mars",["Earth","Sun"]),
            ("Sun is a?","star",["moon","planet"]),("Lungs are for?","air",["food","blood"]),
-           ("Moon orbits?","Earth",["Sun","Mars"]),("Speed of?","light",["sound","wind"]),
-           ("Ice is frozen?","water",["milk","air"]),("Bee wings?","2",["4","6"])],
+           ("Moon orbits?","Earth",["Sun","Mars"]),("Fastest is?","light",["sound","wind"]),
+           ("Ice is frozen?","water",["milk","air"]),("Bee wings?","4",["2","6"]),
+           ("Planets in system?","8",["9","7"]),("Plants give off?","oxygen",["smoke","ash"]),
+           ("We breathe out?","CO2",["O2","H2O"]),("Hottest planet?","Venus",["Mars","Sun"]),
+           ("Earth orbits?","Sun",["Moon","Mars"]),("Magnet pulls?","iron",["wood","glass"])],
     }[g]
     for t in facts:
         out.append(mk(t[0], t[1], t[2], "Nature fact"))
@@ -213,10 +219,18 @@ def gk(g):
            ("Months in year?",12,"Twelve"),("Hours half day?",12,"Twelve")],
         4:[("Days in a year?",365,"365"),("Seconds in min?",60,"Sixty"),
            ("Sides of a dice?",6,"A cube"),("Oceans on Earth?",5,"Five"),
-           ("Continents?",7,"Seven"),("Days in leap yr?",366,"One more")],
+           ("Continents?",7,"Seven"),("Days in leap yr?",366,"One more"),
+           ("Hours in 3 days?",72,"24 x 3"),("Days in Feb?",28,"Short month"),
+           ("Legs on 3 cats?",12,"4 x 3"),("Wheels on 2 cars?",8,"4 and 4"),
+           ("Minutes in 2 hrs?",120,"60 x 2"),("Months in a year?",12,"Twelve"),
+           ("Weeks in a month?",4,"About four"),("Days in a week?",7,"Seven")],
         5:[("Years in decade?",10,"Ten"),("Years in century?",100,"Hundred"),
            ("Days in 2 weeks?",14,"7 and 7"),("Minutes half hr?",30,"Thirty"),
-           ("Hours in 2 days?",48,"24 and 24"),("Sides on a cube?",6,"A box")],
+           ("Hours in 2 days?",48,"24 and 24"),("Sides on a cube?",6,"A box"),
+           ("2 decades is?",20,"10 x 2"),("Days in 3 weeks?",21,"7 x 3"),
+           ("Hours in 4 days?",96,"24 x 4"),("Seconds in 2 min?",120,"60 x 2"),
+           ("Minutes in 3 hrs?",180,"60 x 3"),("Hours in a day?",24,"Twenty four"),
+           ("Days in a year?",365,"365"),("Weeks in a year?",52,"Fifty two")],
     }[g]
     return [q for q in (num(t, c, h, spread(c)) for t, c, h in facts) if q]
 
@@ -242,9 +256,12 @@ def shapes(g):
     for t in COLORS[:cwin]:
         out.append(mk(t[0], t[1], t[2], "Mix colors"))
     extra = {
-        4:[("Cube has faces?",6,"Six"),("Right angle deg?",90,"Ninety")],
+        4:[("Cube has faces?",6,"Six"),("Right angle deg?",90,"Ninety"),
+           ("Corners of square?",4,"Four"),("Corners triangle?",3,"Three"),
+           ("Faces of a box?",6,"A cube")],
         5:[("Circle degrees?",360,"Full turn"),("Cube has edges?",12,"Twelve"),
-           ("Triangle angles?",3,"Three")],
+           ("Triangle angles?",3,"Three"),("Corners of a cube?",8,"Eight"),
+           ("Straight angle?",180,"Half turn"),("Right angle?",90,"A corner")],
     }.get(g, [])
     for t in extra:
         out.append(num(t[0], t[1], t[2], spread(t[1])))

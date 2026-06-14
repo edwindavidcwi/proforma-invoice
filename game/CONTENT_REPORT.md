@@ -7,8 +7,8 @@ Total questions: **500**  |  Grades: 1, 2, 3, 4, 5
 | G1 | 54 | 20 | 14 | 7 | 5 | 100 |
 | G2 | 51 | 20 | 14 | 6 | 9 | 100 |
 | G3 | 51 | 20 | 14 | 6 | 9 | 100 |
-| G4 | 49 | 20 | 14 | 6 | 11 | 100 |
-| G5 | 49 | 20 | 14 | 6 | 11 | 100 |
+| G4 | 32 | 20 | 20 | 14 | 14 | 100 |
+| G5 | 32 | 20 | 20 | 14 | 14 | 100 |
 
 Longest question: 18/18 chars  (`Opposite of happy?`)
 Longest answer:   8/9 chars  (in `Plural of child?`)
@@ -82,7 +82,7 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
     - Octagon sides?  ->  *8*   [8, 9, 13]   _hint: Count the sides_
 
 ### Grade 4
-- **Math** (49):
+- **Math** (32):
     - 11 x 4?  ->  *44*   [44, 33, 15]   _hint: Break it up_
     - 11 x 5?  ->  *55*   [55, 44, 16]   _hint: Break it up_
     - 11 x 6?  ->  *66*   [66, 55, 17]   _hint: Break it up_
@@ -90,21 +90,21 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
     - Opposite of loud?  ->  *quiet*   [quiet, small, cold]   _hint: The opposite word_
     - Opposite of win?  ->  *lose*   [lose, sad, empty]   _hint: The opposite word_
     - Opposite of rich?  ->  *poor*   [poor, night, slow]   _hint: The opposite word_
-- **Science & Nature** (14):
+- **Science & Nature** (20):
     - Baby of a lion?  ->  *cub*   [cub, tadpole, fawn]   _hint: Young animal_
     - Baby of a deer?  ->  *fawn*   [fawn, tadpole, cub]   _hint: Young animal_
     - Baby of a pig?  ->  *piglet*   [piglet, kitten, calf]   _hint: Young animal_
-- **General Knowledge** (6):
+- **General Knowledge** (14):
     - Days in a year?  ->  *365*   [365, 366, 370]   _hint: 365_
     - Seconds in min?  ->  *60*   [60, 61, 65]   _hint: Sixty_
     - Sides of a dice?  ->  *6*   [6, 7, 11]   _hint: A cube_
-- **Shapes & Colors** (11):
+- **Shapes & Colors** (14):
     - Octagon sides?  ->  *8*   [8, 9, 13]   _hint: Count the sides_
     - Heptagon sides?  ->  *7*   [7, 8, 12]   _hint: Count the sides_
     - Nonagon sides?  ->  *9*   [9, 10, 14]   _hint: Count the sides_
 
 ### Grade 5
-- **Math** (49):
+- **Math** (32):
     - 2 plus 2 x 3?  ->  *8*   [8, 12, 7]   _hint: Times before plus_
     - 2 plus 2 x 4?  ->  *10*   [10, 16, 8]   _hint: Times before plus_
     - 2 plus 2 x 5?  ->  *12*   [12, 20, 9]   _hint: Times before plus_
@@ -112,15 +112,15 @@ Longest answer:   8/9 chars  (in `Plural of child?`)
     - Opposite of true?  ->  *false*   [false, night, slow]   _hint: The opposite word_
     - Opposite of weak?  ->  *strong*   [strong, empty, shut]   _hint: The opposite word_
     - Opposite of thick?  ->  *thin*   [thin, sad, empty]   _hint: The opposite word_
-- **Science & Nature** (14):
+- **Science & Nature** (20):
     - Baby of a duck?  ->  *duckling*   [duckling, chick, tadpole]   _hint: Young animal_
     - Baby of kangaroo?  ->  *joey*   [joey, kitten, calf]   _hint: Young animal_
     - Baby of a owl?  ->  *owlet*   [owlet, calf, lamb]   _hint: Young animal_
-- **General Knowledge** (6):
+- **General Knowledge** (14):
     - Years in decade?  ->  *10*   [10, 11, 15]   _hint: Ten_
     - Years in century?  ->  *100*   [100, 101, 105]   _hint: Hundred_
     - Days in 2 weeks?  ->  *14*   [14, 15, 19]   _hint: 7 and 7_
-- **Shapes & Colors** (11):
+- **Shapes & Colors** (14):
     - Heptagon sides?  ->  *7*   [7, 8, 12]   _hint: Count the sides_
     - Nonagon sides?  ->  *9*   [9, 10, 14]   _hint: Count the sides_
     - Decagon sides?  ->  *10*   [10, 11, 15]   _hint: Count the sides_
