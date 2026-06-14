@@ -565,9 +565,9 @@ TTS_JS = r"""
       0x70:"'",0x71:"'",0x72:'"',0x73:'"'};
     return (t in m) ? m[t] : '';
   }
-  function readScreenText() {
+  function readScreenLines() {
     var em = window.__emulator;
-    if (!em || !em.module || !em.e) return '';
+    if (!em || !em.module || !em.e) return [];
     var rd = function (a) { return em.module._emulator_read_mem(em.e, a); };
     var rows = [];
     for (var r = 1; r <= 16; r++) {
@@ -576,9 +576,10 @@ TTS_JS = r"""
         var t = rd(TILE + r * W + c); line += ch(t);
         if (t >= 0x80 && t <= 0xb9) letters++;
       }
-      if (letters >= 2) rows.push(line.replace(/\s+$/, ''));
+      line = line.replace(/\s+/g, ' ').trim();
+      if (letters >= 2) rows.push(line);
     }
-    return rows.join(' ').replace(/\s+/g, ' ').trim();
+    return rows;
   }
   var vMale = null, vFemale = null, vNote = null;
   function pickVoices() {
@@ -610,14 +611,30 @@ TTS_JS = r"""
     else { if (vNote) u.voice = vNote; }
     try { speechSynthesis.cancel(); speechSynthesis.speak(u); } catch (e) {}
   }
-  var prev = '', lastSpoken = '', timer = null, on = false;
+  var prevKey = '', recent = [], timer = null, on = false;
   try { on = localStorage.getItem('pq_read') === '1'; } catch (e) {}
+  function inRecent(line) {
+    for (var i = 0; i < recent.length; i++) if (recent[i] === line) return true;
+    return false;
+  }
+  // Read each line of dialogue ONCE. Game Boy text shows two lines at a time and
+  // scrolls up one line per page, so every line is visible across two pages --
+  // re-reading the whole box each time made it read everything roughly twice.
+  // De-duping per line (remembering the last several spoken lines) fixes that.
   function poll() {
-    var t = readScreenText();
-    if (t && t.length >= 6 && !/^ABCDEFGHIJKLMNOP/.test(t) && t === prev && t !== lastSpoken) {
-      lastSpoken = t; speak(t);
+    var lines = readScreenLines();
+    if (lines.length === 0) { recent.length = 0; prevKey = ''; return; } // box closed: reset
+    var key = lines.join('|');
+    if (key !== prevKey) { prevKey = key; return; }   // act only once the text settles
+    var fresh = [];
+    for (var i = 0; i < lines.length; i++) {
+      var ln = lines[i];
+      if (ln.length < 2 || /^ABCDEFGHIJKLMNOP/.test(ln) || inRecent(ln)) continue;
+      fresh.push(ln);
+      recent.push(ln);
+      if (recent.length > 12) recent.shift();
     }
-    prev = t;
+    if (fresh.length) speak(fresh.join(' '));
   }
   function stopSpeaking() {
     if (nativeTTS && nativeTTS.stop) { try { nativeTTS.stop(); } catch (e) {} }
