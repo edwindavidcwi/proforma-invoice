@@ -107,6 +107,49 @@ QuizItemUse::
 	ld [wQuizResult], a
 	ret
 
+; Catching a wild Pokemon: the player must answer N questions in a row
+; (3 for grades 1-2, 5 for grades 3-5). A miss lets the Pokemon escape.
+; Sets wQuizResult (1 = caught, 0 = escaped) -- the flag survives the callfar
+; back to ItemUseBall (the carry flag would not).
+QuizCapture::
+	call SaveScreenTilesToBuffer2
+	; required streak length, by grade (badge count / 2 + 1)
+	ld hl, wObtainedBadges
+	ld b, 1
+	call CountSetBits
+	ld a, [wNumSetBits]
+	srl a
+	inc a                          ; a = grade (1-5)
+	cp 3
+	ld a, 3                        ; grades 1-2 -> need 3
+	jr c, .gotNeed
+	ld a, 5                        ; grades 3-5 -> need 5
+.gotNeed
+	ld [wQuizCapNeed], a
+	xor a
+	ld [wQuizCapCount], a
+.ask
+	call QuizSelectQuestion
+	call QuizLoadQuestion
+	call QuizAsk                   ; carry set = answered correctly
+	jr nc, .escaped
+	ld a, [wQuizCapCount]
+	inc a
+	ld [wQuizCapCount], a
+	ld hl, wQuizCapNeed
+	cp [hl]
+	jr c, .ask                     ; streak < needed -> ask another
+	ld a, 1                        ; full streak -> caught
+	ld [wQuizResult], a
+	jr .done
+.escaped
+	xor a
+	ld [wQuizResult], a
+.done
+	call LoadScreenTilesFromBuffer2
+	call Delay3
+	ret
+
 ; Player wants to flee a wild battle: ask a grade-scaled question.
 ; Returns carry set = answered correctly (allow the escape attempt),
 ; carry clear = wrong (caller makes the escape fail and spends the turn).

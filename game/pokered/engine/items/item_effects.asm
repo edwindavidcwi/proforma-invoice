@@ -182,6 +182,17 @@ ItemUseBall:
 ; Ultra/Safari Ball: [0, 150]
 ; Loop until an acceptable number is found.
 
+; Educational build: catching a wild Pokemon requires a streak of correct
+; answers (3 for grades 1-2, 5 for grades 3-5). A miss lets it escape.
+	callfar QuizCapture            ; sets wQuizResult: 1 = caught, 0 = escaped
+	ld a, [wQuizResult]
+	and a
+	jp nz, .captured               ; streak achieved -> guaranteed catch (wPokeBallAnimData stays $43)
+	ld a, 1                        ; missed -> the wild Pokemon escapes, battle ends
+	ld [wEscapedFromBattle], a
+	ld [wActionResultOrTookBattleTurn], a
+	ret
+
 .loop
 	call Random
 	ld b, a

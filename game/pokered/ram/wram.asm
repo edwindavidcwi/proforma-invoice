@@ -2283,6 +2283,8 @@ wQuizStreak::       db  ; how many questions answered right in a row (resets on 
 ; Questions live in their own ROM bank(s); the chosen one is copied into RAM (the
 ; large entry+strings buffers overlay the idle PC box, see "Current Box Data").
 wQuizDataBank::     db  ; ROM bank holding the chosen question's data
+wQuizCapNeed::      db  ; capture challenge: correct answers needed in a row (3 or 5)
+wQuizCapCount::     db  ; capture challenge: current correct-in-a-row count
 
 
 SECTION "Stack", WRAM0
