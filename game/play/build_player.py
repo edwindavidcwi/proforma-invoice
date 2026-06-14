@@ -699,22 +699,25 @@ PAUSE_JS = r"""
 """
 
 
-# Sound on/off switch. Toggles the emulator volume (vm.volume) and resumes the
-# audio context. Default on; choice persisted.
+# Sound on/off switch. The game's own audio is kept muted (it would speed up
+# during fast-forward); instead the Sound button toggles the independent,
+# constant-tempo background music (see MUSIC_JS). "Replace all audio" mode.
 SOUND_JS = r"""
 (function () {
   var btn = document.getElementById('btnSound');
   if (!btn) return;
   var on = true;
   try { if (localStorage.getItem('pq_sound') === '0') on = false; } catch (e) {}
-  // Sound behaves the same at every speed -- it just follows the Sound toggle.
+  window.__soundOn = on;
   window.__applyVolume = function () {
-    if (window.__vm) window.__vm.volume = on ? 0.5 : 0;
-    if (on && window.__resumeAudio) window.__resumeAudio();
+    if (window.__vm) window.__vm.volume = 0;            // game audio replaced by our track
+    if (on) { if (window.__musicStart) window.__musicStart(); }
+    else    { if (window.__musicStop)  window.__musicStop();  }
   };
   function apply() {
+    window.__soundOn = on;
     window.__applyVolume();
-    btn.textContent = on ? '🔊 Sound: On' : '🔈 Sound: Off';
+    btn.textContent = on ? '🔊 Music: On' : '🔈 Music: Off';
     btn.classList.toggle('on', on);
     try { localStorage.setItem('pq_sound', on ? '1' : '0'); } catch (e) {}
   }
@@ -723,6 +726,64 @@ SOUND_JS = r"""
   var tries = 0, t = setInterval(function () {
     if (window.__vm || tries++ > 60) { apply(); if (window.__vm) clearInterval(t); }
   }, 100);
+})();
+"""
+
+
+# Original, royalty-free 8-bit background music that ALWAYS plays at normal tempo,
+# independent of the emulator's speed (the game's own audio is muted). A tiny
+# Web Audio sequencer loops a cheerful original tune written for this app.
+MUSIC_JS = r"""
+(function () {
+  var AC = window.AudioContext || window.webkitAudioContext;
+  if (!AC) return;
+  var ctx = null, master = null, playing = false, timer = null, step = 0, nextTime = 0;
+  var TEMPO = 120, spb = 60 / TEMPO / 2;              // seconds per 8th-note step
+  // Original loop in C major (I-V-vi-IV). 0 = rest. Melody (square) + bass (triangle).
+  var MEL = [72,0,76,0,79,0,76,0, 74,0,79,0,74,0,0,0,
+             69,0,72,0,76,0,72,0, 65,0,69,0,72,0,0,0,
+             72,0,76,0,79,0,83,0, 81,0,79,0,76,0,74,0,
+             72,0,71,0,74,0,71,0, 72,0,0,0, 0,0,0,0];
+  var BASS = [48,0,0,0,0,0,0,0, 43,0,0,0,0,0,0,0,
+              45,0,0,0,0,0,0,0, 41,0,0,0,0,0,0,0,
+              48,0,0,0,0,0,0,0, 43,0,0,0,0,0,0,0,
+              45,0,0,0,0,0,0,0, 43,0,0,0,0,0,0,0];
+  function midi(n){ return 440 * Math.pow(2, (n - 69) / 12); }
+  function blip(freq, t, dur, type, vol){
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = type; o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.012);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(master);
+    o.start(t); o.stop(t + dur + 0.03);
+  }
+  function schedule(){
+    while (nextTime < ctx.currentTime + 0.3) {
+      var i = step % MEL.length;
+      if (MEL[i])  blip(midi(MEL[i]),  nextTime, spb * 0.95, 'square',   0.16);
+      if (BASS[i]) blip(midi(BASS[i]), nextTime, spb * 3.6,  'triangle', 0.22);
+      nextTime += spb; step++;
+    }
+  }
+  window.__musicStart = function () {
+    if (!ctx) { ctx = new AC(); master = ctx.createGain(); master.connect(ctx.destination); }
+    if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
+    master.gain.value = 0.5;
+    if (playing) return;
+    playing = true; nextTime = ctx.currentTime + 0.1;
+    timer = setInterval(schedule, 60);
+  };
+  window.__musicStop = function () {
+    playing = false;
+    if (timer) { clearInterval(timer); timer = null; }
+    if (master) master.gain.value = 0;
+  };
+  // Browsers block audio until a user gesture; start on the first tap/key if on.
+  function kick(){ if (window.__soundOn !== false) window.__musicStart(); }
+  ['pointerdown', 'keydown', 'touchend'].forEach(function (ev) {
+    window.addEventListener(ev, kick);
+  });
 })();
 """
 
@@ -910,6 +971,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -925,6 +987,7 @@ def main():
         SPEED_JS,
         PWA_JS,
         TTS_JS,
+        MUSIC_JS,
         SOUND_JS,
         PAUSE_JS,
         MENU_JS,
