@@ -624,7 +624,8 @@ TTS_JS = r"""
   // unfinished tail for when the next page reveals the rest. This keeps natural
   // sentence flow instead of reading each line as if it were its own sentence.
   function flushSentences(force) {
-    var re = /[\s\S]*?[.!?]+/g, m, idx = 0;
+    // Sentence end = . ! ? NOT inside a number (so "4.7?" / "1.0?" stay whole).
+    var re = /[\s\S]*?[.!?]+(?=\s|$|["')\]])/g, m, idx = 0;
     while ((m = re.exec(buffer)) !== null) {
       var s = m[0].trim();
       if (s) speak(s);
