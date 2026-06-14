@@ -1,27 +1,17 @@
 ViridianForestWildMons:
-	def_grass_wildmons 8 ; encounter rate
-IF DEF(_RED)
-	db  4, WEEDLE
-	db  5, KAKUNA
-	db  3, WEEDLE
-	db  5, WEEDLE
-	db  4, KAKUNA
-	db  6, KAKUNA
-	db  4, METAPOD
-	db  3, CATERPIE
-ENDC
-IF DEF(_BLUE)
-	db  4, CATERPIE
-	db  5, METAPOD
-	db  3, CATERPIE
-	db  5, CATERPIE
-	db  4, METAPOD
-	db  6, METAPOD
-	db  4, KAKUNA
-	db  3, WEEDLE
-ENDC
-	db  3, PIKACHU
+; "Starter Forest" -- all three starters plus fan favourites, at low levels so
+; they're catchable early. (Custom for the educational build.)
+	def_grass_wildmons 25 ; encounter rate
 	db  5, PIKACHU
+	db  5, EEVEE
+	db  5, BULBASAUR
+	db  5, CHARMANDER
+	db  5, SQUIRTLE
+	db  6, GROWLITHE
+	db  6, VULPIX
+	db  6, DRATINI
+	db  4, PIDGEY
+	db  3, RATTATA
 	end_grass_wildmons
 
 	def_water_wildmons 0 ; encounter rate
