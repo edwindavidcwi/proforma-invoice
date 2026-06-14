@@ -80,7 +80,8 @@ jobs:
           path: out/
           if-no-files-found: error
 
-  # 2. Wrap that same offline HTML in an Electron app and build a Windows installer.
+  # 2. Wrap that same offline HTML in an Electron app and build a portable Windows
+  #    .exe (no installer -- double-click the downloaded file and the game opens).
   windows:
     needs: android
     runs-on: windows-latest
@@ -104,22 +105,22 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Build the Windows installer (Electron + electron-builder)
+      - name: Build the portable Windows app (Electron + electron-builder)
         working-directory: game/windows-app
         run: |
           npm install
           npm run dist
 
-      - name: Collect the installer under a friendly name
+      - name: Collect the portable exe under a friendly name
         shell: bash
         run: |
           mkdir -p win-out
-          cp game/windows-app/dist/*Setup*.exe "win-out/PokemonQuiz-Windows-Setup.exe"
+          cp game/windows-app/dist/PokemonQuiz-Windows.exe "win-out/PokemonQuiz-Windows.exe"
 
-      - name: Upload the Windows installer (artifact)
+      - name: Upload the Windows app (artifact)
         uses: actions/upload-artifact@v4
         with:
-          name: windows-installer
+          name: windows-app
           path: win-out/
           if-no-files-found: error
 
@@ -138,10 +139,10 @@ jobs:
           name: android-and-html
           path: dl
 
-      - name: Download the Windows installer artifact
+      - name: Download the Windows app artifact
         uses: actions/download-artifact@v4
         with:
-          name: windows-installer
+          name: windows-app
           path: dl
 
       - name: Publish/refresh the release with both apps
@@ -151,7 +152,7 @@ jobs:
           gh release delete pokemon-quiz-app --yes --cleanup-tag 2>/dev/null || true
           gh release create pokemon-quiz-app \
             dl/PokemonQuiz.apk \
-            dl/PokemonQuiz-Windows-Setup.exe \
+            dl/PokemonQuiz-Windows.exe \
             --title "Pokemon Quiz - Android & Windows apps" \
-            --notes $'Installable, offline Pokemon Quiz game.\n\n- **Android:** download **PokemonQuiz.apk**, open it on your phone, allow installing from this source.\n- **Windows:** download **PokemonQuiz-Windows-Setup.exe** and run it (if SmartScreen warns, click *More info -> Run anyway* - it is unsigned).' \
+            --notes $'Offline Pokemon Quiz game -- nothing to install.\n\n- **Windows:** download **PokemonQuiz-Windows.exe** and just double-click it. No installer, no admin -- the game opens straight away. (First launch may take a few seconds to unpack; if SmartScreen warns, click *More info -> Run anyway* - it is unsigned.)\n- **Android:** download **PokemonQuiz.apk**, open it on your phone, allow installing from this source.' \
             --target "$GITHUB_SHA"

@@ -26,16 +26,11 @@
     },
     "win": {
       "target": [
-        "nsis"
+        "portable"
       ]
     },
-    "nsis": {
-      "oneClick": false,
-      "perMachine": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "Pokemon Quiz"
+    "portable": {
+      "artifactName": "PokemonQuiz-Windows.exe"
     }
   }
 }
