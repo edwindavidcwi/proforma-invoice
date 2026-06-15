@@ -746,10 +746,12 @@ MUSIC_JS = r"""
   // ---- the hidden, audio-only Game Boy ----
   var mod = null, e2 = null, audioPtr = null, booting = false, ready = false;
   var running = false, raf = 0, lastSec = 0, startSec = 0;
-  var curId = 0, curBank = 0, poller = null, lastStreak = null;
+  var curId = 0, curBank = 0, poller = null, lastStreak = null, stubSet = false;
   var TPF = 70224, CPU = 4194304, FRAMES = 4096, LAT = 0.1;
   var EV_AUDIO = 2, EV_TICKS = 4;
   var STUB = 0xc6e8, PLAYMUSIC = 0x23a1, MUS_LO = 0xba, MUS_HI = 0xfc;
+  // RAM mailbox the stub polls (in the same V-blank-safe wOverworldMap scratch).
+  var FLAG = 0xc700, IDV = 0xc701, BANKV = 0xc702;
 
   function b64bytes(b64) {
     var s = atob(b64), a = new Uint8Array(s.length);
@@ -775,19 +777,44 @@ MUSIC_JS = r"""
         audioPtr = m._get_audio_buffer_ptr(e2);
         var tgt = m._emulator_get_ticks_f64(e2) + 400 * TPF;   // run to title (discard this audio)
         while (true) { if (m._emulator_run_until_f64(e2, tgt) & EV_TICKS) break; }
+        setupStub();                                           // hand control to the polling stub (one set_PC)
         ready = true; booting = false;
         if (running) { lastSec = performance.now() / 1000; startSec = 0; pump(); }
       } catch (e) { booting = false; }
     }).catch(function () { booting = false; });
   }
 
-  // Make the hidden instance play song `id` from audio bank `bank`.
+  // Install a tiny loop in RAM that watches FLAG and, when set, calls PlayMusic
+  // with the requested id/bank -- then changing songs is just a memory write at a
+  // safe point. We do set_PC exactly ONCE (here); forcing the PC on every change
+  // can land mid-interrupt and corrupt the stack, which silenced the audio after
+  // a few switches.
+  function setupStub() {
+    if (stubSet) return;
+    // loop: if(FLAG){ FLAG=0; c=[BANKV]; a=[IDV]; call PlayMusic; } repeat
+    var code = [0xfa, FLAG & 0xff, (FLAG >> 8) & 0xff,   // ld a,[FLAG]
+                0xa7,                                    // and a
+                0x28, 0xfa,                              // jr z,-6  (back to top)
+                0xaf,                                    // xor a
+                0xea, FLAG & 0xff, (FLAG >> 8) & 0xff,   // ld [FLAG],a  (clear)
+                0xfa, BANKV & 0xff, (BANKV >> 8) & 0xff, // ld a,[BANKV]
+                0x4f,                                    // ld c,a
+                0xfa, IDV & 0xff, (IDV >> 8) & 0xff,     // ld a,[IDV]
+                0xcd, PLAYMUSIC & 0xff, (PLAYMUSIC >> 8) & 0xff, // call PlayMusic
+                0x18, 0xea];                             // jr -22  (back to top)
+    for (var i = 0; i < code.length; i++) mod._emulator_write_mem(e2, STUB + i, code[i]);
+    mod._emulator_write_mem(e2, FLAG, 0);
+    mod._emulator_set_PC(e2, STUB);
+    stubSet = true;
+  }
+
+  // Ask the hidden instance to play song `id` from audio bank `bank` -- just fill
+  // the mailbox; the stub picks it up. No forced PC change.
   function inject(id, bank) {
     if (!ready) return;
-    var stub = [0x3e, id & 0xff, 0x0e, bank & 0xff,
-                0xcd, PLAYMUSIC & 0xff, (PLAYMUSIC >> 8) & 0xff, 0x18, 0xfe];
-    for (var i = 0; i < stub.length; i++) mod._emulator_write_mem(e2, STUB + i, stub[i]);
-    mod._emulator_set_PC(e2, STUB);
+    mod._emulator_write_mem(e2, IDV, id & 0xff);
+    mod._emulator_write_mem(e2, BANKV, bank & 0xff);
+    mod._emulator_write_mem(e2, FLAG, 1);
     curId = id; curBank = bank;
   }
 
