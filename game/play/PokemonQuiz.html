@@ -1668,7 +1668,7 @@ class Rewind {
 (function () {
   var AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return;
-  var ctx = null, master = null, musicGain = null, trackGain = null, sfxGain = null, NOISE = null;
+  var ctx = null, master = null, musicGain = null, trackGain = null, sfxGain = null, NOISE = null, lofiLPF = null, crackleSrc = null;
   var playing = false, timer = null, poller = null, step = 0, nextTime = 0, lastRoot = 0;
   var cur = 'town', pending = null, jingleUntil = 0, lastInBattle = 0, lastStreak = null;
 
@@ -1731,6 +1731,7 @@ class Rewind {
     drive: ['k', 'h', 's', 'h', 'k', 'h', 's', 'o']
   };
   var MAJ = [0, 4, 7, 12], MIN = [0, 3, 7, 12];
+  var MAJ7 = [0, 4, 7, 11], MIN7 = [0, 3, 7, 10];   // jazzy lofi 7th chords
   var VICTORY = [[72,0.18],[76,0.18],[79,0.18],[84,0.5],[0,0.1],[79,0.22],[84,0.75]];
 
   function midi(n) { return 440 * Math.pow(2, (n - 69) / 12); }
@@ -1746,21 +1747,21 @@ class Rewind {
     o.start(t); o.stop(t + dur + 0.03);
   }
   function drum(kind, t) {
-    if (kind === 'k') {                                   // kick: pitch-drop sine
+    if (kind === 'k') {                                   // soft lofi kick: low pitch-drop sine
       var o = ctx.createOscillator(), g = ctx.createGain();
       o.type = 'sine';
-      o.frequency.setValueAtTime(150, t);
-      o.frequency.exponentialRampToValueAtTime(48, t + 0.11);
-      g.gain.setValueAtTime(0.45, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
-      o.connect(g); g.connect(trackGain); o.start(t); o.stop(t + 0.2);
+      o.frequency.setValueAtTime(120, t);
+      o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
+      g.gain.setValueAtTime(0.32, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
+      o.connect(g); g.connect(trackGain); o.start(t); o.stop(t + 0.22);
       return;
     }
-    var src = ctx.createBufferSource(); src.buffer = NOISE;       // snare / hats: noise
+    var src = ctx.createBufferSource(); src.buffer = NOISE;       // snare / hats: gentle noise
     var f = ctx.createBiquadFilter(), g2 = ctx.createGain(), dur, vol;
-    if (kind === 's')      { f.type = 'bandpass'; f.frequency.value = 1800; dur = 0.16; vol = 0.22; }
-    else if (kind === 'o') { f.type = 'highpass'; f.frequency.value = 6000; dur = 0.12; vol = 0.11; }
-    else                   { f.type = 'highpass'; f.frequency.value = 7500; dur = 0.035; vol = 0.11; }
+    if (kind === 's')      { f.type = 'bandpass'; f.frequency.value = 1300; dur = 0.18; vol = 0.13; }  // soft, dusty snare
+    else if (kind === 'o') { f.type = 'highpass'; f.frequency.value = 5000; dur = 0.14; vol = 0.06; }
+    else                   { f.type = 'highpass'; f.frequency.value = 6500; dur = 0.04; vol = 0.06; }  // quiet hat
     g2.gain.setValueAtTime(vol, t);
     g2.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     src.connect(f); f.connect(g2); g2.connect(trackGain);
@@ -1769,16 +1770,23 @@ class Rewind {
 
   function schedule() {
     var tr = TRACKS[cur] || TRACKS.town;
-    var spb = 60 / tr.tempo / 2, len = tr.mel.length, dp = DRUMS[tr.drums];
+    var spb = 60 / (tr.tempo * 0.78) / 2, len = tr.mel.length, dp = DRUMS[tr.drums]; // 0.78 = relaxed lofi tempo
+    var seventh = tr.minor ? MIN7 : MAJ7;
     while (nextTime < ctx.currentTime + 0.25) {
       var i = step % len;
-      if (tr.mel[i])  tone(trackGain, midi(tr.mel[i]), nextTime, spb * 0.9, pulse(tr.duty || 0.5), tr.melVol || 0.16);
-      if (tr.bass[i]) { lastRoot = tr.bass[i]; tone(trackGain, midi(tr.bass[i]), nextTime, spb * 1.8, 'triangle', tr.bassVol || 0.2); }
-      if (lastRoot) {                                     // arpeggio shimmer (a third pulse voice)
-        var off = (tr.minor ? MIN : MAJ)[step % 4];
-        tone(trackGain, midi(lastRoot + 12 + off), nextTime, spb * 0.45, pulse(0.125), tr.arpVol || 0.05);
+      // melody: mellow triangle with a soft envelope (no bright pulse)
+      if (tr.mel[i]) lpad(midi(tr.mel[i]), nextTime, spb * 1.5, 'triangle', (tr.melVol || 0.16) * 0.85);
+      // bass: smooth, round sine sub
+      if (tr.bass[i]) { lastRoot = tr.bass[i]; lpad(midi(tr.bass[i]), nextTime, spb * 2.4, 'sine', (tr.bassVol || 0.2) * 1.1); }
+      // warm jazzy 7th-chord pad once per beat
+      if (lastRoot && (step % 4) === 0) {
+        for (var c = 0; c < seventh.length; c++)
+          lpad(midi(lastRoot + 12 + seventh[c]), nextTime, spb * 3.8, 'sine', 0.04);
       }
-      if (dp) { var d = dp[step % dp.length]; if (d !== '.') drum(d, nextTime); }
+      if (dp) {
+        var swing = (step % 2) ? spb * 0.14 : 0;          // lay the off-beats back a touch
+        var d = dp[step % dp.length]; if (d !== '.') drum(d, nextTime + swing);
+      }
       nextTime += spb; step++;
     }
   }
@@ -1876,9 +1884,35 @@ class Rewind {
     ctx = new AC();
     master = ctx.createGain(); master.gain.value = (window.__soundOn === false ? 0 : 0.5); master.connect(ctx.destination);
     musicGain = ctx.createGain(); musicGain.connect(master);
-    trackGain = ctx.createGain(); trackGain.gain.value = 1; trackGain.connect(musicGain);
+    // lofi warmth: roll the highs off the whole music loop (kept off SFX/victory so they stay crisp)
+    lofiLPF = ctx.createBiquadFilter(); lofiLPF.type = 'lowpass'; lofiLPF.frequency.value = 2600; lofiLPF.Q.value = 0.5;
+    lofiLPF.connect(musicGain);
+    trackGain = ctx.createGain(); trackGain.gain.value = 1; trackGain.connect(lofiLPF);
     sfxGain = ctx.createGain(); sfxGain.gain.value = 0.85; sfxGain.connect(master);
     NOISE = makeNoise();
+  }
+  // Continuous vinyl-crackle bed: a quiet hiss with occasional pops, looped.
+  function startCrackle() {
+    if (crackleSrc || !ctx) return;
+    var len = Math.floor(ctx.sampleRate * 2), buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
+    for (var i = 0; i < len; i++) { var v = Math.random() * 2 - 1; d[i] = (Math.random() < 0.012) ? v : v * 0.1; }
+    crackleSrc = ctx.createBufferSource(); crackleSrc.buffer = buf; crackleSrc.loop = true;
+    var hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1400;
+    var cg = ctx.createGain(); cg.gain.value = 0.05;
+    crackleSrc.connect(hp); hp.connect(cg); cg.connect(master);
+    crackleSrc.start();
+  }
+  function stopCrackle() { if (crackleSrc) { try { crackleSrc.stop(); } catch (e) {} crackleSrc = null; } }
+  // Soft, sustained lofi voice: gentle attack, slight analog drift, smooth release.
+  function lpad(freq, t, dur, wave, vol) {
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.type = wave; o.frequency.value = freq; o.detune.value = Math.random() * 8 - 4;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.03);
+    g.gain.setValueAtTime(vol, t + dur * 0.5);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(trackGain);
+    o.start(t); o.stop(t + dur + 0.05);
   }
   function sfx(name) {
     if (window.__soundOn === false) return;
@@ -1915,6 +1949,7 @@ class Rewind {
     master.gain.value = 0.5;
     if (playing) return;
     playing = true; step = 0; lastRoot = 0; nextTime = ctx.currentTime + 0.1;
+    startCrackle();
     timer = setInterval(schedule, 60);
     if (!poller) poller = setInterval(poll, 200);
   };
@@ -1922,6 +1957,7 @@ class Rewind {
     playing = false;
     if (timer) { clearInterval(timer); timer = null; }
     if (poller) { clearInterval(poller); poller = null; }
+    stopCrackle();
     if (master) master.gain.value = 0;
   };
 
