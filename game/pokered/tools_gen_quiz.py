@@ -185,7 +185,7 @@ def science(g):
     facts = {
         1:[("Cow says?","moo",["baa","woof"]),("Dog says?","woof",["moo","oink"]),
            ("Cat says?","meow",["moo","baa"]),("We breathe?","air",["sand","mud"]),
-           ("Fish live in?","water",["sand","air"]),("Bird can?","fly",["swim","dig"]),
+           ("Fish live in?","water",["sand","air"]),("Birds can?","fly",["swim","dig"]),
            ("Legs on a dog?","4",["2","6"]),("Sun gives?","light",["rain","snow"])],
         2:[("Bees make?","honey",["milk","web"]),("Spider legs?","8",["6","4"]),
            ("Birds lay?","eggs",["milk","cubs"]),("Cows give?","milk",["eggs","honey"]),
@@ -195,16 +195,16 @@ def science(g):
            ("Insect legs?","6",["8","4"]),("Frog baby?","tadpole",["chick","cub"]),
            ("Blood is?","red",["blue","green"]),("Trees give?","oxygen",["smoke","sand"]),
            ("Bee home?","hive",["nest","den"]),("Bird home?","nest",["hive","web"])],
-        4:[("Planet we live?","Earth",["Mars","Sun"]),("Star at center?","Sun",["Moon","Mars"]),
+        4:[("Planet we live on?","Earth",["Mars","Sun"]),("Star at center?","Sun",["Moon","Mars"]),
            ("We see with?","eyes",["ears","nose"]),("Heart pumps?","blood",["air","water"]),
            ("Water formula?","H2O",["CO2","O2"]),("Closest star?","Sun",["Mars","Moon"]),
            ("Bones make a?","body",["car","tree"]),("Fish breathe with?","gills",["lungs","skin"]),
            ("We hear with?","ears",["eyes","nose"]),("We smell with?","nose",["ears","eyes"]),
            ("Ice melts to?","water",["steam","gas"]),("Sun sets in?","west",["east","north"]),
-           ("Largest organ?","skin",["heart","lung"]),("Earth spins in?","day",["week","year"])],
+           ("Largest organ?","skin",["heart","lung"]),("Earth turns in a?","day",["week","year"])],
         5:[("Largest planet?","Jupiter",["Mars","Earth"]),("Red planet?","Mars",["Earth","Sun"]),
            ("Sun is a?","star",["moon","planet"]),("Lungs are for?","air",["food","blood"]),
-           ("Moon orbits?","Earth",["Sun","Mars"]),("Fastest is?","light",["sound","wind"]),
+           ("Moon orbits?","Earth",["Sun","Mars"]),("Fastest thing?","light",["sound","wind"]),
            ("Ice is frozen?","water",["milk","air"]),("Bee wings?","4",["2","6"]),
            ("Planets in system?","8",["9","7"]),("Plants give off?","oxygen",["smoke","ash"]),
            ("We breathe out?","CO2",["O2","H2O"]),("Hottest planet?","Venus",["Mars","Sun"]),
@@ -220,10 +220,10 @@ def gk(g):
            ("Colors in rainbow?",7,"Seven"),("Eyes on a face?",2,"Two eyes"),
            ("Legs on a person?",2,"Two legs"),("Wheels on a car?",4,"Four"),
            ("Thumbs on hands?",2,"One each")],
-        2:[("Months in a year?",12,"Twelve"),("Days in weekend?",2,"Sat Sun"),
+        2:[("Months in a year?",12,"Twelve"),("Days in a weekend?",2,"Sat Sun"),
            ("Hours in a day?",24,"Twenty four"),("Days in a week?",7,"Seven"),
            ("Half of a dozen?",6,"Dozen is 12"),("Legs on 2 cats?",8,"4 and 4")],
-        3:[("Seasons in year?",4,"Four"),("Minutes in hour?",60,"Sixty"),
+        3:[("Seasons in a year?",4,"Four"),("Minutes in hour?",60,"Sixty"),
            ("Days in Sept?",30,"Thirty"),("Weeks in a year?",52,"Fifty two"),
            ("Months in year?",12,"Twelve"),("Hours half day?",12,"Twelve")],
         4:[("Days in a year?",365,"365"),("Seconds in min?",60,"Sixty"),
@@ -265,10 +265,10 @@ def shapes(g):
     for t in COLORS[:cwin]:
         out.append(mk(t[0], t[1], t[2], "Mix colors"))
     extra = {
-        4:[("Cube has faces?",6,"Six"),("Right angle deg?",90,"Ninety"),
-           ("Corners of square?",4,"Four"),("Corners triangle?",3,"Three"),
+        4:[("Faces on a cube?",6,"Six"),("Right angle deg?",90,"Ninety"),
+           ("Square corners?",4,"Four"),("Triangle corners?",3,"Three"),
            ("Faces of a box?",6,"A cube")],
-        5:[("Circle degrees?",360,"Full turn"),("Cube has edges?",12,"Twelve"),
+        5:[("Circle degrees?",360,"Full turn"),("Edges on a cube?",12,"Twelve"),
            ("Triangle angles?",3,"Three"),("Corners of a cube?",8,"Eight"),
            ("Straight angle?",180,"Half turn"),("Right angle?",90,"A corner")],
     }.get(g, [])
@@ -373,33 +373,35 @@ def emit():
     w("; NOTE: a literal-text segment must end with '@' BEFORE a text_ram command,")
     w("; otherwise the text engine runs past it and never prints the RAM string.")
     w("QuizCorrectText::")
-    w('\ttext "Great job!"')
+    w('\ttext "CORRECT ANSWER!"')
     w('\tline "Streak @"')
     w("\ttext_ram wStringBuffer")
     w('\ttext "<PROMPT>"')
     w("")
     w("; shown when the streak crosses a power milestone (x1.5 at 4, x2.0 at 8)")
     w("QuizPowerUpText::")
-    w('\ttext "POWER UP!"')
+    w('\ttext "CORRECT! POWER UP"')
     w('\tline "Streak @"')
     w("\ttext_ram wStringBuffer")
     w('\ttext "<PROMPT>"')
     w("")
     w("QuizMaxPowerText::")
-    w('\ttext "MAX POWER!"')
+    w('\ttext "CORRECT MAX POWER"')
     w('\tline "Streak @"')
     w("\ttext_ram wStringBuffer")
     w('\ttext "<PROMPT>"')
     w("")
+    w("; first wrong try: say it's wrong, then teach via the hint and re-ask")
     w("QuizTryAgainText::")
-    w('\ttext "Hint:"')
+    w('\ttext "WRONG ANSWER!"')
     w('\tline "@"')
     w("\ttext_ram wStringBuffer")
     w('\ttext "<PROMPT>"')
     w("")
+    w("; final wrong: say it's wrong, then reveal the answer so it still teaches")
     w("QuizMissText::")
-    w('\ttext "The answer was"')
-    w('\tline "@"')
+    w('\ttext "WRONG ANSWER!"')
+    w('\tline "It is @"')
     w("\ttext_ram wStringBuffer")
     w('\ttext "<PROMPT>"')
     w("")
