@@ -26,10 +26,51 @@ QuizPlayerAttack::
 	jr nc, .miss
 	xor a                          ; correct -> wMoveMissed = 0 (hit)
 	ld [wMoveMissed], a
+	call QuizStreakDamageBonus     ; the longer the first-try streak, the harder the hit
 	ret
 .miss
 	ld a, $01                      ; wrong -> wMoveMissed = 1 (miss)
 	ld [wMoveMissed], a
+	ret
+
+; Reward a mastery streak with extra attack power. Called only on a correct
+; answer (the move lands), with wDamage already calculated by the battle engine.
+; New damage = damage * (8 + min(streak,8)) / 8  -> up to 2x at an 8+ streak.
+QuizStreakDamageBonus:
+	ld a, [wQuizStreak]
+	and a
+	ret z                          ; no streak -> normal damage
+	cp 9
+	jr c, .haveMul
+	ld a, 8                        ; cap the bonus (max +8/8 = double damage)
+.haveMul
+	add 8                          ; multiplier = 8 + min(streak,8)  (9..16)
+	ldh [hMultiplier], a
+	xor a
+	ldh [hMultiplicand], a
+	ld a, [wDamage]                ; damage high byte (wDamage is big-endian)
+	ldh [hMultiplicand + 1], a
+	ld a, [wDamage + 1]            ; damage low byte
+	ldh [hMultiplicand + 2], a
+	call Multiply                  ; hProduct = damage * multiplier
+	ld a, 8
+	ldh [hDivisor], a
+	ld b, 4
+	call Divide                    ; hQuotient = product / 8
+	ldh a, [hQuotient]             ; bytes 0-1 must be 0, else result > 0xFFFF
+	ld b, a
+	ldh a, [hQuotient + 1]
+	or b
+	jr nz, .clamp
+	ldh a, [hQuotient + 2]
+	ld [wDamage], a                ; boosted damage high
+	ldh a, [hQuotient + 3]
+	ld [wDamage + 1], a            ; boosted damage low
+	ret
+.clamp
+	ld a, $ff                      ; clamp to 0xFFFF (HP-capped downstream)
+	ld [wDamage], a
+	ld [wDamage + 1], a
 	ret
 
 ; Enemy is attacking: optionally ask a grade-scaled question to defend.
