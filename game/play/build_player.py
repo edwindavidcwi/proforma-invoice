@@ -725,88 +725,117 @@ SOUND_JS = r"""
 """
 
 
-# Plays the game's OWN music as an INDEPENDENT track. The real Pokemon Red
-# soundtrack was captured straight from the ROM at build time (render_music.js ->
-# window.__MUSIC_DATA: gzipped 8-bit mono loops) and is played back here through
-# Web Audio. Because it's a fixed-rate buffer loop -- NOT the emulator's audio --
-# it always plays at normal speed, even when the game is fast-forwarded. A poller
-# reads the live game state from emulator RAM and crossfades between the eight
-# context loops (town / route / cave / centre / wild / trainer / boss / rival),
-# with a one-shot victory jingle on a win. The game's own (emulated) audio stays
-# muted (SOUND_JS) so it can never speed up. A small SFX bus adds correct/wrong
-# answer feedback and UI blips; no new background music is synthesized.
+# Background music = the game's OWN soundtrack, played by a SECOND, hidden Game
+# Boy. The visible emulator can run fast (2x / fast-forward) with its audio muted;
+# this second binjgb instance (same inlined ROM + WASM, so ~0 extra download) runs
+# locked at normal 1x speed and its audio IS heard. A poller reads which song the
+# visible game is playing (wChannelSoundIDs music id 0xBA-0xFC + wAudioROMBank) and
+# tells the hidden instance to play that exact song -- by writing a tiny
+# `ld a,id; ld c,bank; call PlayMusic; jr -2` stub into a V-blank-safe RAM scratch
+# (wOverworldMap, 0xc6e8) and pointing its CPU there; the V-blank interrupt then
+# advances + loops the song the ROM's own way (full length, seamless). So the real
+# music plays correctly EVERYWHERE (title, intro, every town, every battle) and
+# never speeds up. A tiny SFX bus adds correct/wrong answer + UI feedback.
+# (pickTrack/readState are kept only for the headless context test.)
 MUSIC_JS = r"""
 (function () {
   var AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return;
-  var ctx = null, master = null, musicGain = null, sfxGain = null, NOISE = null;
-  var DATA = window.__MUSIC_DATA || null;       // captured loops (absent in the headless test)
-  var buffers = {};                             // name -> decoded AudioBuffer
-  var decoded = false, decoding = false;
-  var playing = false, poller = null, voice = null;
-  var cur = 'town', jingleUntil = 0, lastInBattle = 0, lastStreak = null;
+  var ctx = null, master = null, musicGain = null, sfxGain = null;
 
-  // ---- decode the captured loops (gzip -> 8-bit PCM -> AudioBuffer) ----
-  function decodeAll(done) {
-    if (decoded) { done && done(); return; }
-    if (!DATA || !ctx || typeof DecompressionStream === 'undefined') { done && done(); return; }
-    if (decoding) return;
-    decoding = true;
-    var names = Object.keys(DATA.tracks), left = names.length;
-    if (!left) { decoded = true; decoding = false; done && done(); return; }
-    names.forEach(function (nm) {
-      var t = DATA.tracks[nm];
-      var bin = atob(t.b64), raw = new Uint8Array(bin.length);
-      for (var i = 0; i < bin.length; i++) raw[i] = bin.charCodeAt(i);
-      var stream = new Blob([raw]).stream().pipeThrough(new DecompressionStream('gzip'));
-      new Response(stream).arrayBuffer().then(function (ab) {
-        var u8 = new Uint8Array(ab);
-        var buf = ctx.createBuffer(1, u8.length, DATA.rate);
-        var ch = buf.getChannelData(0);
-        for (var j = 0; j < u8.length; j++) ch[j] = (u8[j] - 128) / 128;
-        buffers[nm] = buf;
-        if (--left === 0) { decoded = true; decoding = false; done && done(); }
-      }).catch(function () { if (--left === 0) { decoded = true; decoding = false; done && done(); } });
-    });
+  // ---- the hidden, audio-only Game Boy ----
+  var mod = null, e2 = null, audioPtr = null, booting = false, ready = false;
+  var running = false, raf = 0, lastSec = 0, startSec = 0;
+  var curId = 0, curBank = 0, poller = null, lastStreak = null;
+  var TPF = 70224, CPU = 4194304, FRAMES = 4096, LAT = 0.1;
+  var EV_AUDIO = 2, EV_TICKS = 4;
+  var STUB = 0xc6e8, PLAYMUSIC = 0x23a1, MUS_LO = 0xba, MUS_HI = 0xfc;
+
+  function b64bytes(b64) {
+    var s = atob(b64), a = new Uint8Array(s.length);
+    for (var i = 0; i < s.length; i++) a[i] = s.charCodeAt(i);
+    return a;
   }
 
-  // ---- looping playback with crossfades ----
-  function fadeStop(v, fade) {
-    if (!v) return;
-    var t = ctx.currentTime;
-    try {
-      v.g.gain.cancelScheduledValues(t);
-      v.g.gain.setValueAtTime(Math.max(v.g.gain.value, 0.0001), t);
-      v.g.gain.exponentialRampToValueAtTime(0.0001, t + fade);
-    } catch (e) {}
-    try { v.src.stop(t + fade + 0.05); } catch (e) {}
-  }
-  function startVoice(name, fade) {
-    if (!ctx || !buffers[name]) return;
-    var loop = !(DATA.tracks[name] && DATA.tracks[name].loop === false);
-    var g = ctx.createGain(); g.connect(musicGain);
-    var src = ctx.createBufferSource(); src.buffer = buffers[name]; src.loop = loop; src.connect(g);
-    var t = ctx.currentTime; fade = fade || 0.3;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.exponentialRampToValueAtTime(1.0, t + fade);
-    src.start(t);
-    if (voice) fadeStop(voice, fade);
-    voice = { src: src, g: g, name: name };
-  }
-  function setTrack(name) {
-    if (!name || name === cur) return;
-    cur = name;
-    if (playing && decoded) startVoice(name, 0.35);
-  }
-  function playVictory() {
-    if (!playing || !decoded || !buffers.victory) return;
-    startVoice('victory', 0.08);
-    var durMs = (DATA.tracks.victory.frames / DATA.rate) * 1000;
-    jingleUntil = performance.now() + durMs + 200;
-    setTimeout(function () { if (playing) startVoice(cur, 0.4); }, durMs + 60); // resume context music
+  // Boot a second binjgb instance from the same inlined ROM/WASM, run it to the
+  // title screen (so its audio engine + interrupts are live), then it's ready to
+  // be told what to play.
+  function boot() {
+    if (booting || ready) return;
+    if (typeof Binjgb !== 'function' || !window.__WASM_B64__ || !window.__ROM_B64__) return;
+    booting = true;
+    Binjgb({ wasmBinary: b64bytes(window.__WASM_B64__) }).then(function (m) {
+      try {
+        mod = m;
+        var rom = b64bytes(window.__ROM_B64__);
+        var size = (rom.length + 0x7fff) & ~0x7fff;
+        var p = m._malloc(size); m.HEAPU8.fill(0, p, p + size); m.HEAPU8.set(rom, p);
+        e2 = m._emulator_new_simple(p, size, ctx.sampleRate, FRAMES, 2);
+        if (e2 === 0) { booting = false; return; }
+        audioPtr = m._get_audio_buffer_ptr(e2);
+        var tgt = m._emulator_get_ticks_f64(e2) + 400 * TPF;   // run to title (discard this audio)
+        while (true) { if (m._emulator_run_until_f64(e2, tgt) & EV_TICKS) break; }
+        ready = true; booting = false;
+        if (running) { lastSec = performance.now() / 1000; startSec = 0; pump(); }
+      } catch (e) { booting = false; }
+    }).catch(function () { booting = false; });
   }
 
-  // ---- live game state from emulator RAM ----
+  // Make the hidden instance play song `id` from audio bank `bank`.
+  function inject(id, bank) {
+    if (!ready) return;
+    var stub = [0x3e, id & 0xff, 0x0e, bank & 0xff,
+                0xcd, PLAYMUSIC & 0xff, (PLAYMUSIC >> 8) & 0xff, 0x18, 0xfe];
+    for (var i = 0; i < stub.length; i++) mod._emulator_write_mem(e2, STUB + i, stub[i]);
+    mod._emulator_set_PC(e2, STUB);
+    curId = id; curBank = bank;
+  }
+
+  // Read the hidden instance's freshly generated audio and schedule it. At 1x the
+  // generation rate matches real time, so playback stays smooth.
+  function pushAudio() {
+    var now = ctx.currentTime;
+    if (!startSec || startSec < now || startSec > now + 0.5) startSec = now + LAT;
+    var buf = ctx.createBuffer(2, FRAMES, ctx.sampleRate);
+    var c0 = buf.getChannelData(0), c1 = buf.getChannelData(1);
+    for (var i = 0; i < FRAMES; i++) {
+      c0[i] = (mod.HEAPU8[audioPtr + 2 * i] - 128) / 128;        // 8-bit unsigned -> centered float
+      c1[i] = (mod.HEAPU8[audioPtr + 2 * i + 1] - 128) / 128;
+    }
+    var src = ctx.createBufferSource(); src.buffer = buf; src.connect(musicGain); src.start(startSec);
+    startSec += FRAMES / ctx.sampleRate;
+  }
+
+  // Drive the hidden instance in real time (1x), independent of the visible game's
+  // speed, so fast-forward never speeds the music up.
+  function pump() {
+    if (!running || !ready) return;
+    raf = requestAnimationFrame(pump);
+    var now = performance.now() / 1000;
+    var dt = Math.min(Math.max(now - lastSec, 0), 0.25); lastSec = now;
+    var tgt = mod._emulator_get_ticks_f64(e2) + dt * CPU;
+    while (true) {
+      var ev = mod._emulator_run_until_f64(e2, tgt);
+      if (ev & EV_AUDIO) pushAudio();
+      if (ev & EV_TICKS) break;
+    }
+  }
+
+  // ---- follow the visible game's current song ----
+  function syncSong() {
+    var em = window.__emulator;
+    if (!em || !em.module || em.e == null || typeof em.module._emulator_read_mem !== 'function') return;
+    var m = em.module, e = em.e;
+    var bank = m._emulator_read_mem(e, 0xc0ef) & 0xff;          // wAudioROMBank
+    var id = 0;
+    for (var c = 0; c < 4; c++) {                              // wChannelSoundIDs[CHAN1..4]
+      var v = m._emulator_read_mem(e, 0xc026 + c) & 0xff;
+      if (v >= MUS_LO && v <= MUS_HI) { id = v; break; }        // music ids only; ignore SFX/cries
+    }
+    if (ready && id && (id !== curId || bank !== curBank)) inject(id, bank);
+  }
+
+  // ---- live game state from emulator RAM (kept for the headless context test) ----
   function readState() {
     var em = window.__emulator;
     if (!em || !em.module || em.e == null) return null;
@@ -822,7 +851,7 @@ MUSIC_JS = r"""
            c === 0x2c || c === 0x21 || c === 0x2e || c === 0x2f;
   }
   function pickTrack(s) {
-    if (!s) return cur;
+    if (!s) return 'town';
     if (s.inBattle === 1 || s.inBattle === 2) {
       if (s.inBattle === 2 || s.curOpp >= 200) {
         var cls = s.trClass || (s.curOpp >= 200 ? s.curOpp - 200 : 0);
@@ -840,22 +869,19 @@ MUSIC_JS = r"""
     return 'centre';
   }
   function poll() {
-    if (!playing) return;
-    var s = readState();
-    if (!s) return;
-    // Answer feedback: streak rises on a correct answer, resets to 0 on a miss.
-    if (lastStreak === null) lastStreak = s.streak;
-    else if (s.streak > lastStreak) sfx('correct');
-    else if (s.streak === 0 && lastStreak > 0) sfx('wrong');
-    lastStreak = s.streak;
-    // Victory jingle when a battle ends in a win.
-    if ((lastInBattle === 1 || lastInBattle === 2) && s.inBattle === 0 && s.result === 0) playVictory();
-    lastInBattle = s.inBattle;
-    if (performance.now() < jingleUntil) return;   // let the jingle finish
-    setTrack(pickTrack(s));
+    if (!running) return;
+    var em = window.__emulator;
+    if (em && em.module && em.e != null && typeof em.module._emulator_read_mem === 'function') {
+      var st = em.module._emulator_read_mem(em.e, 0xdef0) & 0xff;  // wQuizStreak
+      if (lastStreak === null) lastStreak = st;
+      else if (st > lastStreak) sfx('correct');
+      else if (st === 0 && lastStreak > 0) sfx('wrong');
+      lastStreak = st;
+    }
+    syncSong();
   }
 
-  // ---- SFX bus (independent of the music; tempo doesn't matter) ----
+  // ---- SFX bus (correct/wrong answer + UI blips) ----
   var pulseCache = {};
   function pulse(duty) {
     if (pulseCache[duty]) return pulseCache[duty];
@@ -879,7 +905,7 @@ MUSIC_JS = r"""
     if (ctx) return;
     ctx = new AC();
     master = ctx.createGain(); master.gain.value = (window.__soundOn === false ? 0 : 0.6); master.connect(ctx.destination);
-    musicGain = ctx.createGain(); musicGain.gain.value = 0.85; musicGain.connect(master);
+    musicGain = ctx.createGain(); musicGain.gain.value = 0.9; musicGain.connect(master);
     sfxGain = ctx.createGain(); sfxGain.gain.value = 0.7; sfxGain.connect(master);
   }
   function sfx(name) {
@@ -914,24 +940,23 @@ MUSIC_JS = r"""
     ensure();
     if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
     master.gain.value = (window.__soundOn === false ? 0 : 0.6);
-    if (playing) return;
-    playing = true; lastStreak = null; lastInBattle = 0; jingleUntil = 0;
-    decodeAll(function () { if (playing && !voice) startVoice(cur, 0.5); });
+    if (running) return;
+    running = true; lastStreak = null;
+    if (!ready) boot();
+    else { lastSec = performance.now() / 1000; startSec = 0; pump(); }
     if (!poller) poller = setInterval(poll, 200);
   };
   window.__musicStop = function () {
-    playing = false;
+    running = false;
+    if (raf) { cancelAnimationFrame(raf); raf = 0; }
     if (poller) { clearInterval(poller); poller = null; }
-    if (voice) { fadeStop(voice, 0.2); voice = null; }
     if (master) master.gain.value = 0;
   };
 
   // Inspection hook (also used by the headless music test).
-  window.__music = { pick: pickTrack, read: readState, victory: playVictory,
-                     get track() { return cur; } };
+  window.__music = { pick: pickTrack, read: readState, get track() { return curId; } };
 
-  // Browsers block audio until a user gesture; start/resume the real music on
-  // the first tap or key press if sound is on.
+  // Browsers block audio until a user gesture; start/resume on the first tap/key.
   function kick() {
     if (window.__soundOn === false) return;
     if (window.__musicStart) window.__musicStart();
@@ -1334,7 +1359,6 @@ def main():
     binjgb_js = os.path.join(VENDOR, "binjgb.js")
     binjgb_wasm = os.path.join(VENDOR, "binjgb.wasm")
     player_js = os.path.join(VENDOR, "player.js")
-    music_data_js = os.path.join(VENDOR, "music_data.js")
 
     for p in (binjgb_js, binjgb_wasm, player_js):
         if not os.path.exists(p):
@@ -1349,16 +1373,6 @@ def main():
     emu_js = read_text(binjgb_js)
     wrap_js = read_text(player_js)
     title_esc = html.escape(args.title)
-
-    # The game's own music, captured to loops by render_music.js. Optional: if it
-    # hasn't been generated yet the player still runs (just without background
-    # music), so the build never hard-fails on it.
-    if os.path.exists(music_data_js):
-        music_js_data = read_text(music_data_js)
-    else:
-        music_js_data = "window.__MUSIC_DATA = null;\n"
-        print("note: %s not found -- run render_music.js for background music."
-              % music_data_js)
 
     # Assemble the single document. Order matters:
     #   1) data blocks (WASM + ROM as base64 strings)
@@ -1394,7 +1408,6 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
-        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -1409,7 +1422,6 @@ def main():
         FILTER_JS,
         SPEED_JS,
         PWA_JS,
-        music_js_data,   # window.__MUSIC_DATA (captured loops) -- must precede MUSIC_JS
         MUSIC_JS,
         SOUND_JS,
         PAUSE_JS,
