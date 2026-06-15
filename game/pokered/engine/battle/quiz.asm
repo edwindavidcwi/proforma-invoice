@@ -224,16 +224,17 @@ QuizPractice::
 ; Choose a question scaled to the player's badges (used by battle attack/defense).
 ; Grade = min(5, badgeCount / 2 + 1).  Returns hl -> 12-byte question entry.
 QuizSelectQuestion::
-	; Spaced repetition: when there are recently-missed questions, ~50% of the
-	; time re-ask one of them instead of a fresh question.
+	; Spaced repetition: when there are recently-missed questions, sometimes
+	; (~1 in 3) re-ask one instead of a fresh question. Mastered questions are
+	; removed from the ring (see QuizReviewRemove), so they stop coming back.
 	ld a, [wQuizReviewFilled]
 	and a
 	jr z, .newQuestion
 	cp 5
 	jr nc, .newQuestion            ; stale/garbage count -> ignore the ring
 	call Random
-	and 1
-	jr z, .newQuestion
+	cp 85                          ; ~33% review, ~67% a fresh question
+	jr nc, .newQuestion
 	ld a, [wQuizReviewFilled]
 	ld b, a                        ; b = filled count (1-4)
 	call Random
@@ -273,7 +274,7 @@ QuizSelectQuestion::
 	ld a, [wNumSetBits]
 	srl a                          ; badges / 2
 	inc a                          ; + 1
-	jr QuizPickGrade
+	jp QuizPickGrade
 
 ; Compute a question entry from wQuizGradeIdx + wQuizPickIdx (used by review).
 ; Out: a = data bank, hl = entry address, wQuizDataBank set.
@@ -307,33 +308,106 @@ QuizEntryFromIdx:
 	ld a, [wQuizDataBank]
 	ret
 
-; Record the current question (wQuizGradeIdx + wQuizPickIdx) as recently missed,
-; so spaced repetition brings it back. Duplicates are fine (weights it harder).
-QuizReviewPush:
-	ld a, [wQuizReviewHead]
-	and 3                          ; mask (overlay may hold stale data)
-	add a                          ; (head & 3) * 2
-	ld c, a
-	ld b, 0
+; ---- spaced-repetition ring (linear array of up to 4 distinct missed
+; questions). A miss adds one; answering it correctly removes it, so a mastered
+; question stops coming back. ----
+
+; Search the ring for (wQuizGradeIdx, wQuizPickIdx) among the first wQuizReviewFilled
+; entries. Out: carry set + b = its index if found; carry clear otherwise.
+QuizReviewFind:
+	ld a, [wQuizReviewFilled]
+	cp 5
+	jr c, .lenOk
+	xor a                          ; stale/garbage count -> reset to empty
+	ld [wQuizReviewFilled], a
+.lenOk
+	and a
+	ret z                          ; empty -> not found (carry clear)
+	ld c, a                        ; c = count
+	ld b, 0                        ; b = index
 	ld hl, wQuizReviewRing
-	add hl, bc
+	ld a, [wQuizGradeIdx]
+	ld e, a                        ; e = target grade
+	ld a, [wQuizPickIdx]
+	ld d, a                        ; d = target index
+.scan
+	ld a, [hli]                    ; grade
+	cp e
+	jr nz, .miss
+	ld a, [hl]                     ; index
+	cp d
+	jr z, .hit
+.miss
+	inc hl                         ; step past index byte to next entry
+	inc b
+	dec c
+	jr nz, .scan
+	and a                          ; not found -> clear carry
+	ret
+.hit
+	scf
+	ret
+
+; Add the current question to the review ring (deduped; drops the oldest if full).
+QuizReviewPush:
+	call QuizReviewFind
+	ret c                          ; already queued -> don't duplicate
+	ld a, [wQuizReviewFilled]
+	cp 4
+	jr c, .append
+	ld hl, wQuizReviewRing         ; full -> shift entries 1..3 down to 0..2
+	ld de, wQuizReviewRing + 2
+	ld c, 6
+.drop
+	ld a, [de]
+	ld [hli], a
+	inc de
+	dec c
+	jr nz, .drop
+	ld a, 3
+	ld [wQuizReviewFilled], a
+.append
+	ld a, [wQuizReviewFilled]
+	add a
+	ld l, a
+	ld h, 0
+	ld de, wQuizReviewRing
+	add hl, de
 	ld a, [wQuizGradeIdx]
 	ld [hli], a
 	ld a, [wQuizPickIdx]
 	ld [hl], a
-	ld a, [wQuizReviewHead]
-	inc a
-	and 3
-	ld [wQuizReviewHead], a
-	ld a, [wQuizReviewFilled]
-	cp 4
-	jr c, .inc
-	ld a, 4                        ; clamp (heals stale/garbage count)
-	ld [wQuizReviewFilled], a
+	ld hl, wQuizReviewFilled
+	inc [hl]
 	ret
-.inc
-	inc a
-	ld [wQuizReviewFilled], a
+
+; Remove the current question from the ring (called when it's answered correctly).
+QuizReviewRemove:
+	call QuizReviewFind
+	ret nc                         ; not queued -> nothing to do
+	ld a, [wQuizReviewFilled]
+	dec a
+	ld [wQuizReviewFilled], a      ; new count
+	sub b                          ; entries after the removed one
+	ret z                          ; it was the last -> done
+	ld c, a
+	sla c                          ; bytes to shift down
+	ld a, b
+	add a
+	ld l, a
+	ld h, 0
+	ld de, wQuizReviewRing
+	add hl, de                     ; hl = removed slot
+	ld d, h
+	ld e, l
+	inc de
+	inc de                         ; de = next slot
+.shift
+	ld a, [de]
+	ld [hli], a
+	inc de
+	dec c
+	jr nz, .shift
 	ret
 
 ; Choose a question scaled to the active Pokemon's level (used by item use).
@@ -601,9 +675,10 @@ QuizAsk::
 	xor a
 	ld [wQuizStreak], a            ; correct only after a miss -> streak resets
 	ld [wQuizFirstTry], a
-	call QuizReviewPush            ; not mastered first-try -> queue for review
+	call QuizReviewRemove          ; answered right (with help) -> stop reviewing it
 	jr .streakReady
 .firstTry
+	call QuizReviewRemove          ; mastered first-try -> stop reviewing it
 	ld a, 1
 	ld [wQuizFirstTry], a
 	ld a, [wQuizStreak]
