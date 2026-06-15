@@ -3,7 +3,7 @@
 
 Targets ~100 questions per grade with a balanced subject mix (Math, English,
 Science & Nature, General Knowledge, Shapes & Colors). Every question has text
-(<=18 chars), 3 answers (<=9 chars each), the correct index, and a method hint
+(<=18 chars), up to 6 answers (<=8 chars each), the correct index, and a hint
 (<=18 chars). Each grade's data is emitted into its own ROM bank (floating ROMX
 section); the engine copies a chosen question into RAM before showing it.
 
@@ -31,8 +31,10 @@ class Q:
         ans = [correct] + [str(d) for d in distractors]
         if not okstr(text, 18) or not okstr(hint, 18):
             raise Bad()
+        if len(ans) > 6:                     # at most 6 options (correct + 5)
+            ans = ans[:6]
         for a in ans:
-            if not okstr(a, 9):
+            if not okstr(a, 8):              # two columns -> <=8 chars per answer
                 raise Bad()
         if len(set(ans)) != len(ans):
             raise Bad()
@@ -47,18 +49,18 @@ def mk(text, correct, distractors, hint):
 def num(text, correct, hint, distractors=None):
     c = int(correct)
     if distractors is None:
-        distractors = _npick(c, [c - 1, c + 1, c + 2, c + 5, c - 2, c + 3, c + 10], 4)  # up to 5 options
+        distractors = _npick(c, [c - 1, c + 1, c + 2, c + 5, c - 2, c + 3, c + 10, c - 3, c + 4], 5)  # up to 6 options
     return mk(text, correct, distractors, hint)
 
 def pick2(correct, word, candidates):
-    """Pick up to 4 distinct distractors from the pool (for up to a 5th answer
+    """Pick up to 5 distinct distractors from the pool (for up to a 6th answer
     option where the pool allows); falls back as low as 2, or None if <2."""
     out = []
     for c in candidates:
         c = str(c)
-        if c != correct and c != word and c not in out and okstr(c, 9):
+        if c != correct and c != word and c not in out and okstr(c, 8):
             out.append(c)
-        if len(out) == 4:
+        if len(out) == 5:
             return out
     return out if len(out) >= 2 else None
 
@@ -89,16 +91,16 @@ def _three(c, cands):
 
 def smart(op, a, b, c):
     """Plausible, common-mistake distractors instead of the trivial c +/- 1."""
-    if op == '+':   cands = [abs(a - b), c + 1, c + 10, c - 2, c + 2]  # subtracted; near; place-value
-    elif op == '-': cands = [a + b, c + 1, c + 10, c - 1, c + 2]       # added instead; near
-    elif op == 'x': cands = [a * (b - 1), a + b, a * (b + 1), c + 1, c - 1]  # a group off; added
-    elif op == '/': cands = [c + 1, b, c + 2, c - 1, c + 3]            # near; confuse with divisor
-    else:           cands = [c + 1, c + 5, c - 2, c * 2, c + 10]
-    return _npick(c, cands, 4)         # 4 distractors -> up to a 5th answer option
+    if op == '+':   cands = [abs(a - b), c + 1, c + 10, c - 2, c + 2, c - 1]  # subtracted; near; place-value
+    elif op == '-': cands = [a + b, c + 1, c + 10, c - 1, c + 2, c - 2]       # added instead; near
+    elif op == 'x': cands = [a * (b - 1), a + b, a * (b + 1), c + 1, c - 1, c + 2]  # a group off; added
+    elif op == '/': cands = [c + 1, b, c + 2, c - 1, c + 3, c - 2]            # near; confuse with divisor
+    else:           cands = [c + 1, c + 5, c - 2, c * 2, c + 10, c - 1]
+    return _npick(c, cands, 5)         # 5 distractors -> up to a 6th answer option
 
 def spread(c):
-    """Four misses (near and wider) so the 5 options aren't a consecutive run."""
-    return _npick(c, [c + 1, c + 5, c - 3, c * 2 if c <= 20 else c + 10, c + 10, c - 1, c + 2, c - 2, c + 3, c + 20], 4)
+    """Five misses (near and wider) so the up-to-6 options aren't a consecutive run."""
+    return _npick(c, [c + 1, c + 5, c - 3, c * 2 if c <= 20 else c + 10, c + 10, c - 1, c + 2, c - 2, c + 3, c + 20], 5)
 
 # ===================== word / fact pools =====================
 OPP = [("big","small"),("hot","cold"),("up","down"),("in","out"),("day","night"),
@@ -353,15 +355,10 @@ def emit():
     w("; question into RAM before showing it (see QuizLoadQuestion).")
     w("; ============================================================================")
     w("")
-    w("; One question entry (16 bytes):")
-    w(";   quizq QUESTION, CORRECT_INDEX(0-4), NUM_ANSWERS(2-5), ANS0..ANS4, HINT")
-    w("MACRO quizq")
-    w("\tdw \\1")
-    w("\tdb \\2")
-    w("\tdb \\3")
-    w("\tdw \\4, \\5, \\6, \\7, \\8")
-    w("\tdw \\9")
-    w("ENDM")
+    w("; One question entry (18 bytes), emitted as raw directives:")
+    w(";   dw QUESTION | db CORRECT(0) | db NUM_ANSWERS(2-6) | dw ANS0..ANS5 | dw HINT")
+    w("; Absent answer slots reuse the last real answer's label so all 6 pointers")
+    w("; are valid (the engine only shows NUM_ANSWERS of them).")
     w("")
     w("QuizGradeTable::")
     for g in range(1, 6):
@@ -422,13 +419,17 @@ def emit():
     for g in range(1, 6):
         w(f'SECTION "Quiz Data G{g}", ROMX')
         w(f"Grade{g}Questions::")
-        LET = "ABCDE"
+        LET = "ABCDEF"
         for i, q in enumerate(banks[g], 1):
             p = f"G{g}Q{i}"
-            n = len(q.answers)                       # 3, 4 or 5 answers
-            # 5 answer-pointer slots; absent slots reuse the last real answer label
-            slots = [f"{p}{LET[k if k < n else n - 1]}" for k in range(5)]
-            w(f"\tquizq {p}, 0, {n}, {', '.join(slots)}, {p}H")
+            n = len(q.answers)                       # 2..6 answers (correct + distractors)
+            # 6 answer-pointer slots; absent slots reuse the last real answer label
+            slots = [f"{p}{LET[k if k < n else n - 1]}" for k in range(6)]
+            w(f"\tdw {p}")                            # question text
+            w(f"\tdb 0")                              # correct index (pre-rotation: always 0)
+            w(f"\tdb {n}")                            # number of answers shown
+            w(f"\tdw {', '.join(slots)}")            # ANS0..ANS5
+            w(f"\tdw {p}H")                           # method hint
         for i, q in enumerate(banks[g], 1):
             p = f"G{g}Q{i}"
             w(f'{p}: db "{q.text}@"')

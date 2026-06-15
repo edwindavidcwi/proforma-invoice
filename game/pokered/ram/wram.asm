@@ -2256,13 +2256,14 @@ NEXTU
 ; Quiz Battle scratch: the chosen question (entry + its strings) is copied here
 ; from its ROM bank before display. This overlays the PC box, which is never
 ; touched during a battle, so no extra WRAM is needed.
-wQuizEntry:: ds 16
+wQuizEntry:: ds 18
 wQuizQStr:: ds 20
 wQuizA0:: ds 20
 wQuizA1:: ds 20
 wQuizA2:: ds 20
 wQuizA3:: ds 20
 wQuizA4:: ds 20
+wQuizA5:: ds 20
 wQuizHStr:: ds 20
 ; Spaced-repetition ring of recently-missed questions (gradeIdx, index). Overlays
 ; the idle PC box; selection validates each entry (grade < 5, index < count) so
@@ -2284,6 +2285,7 @@ wQuizAttemptsLeft:: db  ; tries remaining for this question
 wQuizResult::       db  ; item-use decision: 1 = allow, 0 = deny
 wQuizRotate::       db  ; random rotation applied to the answer order (anti-memorization)
 wQuizSlot::         db  ; scratch: answer slot being drawn
+wQuizCol::          db  ; cursor column in the 2-column answer grid (0 = left, 1 = right)
 wQuizCorrectAnsPtr:: dw ; pointer to the correct answer's text (revealed on a miss)
 wQuizHintPtr::      dw  ; pointer to the current question's method hint (shown on a retry)
 wQuizStreak::       db  ; how many questions answered right in a row (resets on a miss)

@@ -32,7 +32,7 @@ GEN = os.path.join(HERE, "tools_gen_quiz.py")
 # Must match the font/charmap the generator targets.
 ALLOWED = set("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "
               "-/x.:?!")
-Q_MAX, ANS_MAX, HINT_MAX = 18, 9, 18  # screen limits: question/hint full line, answers narrow column
+Q_MAX, ANS_MAX, HINT_MAX = 18, 8, 18  # screen limits: question/hint full line, answers in 2 narrow columns
 
 errors, warnings = [], []
 def err(m): errors.append(m)
@@ -56,13 +56,20 @@ def parse_asm(path):
         for g, n in re.findall(r"dw Grade(\d)Questions\s*\n\s*db (\d+)", gt.group(1)):
             counts[int(g)] = int(n)
 
-    # 3) quizq entries (carry their own grade via the G<g>Q<i> label prefix)
+    # 3) question entries: raw directives, 6 answer slots (carry their own grade
+    #    via the G<g>Q<i> label prefix):
+    #      dw QLABEL / db CIDX / db NUM / dw A0,A1,A2,A3,A4,A5 / dw HLABEL
     qs = []
-    qline = re.compile(r"^\s*quizq\s+(\w+),\s*(\d+),\s*(\d+),\s*(\w+),\s*(\w+),\s*(\w+),\s*(\w+),\s*(\w+),\s*(\w+)", re.M)
+    qline = re.compile(
+        r"^\s*dw\s+(G\dQ\d+)\s*\n"
+        r"\s*db\s+(\d+)\s*\n"
+        r"\s*db\s+(\d+)\s*\n"
+        r"\s*dw\s+(\w+),\s*(\w+),\s*(\w+),\s*(\w+),\s*(\w+),\s*(\w+)\s*\n"
+        r"\s*dw\s+(\w+)", re.M)
     for m in qline.finditer(text):
         qlabel, cidx, num = m.group(1), int(m.group(2)), int(m.group(3))
-        alabels = [m.group(4), m.group(5), m.group(6), m.group(7), m.group(8)]
-        hlabel = m.group(9)
+        alabels = [m.group(i) for i in range(4, 10)]   # 6 answer-pointer slots
+        hlabel = m.group(10)
         gm = re.match(r"G(\d)Q(\d+)", qlabel)
         grade = int(gm.group(1)) if gm else 0
         qs.append({"label": qlabel, "grade": grade, "cidx": cidx, "num": num,
@@ -87,8 +94,8 @@ def resolve(q):
 
 def lint(q):
     g, lbl = q["grade"], q["label"]
-    if not (2 <= q["num"] <= 5):
-        err(f"{lbl}: NUM_ANSWERS {q['num']} not in 2..5")
+    if not (2 <= q["num"] <= 6):
+        err(f"{lbl}: NUM_ANSWERS {q['num']} not in 2..6")
     if not (0 <= q["cidx"] < q["num"]):
         err(f"{lbl}: CORRECT_INDEX {q['cidx']} out of range for {q['num']} answers")
     # charmap + length

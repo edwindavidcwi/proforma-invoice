@@ -21,12 +21,13 @@ const TICKS_PER_FRAME = 70224;
 // Read symbol addresses from pokered.sym next to the ROM, so the harness never
 // breaks when unrelated code shifts a routine's address (e.g. a new menu item).
 const SYM = ROM.replace(/\.gb[c]?$/, ".sym");
-const _sym = {};
+const _sym = {}, _bank = {};
 for (const line of fs.readFileSync(SYM, "utf8").split("\n")) {
   const m = line.trim().match(/^([0-9a-fA-F]+):([0-9a-fA-F]+)\s+(\S+)$/);
-  if (m) _sym[m[3]] = parseInt(m[2], 16);
+  if (m) { _sym[m[3]] = parseInt(m[2], 16); _bank[m[3]] = parseInt(m[1], 16); }
 }
 const S = (n) => { if (_sym[n] === undefined) throw new Error("missing symbol " + n); return _sym[n]; };
+const BANK = (n) => { if (_bank[n] === undefined) throw new Error("missing symbol " + n); return _bank[n]; };
 const PlaceMenuCursor = S("PlaceMenuCursor");
 const wTileMap = S("wTileMap"), SCREEN_W = 20;
 const wTopMenuItemY = S("wTopMenuItemY"), wTopMenuItemX = S("wTopMenuItemX"), wCurrentMenuItem = S("wCurrentMenuItem");
@@ -93,6 +94,37 @@ const check = (name, cond, detail) => {
     console.log(`   answer ${item}: old code -> row ${row} (answer is on row ${9 + 2 * item}) -> ${row === 9 + 2 * item ? "aligned" : "MISALIGNED"}`);
   }
   check("regression: old (flag-set) code misaligns, confirming the fix is needed", mismatchShown);
+
+  // ---- Check 1b: 2-column setup picks the right cursor column + item count ----
+  // QuizSetupColumnCursor reads wQuizNumAnswers + wQuizCol and sets the cursor X
+  // (left col -> 1, right col -> 10), top row 8, and the column's item count.
+  // leftN = ceil(n/2); rightN = n - leftN.
+  console.log("\n-- 2-column answer grid (QuizSetupColumnCursor) --");
+  const QuizSetupColumnCursor = S("QuizSetupColumnCursor"), quizBank = BANK("QuizSetupColumnCursor");
+  const wQuizNumAnswers = S("wQuizNumAnswers"), wQuizCol = S("wQuizCol"), hLoadedROMBank = S("hLoadedROMBank");
+  // The quiz engine lives in a banked ROM section, so map its bank before calling
+  // into it. Give the routine a safe place to land: inject a spin loop (jr -2) and
+  // point its return address (top of stack) at it, so after `ret` the CPU idles
+  // there instead of running garbage that would clobber the vars before we read.
+  const SPIN = 0xc6e8;
+  const setupCol = (n, col) => {
+    wr(0x2000, quizBank); wr(hLoadedROMBank, quizBank);   // map the quiz ROM bank
+    wr(SPIN, 0x18); wr(SPIN + 1, 0xfe);                   // jr -2
+    const sp = module._emulator_get_SP(e);
+    wr(sp, SPIN & 0xff); wr(sp + 1, (SPIN >> 8) & 0xff);
+    wr(wQuizNumAnswers, n); wr(wQuizCol, col);
+    setPC(QuizSetupColumnCursor);
+    module._emulator_run_until_f64(e, ticks() + 600);     // routine runs, then idles in the spin loop
+    return { x: rd(wTopMenuItemX), y: rd(wTopMenuItemY), max: rd(wMaxMenuItem) };
+  };
+  for (const n of [2, 3, 4, 5, 6]) {
+    const leftN = (n + 1) >> 1, rightN = n - leftN;
+    const L = setupCol(n, 0), R = setupCol(n, 1);
+    check(`n=${n}: left column at X=1, Y=8, ${leftN} item(s)`,
+          L.x === 1 && L.y === 8 && L.max === leftN - 1, `x=${L.x} y=${L.y} max=${L.max}`);
+    check(`n=${n}: right column at X=10, Y=8, ${rightN} item(s)`,
+          R.x === 10 && R.y === 8 && R.max === rightN - 1, `x=${R.x} y=${R.y} max=${R.max}`);
+  }
 
   // ---- Check 2: boot stability soak ----
   let aborted = false;

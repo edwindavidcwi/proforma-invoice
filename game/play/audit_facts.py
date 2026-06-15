@@ -51,7 +51,7 @@ OPP = {"big":"small","hot":"cold","up":"down","in":"out","day":"night","fast":"s
 FACTS = {  # exact question text -> accepted answer(s)
     "Days in a week?":"7","How many fingers?":"10","Colors in rainbow":"7","Eyes on a face?":"2",
     "Legs on a person?":"2","Wheels on a car?":"4","Thumbs on hands?":"2","Months in a year?":"12",
-    "Days in weekend?":"2","Hours in a day?":"24","Seasons in year?":"4","Minutes in hour?":"60",
+    "Days in a weekend?":"2","Hours in a day?":"24","Seasons in a year?":"4","Minutes in hour?":"60",
     "Days in Sept?":"30","Weeks in a year?":"52","Hours half day?":"12","Days in a year?":"365",
     "Seconds in min?":"60","Sides of a dice?":"6","Oceans on Earth?":"5","Continents?":"7",
     "Days in leap yr?":"366","Years in decade?":"10","Years in century":"100","Days in 2 weeks?":"14",
@@ -59,19 +59,19 @@ FACTS = {  # exact question text -> accepted answer(s)
     "Legs on 2 cats?":"8","Months in year?":"12",
     "Cow says?":"moo","Dog says?":"woof","Cat says?":"meow","Bees make?":"honey","Spider legs?":"8",
     "Birds lay?":"eggs","Cows give?":"milk","Insect legs?":"6","Frog baby?":"tadpole","Blood is?":"red",
-    "Sun rises in?":"east","Planet we live?":"Earth","Largest planet?":"Jupiter","Red planet?":"Mars",
+    "Sun rises in?":"east","Planet we live on?":"Earth","Largest planet?":"Jupiter","Red planet?":"Mars",
     "Moon orbits?":"Earth","Water formula?":"H2O","Bee wings?":"4","Heart pumps?":"blood",
     "Red and blue?":"purple","Blue and yellow?":"green","Red and yellow?":"orange",
-    "Red and white?":"pink","Black and white?":"grey","Cube has faces?":"6","Right angle deg?":"90",
-    "Circle degrees?":"360","Cube has edges?":"12","Triangle angles?":"3",
+    "Red and white?":"pink","Black and white?":"grey","Faces on a cube?":"6","Right angle deg?":"90",
+    "Circle degrees?":"360","Edges on a cube?":"12","Triangle angles?":"3",
     # rebalanced G4-G5 additions (independently keyed)
     "We hear with?":"ears","We smell with?":"nose","Ice melts to?":"water","Sun sets in?":"west",
-    "Largest organ?":"skin","Earth spins in?":"day","Planets in system?":"8","Plants give off?":"oxygen",
+    "Largest organ?":"skin","Earth turns in a?":"day","Planets in system?":"8","Plants give off?":"oxygen",
     "We breathe out?":"CO2","Hottest planet?":"Venus","Earth orbits?":"Sun","Magnet pulls?":"iron",
-    "Fastest is?":"light","Hours in 3 days?":"72","Days in Feb?":"28","Legs on 3 cats?":"12",
+    "Fastest thing?":"light","Hours in 3 days?":"72","Days in Feb?":"28","Legs on 3 cats?":"12",
     "Wheels on 2 cars?":"8","Minutes in 2 hrs?":"120","Weeks in a month?":"4","2 decades is?":"20",
     "Days in 3 weeks?":"21","Hours in 4 days?":"96","Seconds in 2 min?":"120","Minutes in 3 hrs?":"180",
-    "Corners of square?":"4","Corners triangle?":"3","Faces of a box?":"6","Corners of a cube?":"8",
+    "Square corners?":"4","Triangle corners?":"3","Faces of a box?":"6","Corners of a cube?":"8",
     "Straight angle?":"180","Right angle?":"90",
     "Sides triangle?":"3","Sides square?":"4","Sides pentagon?":"5","Sides hexagon?":"6",
     "Sides rectangle?":"4","Sides octagon?":"8","Sides heptagon?":"7","Sides nonagon?":"9","Sides decagon?":"10",
@@ -92,7 +92,7 @@ checked = mism = skipped = 0; bad = []
 for g in range(1,6):
     e = gto+(g-1)*4; base = rom[e]|(rom[e+1]<<8); cnt = rom[e+2]; bank = rom[e+3]
     for idx in range(cnt):
-        eo = off(bank,base)+idx*16
+        eo = off(bank,base)+idx*18
         q = rd(bank, rom[eo]|(rom[eo+1]<<8)); ci = rom[eo+2]
         correct = rd(bank, rom[eo+4+2*ci]|(rom[eo+5+2*ci]<<8))
         exp = key_answer(q)

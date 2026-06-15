@@ -507,7 +507,7 @@ QuizPickGrade:
 	and a
 	jr z, .gotEntry
 	ld b, a                         ; b = index
-	ld de, 16
+	ld de, 18
 .addLoop
 	add hl, de
 	dec b
@@ -523,7 +523,7 @@ QuizPickGrade:
 QuizLoadQuestion:
 	ld [wQuizDataBank], a
 	ld de, wQuizEntry
-	ld bc, 16
+	ld bc, 18
 	call FarCopyData               ; bank:hl(entry) -> wQuizEntry
 	ld hl, wQuizEntry              ; question text pointer (offset 0)
 	ld de, wQuizQStr
@@ -543,7 +543,10 @@ QuizLoadQuestion:
 	ld hl, wQuizEntry + 12
 	ld de, wQuizA4
 	call QuizFixupStr
-	ld hl, wQuizEntry + 14         ; hint (offset 14)
+	ld hl, wQuizEntry + 14
+	ld de, wQuizA5
+	call QuizFixupStr
+	ld hl, wQuizEntry + 16         ; hint (offset 16)
 	ld de, wQuizHStr
 	call QuizFixupStr
 	ld hl, wQuizEntry
@@ -597,9 +600,9 @@ QuizAsk::
 	ld a, [hl]
 	ld [wQuizCorrectAnsPtr + 1], a
 	pop hl
-	; Remember the method-hint pointer (entry offset 12 = answer-table base + 8).
+	; Remember the method-hint pointer (entry offset 16 = answer-table base + 12).
 	push hl
-	ld bc, 10
+	ld bc, 12
 	add hl, bc
 	ld a, [hli]
 	ld [wQuizHintPtr], a
@@ -648,7 +651,7 @@ QuizAsk::
 	ld [wDoNotWaitForButtonPressAfterDisplayingText], a
 .attempt
 	call QuizDrawScreen
-	call HandleMenuInput           ; only A is watched; selection -> wCurrentMenuItem
+	call QuizGridInput             ; 2-column grid; selection (absolute slot) -> wCurrentMenuItem
 	ld a, [wCurrentMenuItem]
 	ld hl, wQuizCorrectIndex
 	cp [hl]
@@ -804,29 +807,19 @@ QuizDrawScreen::
 	ld d, a
 	call PlaceString
 	call QuizPrintAnswers
-	ld a, 8
-	ld [wTopMenuItemY], a
-	ld a, 1
-	ld [wTopMenuItemX], a
-	xor a
+	xor a                          ; start at the top of the left column
+	ld [wQuizCol], a
 	ld [wCurrentMenuItem], a
 	ld [wLastMenuItem], a
-	ld a, [wQuizNumAnswers]
-	dec a
-	ld [wMaxMenuItem], a
-	ld a, PAD_A
-	ld [wMenuWatchedKeys], a
-	ld a, QUIZ_WRAP_MENU
-	ld [wMenuWrappingEnabled], a
 	ret
 
-; Print the answers down the left of the box, double-spaced from row 9, in the
-; rotated order chosen in QuizAsk: display slot s shows the original answer at
-; index (s + wQuizRotate) mod numAnswers.
+; Answers fill two columns to use the space and allow up to 6 options. Display
+; slot s (in the rotated order from QuizAsk) goes to the left column for the
+; first ceil(n/2) slots, otherwise the right column; rows are double-spaced from
+; row 8. Left text at col 2 (cursor col 1); right text at col 11 (cursor col 10).
 QuizPrintAnswers::
 	xor a
 	ld [wQuizSlot], a              ; start at display slot 0
-	hlcoord 2, 8                   ; hl = destination tile for slot 0
 .loop
 	ld a, [wQuizSlot]
 	ld b, a                        ; b = slot
@@ -849,7 +842,6 @@ QuizPrintAnswers::
 	add a                          ; o * 2 (answer pointers are 2 bytes)
 	ld c, a
 	ld b, 0
-	push hl                        ; save destination
 	ld a, [wQuizAnswersPtr]
 	ld l, a
 	ld a, [wQuizAnswersPtr + 1]
@@ -859,15 +851,133 @@ QuizPrintAnswers::
 	ld e, a
 	ld a, [hl]
 	ld d, a                        ; de = answer string
-	pop hl                         ; restore destination
-	push hl                        ; keep it across PlaceString
-	call PlaceString
-	pop hl
-	ld de, 2 * SCREEN_WIDTH        ; advance two rows (double spaced)
+	push de                        ; save string pointer across the layout math
+	; destination = base(col) + row * 2 rows.  leftN = (n + 1) / 2.
+	ld a, [wQuizNumAnswers]
+	inc a
+	srl a
+	ld c, a                        ; c = leftN
+	ld a, [wQuizSlot]
+	cp c
+	jr c, .leftCol
+	sub c                          ; row = slot - leftN
+	ld b, a                        ; b = row
+	hlcoord 11, 8                  ; right column base
+	jr .addRows
+.leftCol
+	ld b, a                        ; b = row = slot
+	hlcoord 2, 8                   ; left column base
+.addRows
+	ld a, b
+	and a
+	jr z, .place
+	ld de, 2 * SCREEN_WIDTH
+.rowLoop
 	add hl, de
+	dec b
+	jr nz, .rowLoop
+.place
+	pop de                         ; de = answer string
+	call PlaceString
 	ld a, [wQuizSlot]
 	inc a
 	ld [wQuizSlot], a
 	jr .loop
+
+; Two-column answer selection. Up/Down move within a column (HandleMenuInput);
+; Left/Right switch columns. Returns the chosen ABSOLUTE slot in wCurrentMenuItem
+; (so it can be compared to wQuizCorrectIndex). Only A confirms -- no B escape.
+QuizGridInput::
+.loop
+	call QuizSetupColumnCursor
+	call HandleMenuInput           ; handles Up/Down; returns pressed watched keys in a
+	bit B_PAD_A, a
+	jr nz, .confirm
+	ld b, a                        ; b = pressed keys
+	ld a, [wQuizNumAnswers]
+	inc a
+	srl a
+	ld c, a                        ; c = leftN
+	bit B_PAD_LEFT, b
+	jr nz, .toLeft
+	bit B_PAD_RIGHT, b
+	jr z, .loop                    ; neither A/Left/Right (e.g. input timeout) -> keep waiting
+	; Right pressed: move to the right column (if not already there).
+	ld a, [wQuizCol]
+	and a
+	jr nz, .loop
+	call EraseMenuCursor           ; remove the left arrow before drawing the right one
+	ld a, 1
+	ld [wQuizCol], a
+	ld a, [wQuizNumAnswers]
+	sub c                          ; rightN
+	dec a                          ; max row in right column
+	jr .clamp
+.toLeft
+	; Left pressed: move to the left column (if not already there).
+	ld a, [wQuizCol]
+	and a
+	jr z, .loop
+	call EraseMenuCursor           ; remove the right arrow before drawing the left one
+	xor a
+	ld [wQuizCol], a
+	ld a, c                        ; leftN
+	dec a                          ; max row in left column
+.clamp
+	ld b, a                        ; b = max row in the new column
+	ld a, [wCurrentMenuItem]
+	cp b
+	jr c, .clamped
+	ld a, b                        ; clamp the row to the new column's last item
+.clamped
+	ld [wCurrentMenuItem], a
+	ld [wLastMenuItem], a
+	jr .loop
+.confirm
+	; absolute slot = row, plus leftN if we're in the right column
+	ld a, [wQuizCol]
+	and a
+	ret z
+	ld a, [wQuizNumAnswers]
+	inc a
+	srl a
+	ld b, a                        ; leftN
+	ld a, [wCurrentMenuItem]
+	add b
+	ld [wCurrentMenuItem], a
+	ret
+
+; Point HandleMenuInput at the current column: cursor X (1 = left, 10 = right),
+; top row 8, and the number of items in that column.
+QuizSetupColumnCursor::
+	ld a, 8
+	ld [wTopMenuItemY], a
+	ld a, [wQuizCol]
+	and a
+	ld a, 1                        ; left cursor column
+	jr z, .haveX
+	ld a, 10                       ; right cursor column
+.haveX
+	ld [wTopMenuItemX], a
+	ld a, [wQuizNumAnswers]
+	inc a
+	srl a
+	ld b, a                        ; leftN
+	ld a, [wQuizCol]
+	and a
+	jr z, .leftCount
+	ld a, [wQuizNumAnswers]
+	sub b                          ; rightN
+	jr .haveCount
+.leftCount
+	ld a, b                        ; leftN
+.haveCount
+	dec a
+	ld [wMaxMenuItem], a
+	ld a, PAD_A | PAD_LEFT | PAD_RIGHT
+	ld [wMenuWatchedKeys], a
+	ld a, QUIZ_WRAP_MENU
+	ld [wMenuWrappingEnabled], a
+	ret
 
 INCLUDE "engine/battle/quiz_data.asm"
