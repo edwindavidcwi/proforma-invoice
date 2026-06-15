@@ -508,7 +508,7 @@ BODY_HTML = r"""
       <div id="menu_head"><span>&#9776; Menu</span><button id="btnMenuClose" title="Close">&#10005;</button></div>
       <div id="menu_body">
         <section class="card">
-          <h3>Fast-forward speed <small>(normal play is 1&times; so the real music sounds right; hold Space to boost)</small></h3>
+          <h3>Fast-forward speed <small>(normal play is 2&times;; hold Space to boost &mdash; music stays at normal speed)</small></h3>
           <span class="seg" title="Speed while holding Space">
             <button class="spd" data-spd="3">3&times;</button>
             <button class="spd on" data-spd="4">4&times;</button>
@@ -581,25 +581,21 @@ FILTER_JS = r"""
 """
 
 
-# Game-speed control. Normal play runs at 1x (BASE) so the game's REAL Pokemon
-# Red music and sound effects play at their true pitch/tempo (they're clocked by
-# the emulator, so any faster and they'd speed up). Holding Space "fast-forwards"
-# to the boost speed chosen in the menu (default 4x) for grinding; the real audio
-# is muted only while boosting (to avoid the chipmunk speed-up). window.__speed is
-# what player.js reads in its run loop; window.__boosting tells the audio code to
-# mute during a boost.
+# Game-speed control. Normal play runs at 2x (BASE) for a snappy feel. The music
+# is an INDEPENDENT track (see MUSIC_JS) played from captured buffers, so it keeps
+# its normal speed no matter how fast the game runs -- fast-forward never speeds
+# up the music. Holding Space "fast-forwards" to the boost speed chosen in the
+# menu (default 4x). window.__speed is what player.js reads in its run loop.
 SPEED_JS = r"""
 (function () {
-  var BASE = 1;                                   // normal play speed (real-time, so the real music sounds right)
+  var BASE = 2;                                   // normal play speed
   var btns = Array.prototype.slice.call(document.querySelectorAll('.spd'));
   var boost = 4;
   try { var v = parseInt(localStorage.getItem('pq_boost'), 10); if ([3,4,6,8].indexOf(v) >= 0) boost = v; } catch (e) {}
   var boosting = false;
 
   function applySpeed() {
-    window.__speed = boosting ? boost : BASE;
-    window.__boosting = boosting;                      // audio mutes itself while fast-forwarding
-    if (window.__applyVolume) window.__applyVolume();  // unmute real audio at 1x, mute during boost
+    window.__speed = boosting ? boost : BASE;          // music is independent, so speed never touches audio
   }
   function setBoost(s) {
     boost = s;
@@ -611,7 +607,7 @@ SPEED_JS = r"""
   setBoost(boost);
   applySpeed();
 
-  // Hold Space to fast-forward; release to return to normal 1x. (Typing in a
+  // Hold Space to fast-forward; release to return to normal 2x. (Typing in a
   // text field, if any ever exists, is left alone.)
   function isTyping(e) { var t = e.target; return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA'); }
   window.addEventListener('keydown', function (e) {
@@ -697,22 +693,21 @@ PAUSE_JS = r"""
 """
 
 
-# Sound on/off switch. This plays the game's REAL Pokemon Red audio (the genuine
-# route/town/battle music, cries and effects emulated by binjgb), scaled through
-# vm.volume. It sounds correct only at 1x, so we mute it while fast-forwarding
-# (window.__boosting) and the Sound button turns it on/off.
+# Sound on/off switch. The game's own EMULATED audio is kept muted (it would
+# speed up during fast-forward); instead the real Pokemon Red music plays as an
+# independent, fixed-speed track (MUSIC_JS), and this button turns that track
+# (plus the answer/UI sound effects) on or off.
 SOUND_JS = r"""
 (function () {
-  var LEVEL = 0.55;                                     // real-audio volume at 1x
   var btn = document.getElementById('btnSound');
   if (!btn) return;
   var on = true;
   try { if (localStorage.getItem('pq_sound') === '0') on = false; } catch (e) {}
   window.__soundOn = on;
   window.__applyVolume = function () {
-    // Real Game Boy audio: on at normal speed, muted while boosting (it would
-    // speed up) and when Sound is off.
-    if (window.__vm) window.__vm.volume = (on && !window.__boosting) ? LEVEL : 0;
+    if (window.__vm) window.__vm.volume = 0;            // emulated audio replaced by our independent track
+    if (on) { if (window.__musicStart) window.__musicStart(); }
+    else    { if (window.__musicStop)  window.__musicStop();  }
   };
   function apply() {
     window.__soundOn = on;
@@ -730,179 +725,85 @@ SOUND_JS = r"""
 """
 
 
-# The game now plays its REAL Pokemon Red music and sound (see SOUND_JS, which
-# unmutes binjgb's emulated audio at 1x), so the old synthesized soundtrack is no
-# longer auto-started. This block is kept for two things it still provides:
-#   1. window.__sfx -- a tiny blip when the player taps our HTML chrome (toolbar /
-#      slide-up menu), which are NOT part of the game, so it never clashes with
-#      the real game audio.
-#   2. window.__music -- the pure context-aware track-selection helper (pick/read)
-#      that the headless music test exercises against live emulator RAM.
-# The full synth engine (__musicStart/__musicStop) remains defined but is never
-# auto-started; nothing calls it now.
+# Plays the game's OWN music as an INDEPENDENT track. The real Pokemon Red
+# soundtrack was captured straight from the ROM at build time (render_music.js ->
+# window.__MUSIC_DATA: gzipped 8-bit mono loops) and is played back here through
+# Web Audio. Because it's a fixed-rate buffer loop -- NOT the emulator's audio --
+# it always plays at normal speed, even when the game is fast-forwarded. A poller
+# reads the live game state from emulator RAM and crossfades between the eight
+# context loops (town / route / cave / centre / wild / trainer / boss / rival),
+# with a one-shot victory jingle on a win. The game's own (emulated) audio stays
+# muted (SOUND_JS) so it can never speed up. A small SFX bus adds correct/wrong
+# answer feedback and UI blips; no new background music is synthesized.
 MUSIC_JS = r"""
 (function () {
   var AC = window.AudioContext || window.webkitAudioContext;
   if (!AC) return;
-  var ctx = null, master = null, musicGain = null, trackGain = null, sfxGain = null, NOISE = null, lofiLPF = null, crackleSrc = null;
-  var playing = false, timer = null, poller = null, step = 0, nextTime = 0, lastRoot = 0;
-  var cur = 'town', pending = null, jingleUntil = 0, lastInBattle = 0, lastStreak = null;
+  var ctx = null, master = null, musicGain = null, sfxGain = null, NOISE = null;
+  var DATA = window.__MUSIC_DATA || null;       // captured loops (absent in the headless test)
+  var buffers = {};                             // name -> decoded AudioBuffer
+  var decoded = false, decoding = false;
+  var playing = false, poller = null, voice = null;
+  var cur = 'town', jingleUntil = 0, lastInBattle = 0, lastStreak = null;
 
-  // Variable-duty pulse waves (12.5% / 25% / 50%) give the classic bright,
-  // hollow chiptune lead timbres instead of a single plain square.
-  var pulseCache = {};
-  function pulse(duty) {
-    if (pulseCache[duty]) return pulseCache[duty];
-    var n = 28, real = new Float32Array(n), imag = new Float32Array(n);
-    for (var k = 1; k < n; k++) imag[k] = (2 / (k * Math.PI)) * Math.sin(Math.PI * k * duty);
-    var w = ctx.createPeriodicWave(real, imag);
-    pulseCache[duty] = w; return w;
-  }
-  function makeNoise() {
-    var len = Math.floor(ctx.sampleRate * 0.5), buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
-    for (var i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
-    return buf;
-  }
-
-  // tempo, key mode, lead melody (MIDI; 0 = rest), bass roots, drum style, lead duty.
-  var TRACKS = {
-    town: { tempo: 120, minor: false, drums: 'soft', duty: 0.5, mel:
-      [67,0,64,0,72,0,64,0, 74,0,72,0,67,0,0,0, 69,0,72,0,76,0,72,0, 74,0,71,0,72,0,0,0],
-      bass:
-      [48,0,0,0,55,0,0,0, 43,0,0,0,50,0,0,0, 45,0,0,0,52,0,0,0, 41,0,0,0,48,0,0,0] },
-    route: { tempo: 132, minor: false, drums: 'beat', duty: 0.5, mel:
-      [72,76,79,76,72,76,79,81, 79,77,76,74,72,74,76,0, 76,79,84,79,76,79,84,86, 79,81,79,77,76,74,72,0],
-      bass:
-      [48,0,55,0,48,0,55,0, 43,0,50,0,43,0,50,0, 45,0,52,0,45,0,52,0, 41,0,48,0,43,0,55,0] },
-    cave: { tempo: 100, minor: true, drums: 'none', duty: 0.25, melVol: 0.13, mel:
-      [69,0,0,0,72,0,71,0, 69,0,0,0,64,0,0,0, 65,0,0,0,67,0,69,0, 64,0,0,0,0,0,0,0],
-      bass:
-      [33,0,0,0,0,0,0,0, 33,0,0,0,40,0,0,0, 29,0,0,0,0,0,0,0, 28,0,0,0,0,0,0,0] },
-    centre: { tempo: 96, minor: false, drums: 'none', duty: 0.5, melVol: 0.14, arpVol: 0.03, mel:
-      [76,0,74,0,72,0,0,0, 74,0,76,0,79,0,0,0, 81,0,79,0,76,0,74,0, 72,0,0,0,0,0,0,0],
-      bass:
-      [48,0,0,0,52,0,0,0, 50,0,0,0,53,0,0,0, 45,0,0,0,52,0,0,0, 48,0,0,0,0,0,0,0] },
-    wild: { tempo: 152, minor: true, drums: 'drive', duty: 0.25, melVol: 0.15, mel:
-      [69,69,72,69,76,0,74,0, 72,0,69,0,71,0,67,0, 69,69,72,76,81,0,79,0, 76,0,72,0,69,0,0,0],
-      bass:
-      [45,45,45,45,40,40,40,40, 41,41,41,41,40,40,40,40, 45,45,45,45,40,40,40,40, 43,43,43,43,40,40,40,40] },
-    trainer: { tempo: 146, minor: false, drums: 'beat', duty: 0.25, melVol: 0.15, mel:
-      [67,72,76,79,76,72,67,0, 65,69,72,77,72,69,65,0, 67,71,74,79,74,71,67,0, 72,76,79,84,0,79,0,0],
-      bass:
-      [48,0,48,0,48,0,48,0, 41,0,41,0,41,0,41,0, 43,0,43,0,43,0,43,0, 48,0,48,0,55,0,48,0] },
-    boss: { tempo: 140, minor: true, drums: 'drive', duty: 0.25, melVol: 0.15, mel:
-      [74,0,74,72,74,0,77,0, 76,0,74,72,69,0,0,0, 74,77,81,77,74,0,72,0, 74,0,69,0,74,0,0,0],
-      bass:
-      [38,38,38,38,38,38,38,38, 36,36,36,36,36,36,36,36, 41,41,41,41,41,41,41,41, 38,38,38,38,45,45,45,45] },
-    rival: { tempo: 142, minor: false, drums: 'drive', duty: 0.25, melVol: 0.15, mel:
-      [74,0,74,76,74,0,71,0, 79,0,77,0,74,0,0,0, 76,0,79,0,81,0,79,76, 74,0,72,71,67,0,0,0],
-      bass:
-      [43,0,43,0,50,0,43,0, 41,0,41,0,48,0,41,0, 45,0,45,0,52,0,45,0, 43,0,43,0,38,0,43,0] }
-  };
-  // 8-step drum patterns (k kick, s snare, h hat, o open hat, . rest).
-  var DRUMS = {
-    none:  null,
-    soft:  ['k', '.', '.', '.', 's', '.', '.', 'h'],
-    beat:  ['k', '.', 'h', '.', 's', '.', 'h', '.'],
-    drive: ['k', 'h', 's', 'h', 'k', 'h', 's', 'o']
-  };
-  var MAJ = [0, 4, 7, 12], MIN = [0, 3, 7, 12];
-  var MAJ7 = [0, 4, 7, 11], MIN7 = [0, 3, 7, 10];   // jazzy lofi 7th chords
-  var VICTORY = [[72,0.18],[76,0.18],[79,0.18],[84,0.5],[0,0.1],[79,0.22],[84,0.75]];
-
-  function midi(n) { return 440 * Math.pow(2, (n - 69) / 12); }
-
-  function tone(dest, freq, t, dur, wave, vol) {
-    var o = ctx.createOscillator(), g = ctx.createGain();
-    if (typeof wave === 'string') o.type = wave; else o.setPeriodicWave(wave);
-    o.frequency.value = freq;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(vol, t + 0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g); g.connect(dest);
-    o.start(t); o.stop(t + dur + 0.03);
-  }
-  function drum(kind, t) {
-    if (kind === 'k') {                                   // soft lofi kick: low pitch-drop sine
-      var o = ctx.createOscillator(), g = ctx.createGain();
-      o.type = 'sine';
-      o.frequency.setValueAtTime(120, t);
-      o.frequency.exponentialRampToValueAtTime(45, t + 0.12);
-      g.gain.setValueAtTime(0.32, t);
-      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.18);
-      o.connect(g); g.connect(trackGain); o.start(t); o.stop(t + 0.22);
-      return;
-    }
-    var src = ctx.createBufferSource(); src.buffer = NOISE;       // snare / hats: gentle noise
-    var f = ctx.createBiquadFilter(), g2 = ctx.createGain(), dur, vol;
-    if (kind === 's')      { f.type = 'bandpass'; f.frequency.value = 1300; dur = 0.18; vol = 0.13; }  // soft, dusty snare
-    else if (kind === 'o') { f.type = 'highpass'; f.frequency.value = 5000; dur = 0.14; vol = 0.06; }
-    else                   { f.type = 'highpass'; f.frequency.value = 6500; dur = 0.04; vol = 0.06; }  // quiet hat
-    g2.gain.setValueAtTime(vol, t);
-    g2.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    src.connect(f); f.connect(g2); g2.connect(trackGain);
-    src.start(t); src.stop(t + dur + 0.05);
-  }
-
-  function schedule() {
-    var tr = TRACKS[cur] || TRACKS.town;
-    var spb = 60 / (tr.tempo * 0.78) / 2, len = tr.mel.length, dp = DRUMS[tr.drums]; // 0.78 = relaxed lofi tempo
-    var seventh = tr.minor ? MIN7 : MAJ7;
-    while (nextTime < ctx.currentTime + 0.25) {
-      var i = step % len;
-      // melody: mellow triangle with a soft envelope (no bright pulse)
-      if (tr.mel[i]) lpad(midi(tr.mel[i]), nextTime, spb * 1.5, 'triangle', (tr.melVol || 0.16) * 0.85);
-      // bass: smooth, round sine sub
-      if (tr.bass[i]) { lastRoot = tr.bass[i]; lpad(midi(tr.bass[i]), nextTime, spb * 2.4, 'sine', (tr.bassVol || 0.2) * 1.1); }
-      // warm jazzy 7th-chord pad once per beat
-      if (lastRoot && (step % 4) === 0) {
-        for (var c = 0; c < seventh.length; c++)
-          lpad(midi(lastRoot + 12 + seventh[c]), nextTime, spb * 3.8, 'sine', 0.04);
-      }
-      if (dp) {
-        var swing = (step % 2) ? spb * 0.14 : 0;          // lay the off-beats back a touch
-        var d = dp[step % dp.length]; if (d !== '.') drum(d, nextTime + swing);
-      }
-      nextTime += spb; step++;
-    }
-  }
-
-  function setTrack(key) {
-    if (!TRACKS[key] || key === cur || key === pending) return;
-    pending = key;
-    var t0 = ctx.currentTime;
-    trackGain.gain.cancelScheduledValues(t0);
-    trackGain.gain.setValueAtTime(trackGain.gain.value, t0);
-    trackGain.gain.linearRampToValueAtTime(0.0001, t0 + 0.15);
-    setTimeout(function () {
-      if (!playing) { pending = null; return; }
-      cur = pending; pending = null; step = 0; lastRoot = 0; nextTime = ctx.currentTime + 0.05;
-      var t1 = ctx.currentTime;
-      trackGain.gain.cancelScheduledValues(t1);
-      trackGain.gain.setValueAtTime(0.0001, t1);
-      trackGain.gain.linearRampToValueAtTime(1.0, t1 + 0.15);
-    }, 160);
-  }
-
-  function playVictory() {
-    var t0 = ctx.currentTime + 0.04, dur = 0;
-    trackGain.gain.cancelScheduledValues(t0);
-    trackGain.gain.setValueAtTime(trackGain.gain.value, t0);
-    trackGain.gain.linearRampToValueAtTime(0.0001, t0 + 0.1);
-    var beat = 0.14;
-    VICTORY.forEach(function (nv) {
-      if (nv[0]) { tone(musicGain, midi(nv[0]), t0 + dur, nv[1] * beat * 0.95, pulse(0.5), 0.2);
-                   tone(musicGain, midi(nv[0] - 12), t0 + dur, nv[1] * beat * 0.95, 'triangle', 0.14); }
-      dur += nv[1] * beat;
+  // ---- decode the captured loops (gzip -> 8-bit PCM -> AudioBuffer) ----
+  function decodeAll(done) {
+    if (decoded) { done && done(); return; }
+    if (!DATA || !ctx || typeof DecompressionStream === 'undefined') { done && done(); return; }
+    if (decoding) return;
+    decoding = true;
+    var names = Object.keys(DATA.tracks), left = names.length;
+    if (!left) { decoded = true; decoding = false; done && done(); return; }
+    names.forEach(function (nm) {
+      var t = DATA.tracks[nm];
+      var bin = atob(t.b64), raw = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) raw[i] = bin.charCodeAt(i);
+      var stream = new Blob([raw]).stream().pipeThrough(new DecompressionStream('gzip'));
+      new Response(stream).arrayBuffer().then(function (ab) {
+        var u8 = new Uint8Array(ab);
+        var buf = ctx.createBuffer(1, u8.length, DATA.rate);
+        var ch = buf.getChannelData(0);
+        for (var j = 0; j < u8.length; j++) ch[j] = (u8[j] - 128) / 128;
+        buffers[nm] = buf;
+        if (--left === 0) { decoded = true; decoding = false; done && done(); }
+      }).catch(function () { if (--left === 0) { decoded = true; decoding = false; done && done(); } });
     });
-    jingleUntil = performance.now() + dur * 1000 + 350;
-    setTimeout(function () {
-      if (!playing) return;
-      var t1 = ctx.currentTime;
-      trackGain.gain.cancelScheduledValues(t1);
-      trackGain.gain.setValueAtTime(0.0001, t1);
-      trackGain.gain.linearRampToValueAtTime(1.0, t1 + 0.2);
-    }, dur * 1000 + 120);
+  }
+
+  // ---- looping playback with crossfades ----
+  function fadeStop(v, fade) {
+    if (!v) return;
+    var t = ctx.currentTime;
+    try {
+      v.g.gain.cancelScheduledValues(t);
+      v.g.gain.setValueAtTime(Math.max(v.g.gain.value, 0.0001), t);
+      v.g.gain.exponentialRampToValueAtTime(0.0001, t + fade);
+    } catch (e) {}
+    try { v.src.stop(t + fade + 0.05); } catch (e) {}
+  }
+  function startVoice(name, fade) {
+    if (!ctx || !buffers[name]) return;
+    var loop = !(DATA.tracks[name] && DATA.tracks[name].loop === false);
+    var g = ctx.createGain(); g.connect(musicGain);
+    var src = ctx.createBufferSource(); src.buffer = buffers[name]; src.loop = loop; src.connect(g);
+    var t = ctx.currentTime; fade = fade || 0.3;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(1.0, t + fade);
+    src.start(t);
+    if (voice) fadeStop(voice, fade);
+    voice = { src: src, g: g, name: name };
+  }
+  function setTrack(name) {
+    if (!name || name === cur) return;
+    cur = name;
+    if (playing && decoded) startVoice(name, 0.35);
+  }
+  function playVictory() {
+    if (!playing || !decoded || !buffers.victory) return;
+    startVoice('victory', 0.08);
+    var durMs = (DATA.tracks.victory.frames / DATA.rate) * 1000;
+    jingleUntil = performance.now() + durMs + 200;
+    setTimeout(function () { if (playing) startVoice(cur, 0.4); }, durMs + 60); // resume context music
   }
 
   // ---- live game state from emulator RAM ----
@@ -950,45 +851,36 @@ MUSIC_JS = r"""
     // Victory jingle when a battle ends in a win.
     if ((lastInBattle === 1 || lastInBattle === 2) && s.inBattle === 0 && s.result === 0) playVictory();
     lastInBattle = s.inBattle;
-    if (performance.now() < jingleUntil) return;
+    if (performance.now() < jingleUntil) return;   // let the jingle finish
     setTrack(pickTrack(s));
   }
 
-  // ---- SFX bus (independent of the music loop) ----
+  // ---- SFX bus (independent of the music; tempo doesn't matter) ----
+  var pulseCache = {};
+  function pulse(duty) {
+    if (pulseCache[duty]) return pulseCache[duty];
+    var n = 28, real = new Float32Array(n), imag = new Float32Array(n);
+    for (var k = 1; k < n; k++) imag[k] = (2 / (k * Math.PI)) * Math.sin(Math.PI * k * duty);
+    var w = ctx.createPeriodicWave(real, imag);
+    pulseCache[duty] = w; return w;
+  }
+  function midi(n) { return 440 * Math.pow(2, (n - 69) / 12); }
+  function tone(dest, freq, t, dur, wave, vol) {
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    if (typeof wave === 'string') o.type = wave; else o.setPeriodicWave(wave);
+    o.frequency.value = freq;
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.linearRampToValueAtTime(vol, t + 0.01);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+    o.connect(g); g.connect(dest);
+    o.start(t); o.stop(t + dur + 0.03);
+  }
   function ensure() {
     if (ctx) return;
     ctx = new AC();
-    master = ctx.createGain(); master.gain.value = (window.__soundOn === false ? 0 : 0.5); master.connect(ctx.destination);
-    musicGain = ctx.createGain(); musicGain.connect(master);
-    // lofi warmth: roll the highs off the whole music loop (kept off SFX/victory so they stay crisp)
-    lofiLPF = ctx.createBiquadFilter(); lofiLPF.type = 'lowpass'; lofiLPF.frequency.value = 2600; lofiLPF.Q.value = 0.5;
-    lofiLPF.connect(musicGain);
-    trackGain = ctx.createGain(); trackGain.gain.value = 1; trackGain.connect(lofiLPF);
-    sfxGain = ctx.createGain(); sfxGain.gain.value = 0.85; sfxGain.connect(master);
-    NOISE = makeNoise();
-  }
-  // Continuous vinyl-crackle bed: a quiet hiss with occasional pops, looped.
-  function startCrackle() {
-    if (crackleSrc || !ctx) return;
-    var len = Math.floor(ctx.sampleRate * 2), buf = ctx.createBuffer(1, len, ctx.sampleRate), d = buf.getChannelData(0);
-    for (var i = 0; i < len; i++) { var v = Math.random() * 2 - 1; d[i] = (Math.random() < 0.012) ? v : v * 0.1; }
-    crackleSrc = ctx.createBufferSource(); crackleSrc.buffer = buf; crackleSrc.loop = true;
-    var hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 1400;
-    var cg = ctx.createGain(); cg.gain.value = 0.05;
-    crackleSrc.connect(hp); hp.connect(cg); cg.connect(master);
-    crackleSrc.start();
-  }
-  function stopCrackle() { if (crackleSrc) { try { crackleSrc.stop(); } catch (e) {} crackleSrc = null; } }
-  // Soft, sustained lofi voice: gentle attack, slight analog drift, smooth release.
-  function lpad(freq, t, dur, wave, vol) {
-    var o = ctx.createOscillator(), g = ctx.createGain();
-    o.type = wave; o.frequency.value = freq; o.detune.value = Math.random() * 8 - 4;
-    g.gain.setValueAtTime(0.0001, t);
-    g.gain.linearRampToValueAtTime(vol, t + 0.03);
-    g.gain.setValueAtTime(vol, t + dur * 0.5);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
-    o.connect(g); g.connect(trackGain);
-    o.start(t); o.stop(t + dur + 0.05);
+    master = ctx.createGain(); master.gain.value = (window.__soundOn === false ? 0 : 0.6); master.connect(ctx.destination);
+    musicGain = ctx.createGain(); musicGain.gain.value = 0.85; musicGain.connect(master);
+    sfxGain = ctx.createGain(); sfxGain.gain.value = 0.7; sfxGain.connect(master);
   }
   function sfx(name) {
     if (window.__soundOn === false) return;
@@ -1010,8 +902,7 @@ MUSIC_JS = r"""
     }
   }
   window.__sfx = sfx;
-  // A subtle blip when the player taps our overlay chrome (toolbar / menu), so
-  // the UI feels responsive even though the game's own audio is muted.
+  // A subtle blip when the player taps our overlay chrome (toolbar / menu).
   if (typeof document !== 'undefined') {
     document.addEventListener('click', function (e) {
       var t = e.target; if (!t || !t.closest) return;
@@ -1022,18 +913,16 @@ MUSIC_JS = r"""
   window.__musicStart = function () {
     ensure();
     if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
-    master.gain.value = 0.5;
+    master.gain.value = (window.__soundOn === false ? 0 : 0.6);
     if (playing) return;
-    playing = true; step = 0; lastRoot = 0; nextTime = ctx.currentTime + 0.1;
-    startCrackle();
-    timer = setInterval(schedule, 60);
+    playing = true; lastStreak = null; lastInBattle = 0; jingleUntil = 0;
+    decodeAll(function () { if (playing && !voice) startVoice(cur, 0.5); });
     if (!poller) poller = setInterval(poll, 200);
   };
   window.__musicStop = function () {
     playing = false;
-    if (timer) { clearInterval(timer); timer = null; }
     if (poller) { clearInterval(poller); poller = null; }
-    stopCrackle();
+    if (voice) { fadeStop(voice, 0.2); voice = null; }
     if (master) master.gain.value = 0;
   };
 
@@ -1041,9 +930,14 @@ MUSIC_JS = r"""
   window.__music = { pick: pickTrack, read: readState, victory: playVictory,
                      get track() { return cur; } };
 
-  // The real Game Boy audio is started/unlocked by binjgb's own gesture
-  // listeners and the Sound toggle, so we no longer auto-start the synth here.
-  // (window.__sfx still lazily creates its blip context on the first tap.)
+  // Browsers block audio until a user gesture; start/resume the real music on
+  // the first tap or key press if sound is on.
+  function kick() {
+    if (window.__soundOn === false) return;
+    if (window.__musicStart) window.__musicStart();
+    if (ctx && ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
+  }
+  ['pointerdown', 'keydown', 'touchend'].forEach(function (ev) { window.addEventListener(ev, kick); });
 })();
 """
 
@@ -1440,6 +1334,7 @@ def main():
     binjgb_js = os.path.join(VENDOR, "binjgb.js")
     binjgb_wasm = os.path.join(VENDOR, "binjgb.wasm")
     player_js = os.path.join(VENDOR, "player.js")
+    music_data_js = os.path.join(VENDOR, "music_data.js")
 
     for p in (binjgb_js, binjgb_wasm, player_js):
         if not os.path.exists(p):
@@ -1454,6 +1349,16 @@ def main():
     emu_js = read_text(binjgb_js)
     wrap_js = read_text(player_js)
     title_esc = html.escape(args.title)
+
+    # The game's own music, captured to loops by render_music.js. Optional: if it
+    # hasn't been generated yet the player still runs (just without background
+    # music), so the build never hard-fails on it.
+    if os.path.exists(music_data_js):
+        music_js_data = read_text(music_data_js)
+    else:
+        music_js_data = "window.__MUSIC_DATA = null;\n"
+        print("note: %s not found -- run render_music.js for background music."
+              % music_data_js)
 
     # Assemble the single document. Order matters:
     #   1) data blocks (WASM + ROM as base64 strings)
@@ -1489,6 +1394,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -1503,6 +1409,7 @@ def main():
         FILTER_JS,
         SPEED_JS,
         PWA_JS,
+        music_js_data,   # window.__MUSIC_DATA (captured loops) -- must precede MUSIC_JS
         MUSIC_JS,
         SOUND_JS,
         PAUSE_JS,
