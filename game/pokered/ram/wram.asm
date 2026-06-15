@@ -2293,6 +2293,7 @@ wQuizPickCount::    db  ; scratch: this grade's question count
 wQuizSubjBase::     dw  ; scratch: this grade's subject-array base address
 wQuizPickTries::    db  ; scratch: remaining re-roll attempts
 wQuizPickIdx::      db  ; scratch: chosen question index
+wQuizFirstTry::     db  ; 1 if the last question was answered right on the FIRST try (mastery)
 
 
 SECTION "Stack", WRAM0

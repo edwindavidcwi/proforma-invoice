@@ -132,7 +132,9 @@ QuizCapture::
 	call QuizSelectQuestion
 	call QuizLoadQuestion
 	call QuizAsk                   ; carry set = answered correctly
-	jr nc, .escaped
+	ld a, [wQuizFirstTry]          ; capture requires FIRST-TRY correct (anti-luck)
+	and a
+	jr z, .escaped                 ; wrong, or right only after a hint -> it escapes
 	ld a, [wQuizCapCount]
 	inc a
 	ld [wQuizCapCount], a
@@ -442,7 +444,19 @@ QuizAsk::
 	call PrintText
 	jr .attempt
 .correct
-	; Bump the answered-in-a-row streak (capped at 99) and show it.
+	; Real-mastery / anti-luck rule: only a FIRST-TRY correct answer builds the
+	; streak. Getting it right only after a wrong guess (hint shown) earns no
+	; streak credit and breaks the streak -- guessing can't fake progress.
+	ld a, [wQuizAttemptsLeft]
+	cp QUIZ_MAX_ATTEMPTS            ; still full == no wrong attempt yet == first try
+	jr z, .firstTry
+	xor a
+	ld [wQuizStreak], a            ; correct only after a miss -> streak resets
+	ld [wQuizFirstTry], a
+	jr .streakReady
+.firstTry
+	ld a, 1
+	ld [wQuizFirstTry], a
 	ld a, [wQuizStreak]
 	cp 99
 	jr nc, .streakReady
@@ -457,6 +471,7 @@ QuizAsk::
 .failed
 	xor a
 	ld [wQuizStreak], a            ; a miss breaks the streak
+	ld [wQuizFirstTry], a
 	; Reveal the correct answer so even a missed question teaches the fact.
 	ld a, [wQuizCorrectAnsPtr]
 	ld e, a
