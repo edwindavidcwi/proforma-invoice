@@ -58,11 +58,11 @@ def parse_asm(path):
 
     # 3) quizq entries (carry their own grade via the G<g>Q<i> label prefix)
     qs = []
-    qline = re.compile(r"^\s*quizq\s+(\w+),\s*(\d+),\s*(\d+),\s*(\w+),\s*(\w+),\s*(\w+),\s*(\w+),\s*(\w+)", re.M)
+    qline = re.compile(r"^\s*quizq\s+(\w+),\s*(\d+),\s*(\d+),\s*(\w+),\s*(\w+),\s*(\w+),\s*(\w+),\s*(\w+),\s*(\w+)", re.M)
     for m in qline.finditer(text):
         qlabel, cidx, num = m.group(1), int(m.group(2)), int(m.group(3))
-        alabels = [m.group(4), m.group(5), m.group(6), m.group(7)]
-        hlabel = m.group(8)
+        alabels = [m.group(4), m.group(5), m.group(6), m.group(7), m.group(8)]
+        hlabel = m.group(9)
         gm = re.match(r"G(\d)Q(\d+)", qlabel)
         grade = int(gm.group(1)) if gm else 0
         qs.append({"label": qlabel, "grade": grade, "cidx": cidx, "num": num,
@@ -87,8 +87,8 @@ def resolve(q):
 
 def lint(q):
     g, lbl = q["grade"], q["label"]
-    if not (2 <= q["num"] <= 4):
-        err(f"{lbl}: NUM_ANSWERS {q['num']} not in 2..4")
+    if not (2 <= q["num"] <= 5):
+        err(f"{lbl}: NUM_ANSWERS {q['num']} not in 2..5")
     if not (0 <= q["cidx"] < q["num"]):
         err(f"{lbl}: CORRECT_INDEX {q['cidx']} out of range for {q['num']} answers")
     # charmap + length

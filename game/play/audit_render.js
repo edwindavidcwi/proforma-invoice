@@ -40,7 +40,7 @@ for (let g = 1; g <= 5; g++) {
   const base = rom[e] | (rom[e + 1] << 8), count = rom[e + 2], bank = rom[e + 3];
   const map = new Map();
   for (let i = 0; i < count; i++) {
-    const eo = off(bank, base) + i * 14;
+    const eo = off(bank, base) + i * 16;
     const q = romStr(bank, rom[eo] | (rom[eo + 1] << 8));
     const ci = rom[eo + 2];
     const n = rom[eo + 3];                 // 3 or 4 answers
@@ -57,7 +57,7 @@ for (let g = 1; g <= 5; g++) {
   let totalChecked = 0, mismatches = 0;
   console.log(`Sampling the live loader ${RUNS}x per grade (${RUNS * 5} loads)...\n`);
   for (let g = 1; g <= 5; g++) {
-    const seen = new Set(), slot = [0, 0, 0, 0];
+    const seen = new Set(), slot = [0, 0, 0, 0, 0];
     let badRender = 0, examples = [];
     for (let r = 0; r < RUNS; r++) {
       const rp = module._malloc(size);
@@ -72,7 +72,7 @@ for (let g = 1; g <= 5; g++) {
       module._emulator_set_PC(e, QPA.addr); run(60);
       let q = ""; for (let i = 0; i < 20; i++) { const b = rd(wQStr + i); if (b === 0x50) break; q += tile(b); }
       const ansRow = rr => { let s = ""; for (let c = 2; c < 19; c++) s += tile(rd(wTileMap + rr * 20 + c)); return s.trim(); };
-      const allRows = [ansRow(9), ansRow(11), ansRow(13), ansRow(15)]; // up to 4 answer rows
+      const allRows = [ansRow(8), ansRow(10), ansRow(12), ansRow(14), ansRow(16)]; // up to 5 answer rows
       module._emulator_delete(e); module._free(rp);
       if (!q || q.indexOf('~') >= 0 || q.trim().length < 2) { module._emulator_delete; continue; } // box not drawn this run; skip
       totalChecked++;
@@ -86,7 +86,7 @@ for (let g = 1; g <= 5; g++) {
       seen.add(q); slot[cs]++;
     }
     const cov = seen.size, total = slot.reduce((a, b) => a + b, 0);
-    const pct = total ? slot.map(s => Math.round(100 * s / total)) : [0, 0, 0, 0];
+    const pct = total ? slot.map(s => Math.round(100 * s / total)) : [0, 0, 0, 0, 0];
     console.log(`Grade ${g}: render OK ${total}/${RUNS}, coverage ${cov}/100 distinct, ` +
       `correct-answer slot split ${pct.join("/")}%  ${badRender ? "FAIL " + badRender : "OK"}`);
     examples.forEach(x => console.log("    " + x));

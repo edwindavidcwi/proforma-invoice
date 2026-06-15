@@ -61,7 +61,7 @@ function tile(b) {
 
     let q = ""; for (let i = 0; i < 20; i++) { const b = rd(wQuizQStr + i); if (b === 0x50) break; q += tile(b); }
     const row = (r) => { let s = ""; for (let c = 1; c < 19; c++) s += tile(rd(wTileMap + r * 20 + c)); return s.trim(); };
-    const answers = [row(9), row(11), row(13)].filter((s) => s);
+    const answers = [row(8), row(10), row(12), row(14), row(16)].filter((s) => s);
     const ok = q.length > 1 && answers.length >= 2 && !(q + answers.join("")).includes("~");
     if (!ok) failures++;
     console.log(`${ok ? "PASS" : "FAIL"}  ${label} (bank ${rd(wQuizDataBank)}): "${q}"  ->  ${answers.join(" / ")}`);

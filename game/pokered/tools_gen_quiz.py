@@ -47,18 +47,18 @@ def mk(text, correct, distractors, hint):
 def num(text, correct, hint, distractors=None):
     c = int(correct)
     if distractors is None:
-        distractors = _three(c, [c - 1, c + 1, c + 2, c + 5, c - 2])  # 4th option where it fits
+        distractors = _npick(c, [c - 1, c + 1, c + 2, c + 5, c - 2, c + 3, c + 10], 4)  # up to 5 options
     return mk(text, correct, distractors, hint)
 
 def pick2(correct, word, candidates):
-    """Pick up to 3 distinct distractors from the pool (a 4th answer option where
-    the pool allows); falls back to 2, or None if fewer than 2 are available."""
+    """Pick up to 4 distinct distractors from the pool (for up to a 5th answer
+    option where the pool allows); falls back as low as 2, or None if <2."""
     out = []
     for c in candidates:
         c = str(c)
         if c != correct and c != word and c not in out and okstr(c, 9):
             out.append(c)
-        if len(out) == 3:
+        if len(out) == 4:
             return out
     return out if len(out) >= 2 else None
 
@@ -94,11 +94,11 @@ def smart(op, a, b, c):
     elif op == 'x': cands = [a * (b - 1), a + b, a * (b + 1), c + 1, c - 1]  # a group off; added
     elif op == '/': cands = [c + 1, b, c + 2, c - 1, c + 3]            # near; confuse with divisor
     else:           cands = [c + 1, c + 5, c - 2, c * 2, c + 10]
-    return _three(c, cands)            # 3 distractors -> a 4th answer option
+    return _npick(c, cands, 4)         # 4 distractors -> up to a 5th answer option
 
 def spread(c):
-    """Three misses (a near one and wider ones) so the 4 options aren't consecutive."""
-    return _three(c, [c + 1, c + 5, c - 3, c * 2 if c <= 20 else c + 10, c + 10, c - 1, c + 2, c - 2])
+    """Four misses (near and wider) so the 5 options aren't a consecutive run."""
+    return _npick(c, [c + 1, c + 5, c - 3, c * 2 if c <= 20 else c + 10, c + 10, c - 1, c + 2, c - 2, c + 3, c + 20], 4)
 
 # ===================== word / fact pools =====================
 OPP = [("big","small"),("hot","cold"),("up","down"),("in","out"),("day","night"),
@@ -353,14 +353,14 @@ def emit():
     w("; question into RAM before showing it (see QuizLoadQuestion).")
     w("; ============================================================================")
     w("")
-    w("; One question entry (14 bytes):")
-    w(";   quizq QUESTION, CORRECT_INDEX(0-3), NUM_ANSWERS(2-4), ANS0, ANS1, ANS2, ANS3, HINT")
+    w("; One question entry (16 bytes):")
+    w(";   quizq QUESTION, CORRECT_INDEX(0-4), NUM_ANSWERS(2-5), ANS0..ANS4, HINT")
     w("MACRO quizq")
     w("\tdw \\1")
     w("\tdb \\2")
     w("\tdb \\3")
-    w("\tdw \\4, \\5, \\6, \\7")
-    w("\tdw \\8")
+    w("\tdw \\4, \\5, \\6, \\7, \\8")
+    w("\tdw \\9")
     w("ENDM")
     w("")
     w("QuizGradeTable::")
@@ -407,19 +407,18 @@ def emit():
     for g in range(1, 6):
         w(f'SECTION "Quiz Data G{g}", ROMX')
         w(f"Grade{g}Questions::")
+        LET = "ABCDE"
         for i, q in enumerate(banks[g], 1):
             p = f"G{g}Q{i}"
-            n = len(q.answers)                       # 3 or 4 answers
-            slot3 = f"{p}D" if n >= 4 else f"{p}C"    # 4th slot (real D, or C as filler)
-            w(f"\tquizq {p}, 0, {n}, {p}A, {p}B, {p}C, {slot3}, {p}H")
+            n = len(q.answers)                       # 3, 4 or 5 answers
+            # 5 answer-pointer slots; absent slots reuse the last real answer label
+            slots = [f"{p}{LET[k if k < n else n - 1]}" for k in range(5)]
+            w(f"\tquizq {p}, 0, {n}, {', '.join(slots)}, {p}H")
         for i, q in enumerate(banks[g], 1):
             p = f"G{g}Q{i}"
             w(f'{p}: db "{q.text}@"')
-            w(f'{p}A: db "{q.answers[0]}@"')
-            w(f'{p}B: db "{q.answers[1]}@"')
-            w(f'{p}C: db "{q.answers[2]}@"')
-            if len(q.answers) >= 4:
-                w(f'{p}D: db "{q.answers[3]}@"')
+            for k in range(len(q.answers)):
+                w(f'{p}{LET[k]}: db "{q.answers[k]}@"')
             w(f'{p}H: db "{q.hint}@"')
         w("")
     return "\n".join(L)

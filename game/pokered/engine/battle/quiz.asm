@@ -257,7 +257,7 @@ QuizEntryFromIdx:
 	and a
 	jr z, .done
 	ld b, a
-	ld de, 14
+	ld de, 16
 .loop
 	add hl, de
 	dec b
@@ -392,7 +392,7 @@ QuizPickGrade:
 	and a
 	jr z, .gotEntry
 	ld b, a                         ; b = index
-	ld de, 14
+	ld de, 16
 .addLoop
 	add hl, de
 	dec b
@@ -408,7 +408,7 @@ QuizPickGrade:
 QuizLoadQuestion:
 	ld [wQuizDataBank], a
 	ld de, wQuizEntry
-	ld bc, 14
+	ld bc, 16
 	call FarCopyData               ; bank:hl(entry) -> wQuizEntry
 	ld hl, wQuizEntry              ; question text pointer (offset 0)
 	ld de, wQuizQStr
@@ -425,7 +425,10 @@ QuizLoadQuestion:
 	ld hl, wQuizEntry + 10
 	ld de, wQuizA3
 	call QuizFixupStr
-	ld hl, wQuizEntry + 12         ; hint (offset 12)
+	ld hl, wQuizEntry + 12
+	ld de, wQuizA4
+	call QuizFixupStr
+	ld hl, wQuizEntry + 14         ; hint (offset 14)
 	ld de, wQuizHStr
 	call QuizFixupStr
 	ld hl, wQuizEntry
@@ -481,7 +484,7 @@ QuizAsk::
 	pop hl
 	; Remember the method-hint pointer (entry offset 12 = answer-table base + 8).
 	push hl
-	ld bc, 8
+	ld bc, 10
 	add hl, bc
 	ld a, [hli]
 	ld [wQuizHintPtr], a
@@ -630,7 +633,7 @@ QuizDrawScreen::
 	ld d, a
 	call PlaceString
 	call QuizPrintAnswers
-	ld a, 9
+	ld a, 8
 	ld [wTopMenuItemY], a
 	ld a, 1
 	ld [wTopMenuItemX], a
@@ -652,7 +655,7 @@ QuizDrawScreen::
 QuizPrintAnswers::
 	xor a
 	ld [wQuizSlot], a              ; start at display slot 0
-	hlcoord 2, 9                   ; hl = destination tile for slot 0
+	hlcoord 2, 8                   ; hl = destination tile for slot 0
 .loop
 	ld a, [wQuizSlot]
 	ld b, a                        ; b = slot

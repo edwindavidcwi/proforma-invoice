@@ -92,7 +92,7 @@ checked = mism = skipped = 0; bad = []
 for g in range(1,6):
     e = gto+(g-1)*4; base = rom[e]|(rom[e+1]<<8); cnt = rom[e+2]; bank = rom[e+3]
     for idx in range(cnt):
-        eo = off(bank,base)+idx*14
+        eo = off(bank,base)+idx*16
         q = rd(bank, rom[eo]|(rom[eo+1]<<8)); ci = rom[eo+2]
         correct = rd(bank, rom[eo+4+2*ci]|(rom[eo+5+2*ci]<<8))
         exp = key_answer(q)

@@ -2256,12 +2256,13 @@ NEXTU
 ; Quiz Battle scratch: the chosen question (entry + its strings) is copied here
 ; from its ROM bank before display. This overlays the PC box, which is never
 ; touched during a battle, so no extra WRAM is needed.
-wQuizEntry:: ds 14
+wQuizEntry:: ds 16
 wQuizQStr:: ds 20
 wQuizA0:: ds 20
 wQuizA1:: ds 20
 wQuizA2:: ds 20
 wQuizA3:: ds 20
+wQuizA4:: ds 20
 wQuizHStr:: ds 20
 ; Spaced-repetition ring of recently-missed questions (gradeIdx, index). Overlays
 ; the idle PC box; selection validates each entry (grade < 5, index < count) so
