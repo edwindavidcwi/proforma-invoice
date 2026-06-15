@@ -633,29 +633,71 @@ QuizAsk::
 	and a                          ; clear carry
 	ret
 
-; Write wQuizStreak (0-99) as a decimal string into wStringBuffer for display.
+; Write the streak and the current attack-power multiplier into wStringBuffer,
+; e.g. "4  x1.5" -- shown as "Streak 4  x1.5". The multiplier matches the damage
+; bonus in QuizStreakDamageBonus: (8 + min(streak,8)) / 8, in tenths (1.0 .. 2.0).
 QuizStreakToBuffer::
+	ld hl, wStringBuffer
 	ld a, [wQuizStreak]
-	ld b, 0                        ; b = tens digit
+	call QuizPutDec                ; streak number
+	ld a, CHARVAL(" ")
+	ld [hli], a
+	ld a, CHARVAL("x")
+	ld [hli], a
+	; multiplier in tenths T = (8 + min(streak,8)) * 5 / 4   (range 10..20)
+	ld a, [wQuizStreak]
+	cp 9
+	jr c, .cap
+	ld a, 8
+.cap
+	add 8                          ; n = 8 + min(streak,8)
+	ld b, a
+	add a
+	add a                          ; n*4
+	add b                          ; n*5
+	srl a
+	srl a                          ; (n*5)/4 = T
+	; ones = T/10 (1 or 2), tenth = T mod 10
+	ld c, 0
+.tens
+	cp 10
+	jr c, .haveOnes
+	sub 10
+	inc c
+	jr .tens
+.haveOnes
+	ld b, a                        ; b = tenths digit
+	ld a, c
+	add CHARVAL("0")               ; whole part
+	ld [hli], a
+	ld a, CHARVAL(".")
+	ld [hli], a
+	ld a, b
+	add CHARVAL("0")               ; tenths
+	ld [hli], a
+	ld [hl], CHARVAL("@")
+	ret
+
+; Write a (0-99) as a decimal string to [hl] (no leading zero), advancing hl.
+QuizPutDec:
+	ld c, 0
 .tens
 	cp 10
 	jr c, .ones
 	sub 10
-	inc b
+	inc c
 	jr .tens
 .ones
-	ld c, a                        ; c = ones digit
-	ld hl, wStringBuffer
-	ld a, b
-	and a
-	jr z, .noTens
-	add CHARVAL("0")               ; tens digit (skip a leading zero)
-	ld [hli], a
-.noTens
+	ld b, a                        ; ones
 	ld a, c
-	add CHARVAL("0")               ; ones digit
+	and a
+	jr z, .skipTens
+	add CHARVAL("0")
 	ld [hli], a
-	ld [hl], CHARVAL("@")          ; string terminator
+.skipTens
+	ld a, b
+	add CHARVAL("0")
+	ld [hli], a
 	ret
 
 ; Draw the question box, the question, the answers, and prime the menu.
