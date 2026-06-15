@@ -2263,6 +2263,12 @@ wQuizA1:: ds 20
 wQuizA2:: ds 20
 wQuizA3:: ds 20
 wQuizHStr:: ds 20
+; Spaced-repetition ring of recently-missed questions (gradeIdx, index). Overlays
+; the idle PC box; selection validates each entry (grade < 5, index < count) so
+; stale/box data here is harmless.
+wQuizReviewRing:: ds 8  ; 4 entries x (gradeIdx, index)
+wQuizReviewHead:: db    ; next write slot (masked to 0-3 on use)
+wQuizReviewFilled:: db  ; valid slot count (validated on use)
 ENDU
 
 

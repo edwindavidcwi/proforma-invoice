@@ -183,6 +183,49 @@ QuizPractice::
 ; Choose a question scaled to the player's badges (used by battle attack/defense).
 ; Grade = min(5, badgeCount / 2 + 1).  Returns hl -> 12-byte question entry.
 QuizSelectQuestion::
+	; Spaced repetition: when there are recently-missed questions, ~50% of the
+	; time re-ask one of them instead of a fresh question.
+	ld a, [wQuizReviewFilled]
+	and a
+	jr z, .newQuestion
+	cp 5
+	jr nc, .newQuestion            ; stale/garbage count -> ignore the ring
+	call Random
+	and 1
+	jr z, .newQuestion
+	ld a, [wQuizReviewFilled]
+	ld b, a                        ; b = filled count (1-4)
+	call Random
+.modReview
+	cp b
+	jr c, .gotReview
+	sub b
+	jr .modReview
+.gotReview
+	add a                           ; ring index * 2
+	ld c, a
+	ld b, 0
+	ld hl, wQuizReviewRing
+	add hl, bc
+	ld a, [hli]
+	cp 5
+	jr nc, .newQuestion            ; bad grade index -> fall back to a new question
+	ld [wQuizGradeIdx], a
+	ld a, [hl]
+	ld [wQuizPickIdx], a
+	; validate index < this grade's question count (guards stale overlay data)
+	ld a, [wQuizGradeIdx]
+	add a
+	add a
+	ld c, a
+	ld b, 0
+	ld hl, QuizGradeTable + 2      ; count byte of grade entry 0
+	add hl, bc
+	ld a, [wQuizPickIdx]
+	cp [hl]
+	jr nc, .newQuestion            ; index out of range -> new question
+	jp QuizEntryFromIdx             ; load that exact question
+.newQuestion
 	ld hl, wObtainedBadges
 	ld b, 1
 	call CountSetBits              ; -> [wNumSetBits]
@@ -190,6 +233,67 @@ QuizSelectQuestion::
 	srl a                          ; badges / 2
 	inc a                          ; + 1
 	jr QuizPickGrade
+
+; Compute a question entry from wQuizGradeIdx + wQuizPickIdx (used by review).
+; Out: a = data bank, hl = entry address, wQuizDataBank set.
+QuizEntryFromIdx:
+	ld a, [wQuizGradeIdx]
+	add a
+	add a                          ; idx * 4
+	ld c, a
+	ld b, 0
+	ld hl, QuizGradeTable
+	add hl, bc
+	ld a, [hli]
+	ld e, a
+	ld a, [hli]
+	ld d, a                        ; de = list base
+	inc hl                         ; skip count byte
+	ld a, [hl]
+	ld [wQuizDataBank], a          ; data bank
+	ld h, d
+	ld l, e                        ; hl = base
+	ld a, [wQuizPickIdx]
+	and a
+	jr z, .done
+	ld b, a
+	ld de, 14
+.loop
+	add hl, de
+	dec b
+	jr nz, .loop
+.done
+	ld a, [wQuizDataBank]
+	ret
+
+; Record the current question (wQuizGradeIdx + wQuizPickIdx) as recently missed,
+; so spaced repetition brings it back. Duplicates are fine (weights it harder).
+QuizReviewPush:
+	ld a, [wQuizReviewHead]
+	and 3                          ; mask (overlay may hold stale data)
+	add a                          ; (head & 3) * 2
+	ld c, a
+	ld b, 0
+	ld hl, wQuizReviewRing
+	add hl, bc
+	ld a, [wQuizGradeIdx]
+	ld [hli], a
+	ld a, [wQuizPickIdx]
+	ld [hl], a
+	ld a, [wQuizReviewHead]
+	inc a
+	and 3
+	ld [wQuizReviewHead], a
+	ld a, [wQuizReviewFilled]
+	cp 4
+	jr c, .inc
+	ld a, 4                        ; clamp (heals stale/garbage count)
+	ld [wQuizReviewFilled], a
+	ret
+.inc
+	inc a
+	ld [wQuizReviewFilled], a
+	ret
 
 ; Choose a question scaled to the active Pokemon's level (used by item use).
 ; Grade rises every 10 levels: Lv<=10 -> 1, <=20 -> 2, ... Lv 41+ -> 5.
@@ -453,6 +557,7 @@ QuizAsk::
 	xor a
 	ld [wQuizStreak], a            ; correct only after a miss -> streak resets
 	ld [wQuizFirstTry], a
+	call QuizReviewPush            ; not mastered first-try -> queue for review
 	jr .streakReady
 .firstTry
 	ld a, 1
@@ -472,6 +577,7 @@ QuizAsk::
 	xor a
 	ld [wQuizStreak], a            ; a miss breaks the streak
 	ld [wQuizFirstTry], a
+	call QuizReviewPush            ; missed -> queue for spaced-repetition review
 	; Reveal the correct answer so even a missed question teaches the fact.
 	ld a, [wQuizCorrectAnsPtr]
 	ld e, a
