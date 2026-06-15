@@ -508,7 +508,7 @@ BODY_HTML = r"""
       <div id="menu_head"><span>&#9776; Menu</span><button id="btnMenuClose" title="Close">&#10005;</button></div>
       <div id="menu_body">
         <section class="card">
-          <h3>Fast-forward speed <small>(normal play is 2&times;; hold Space to boost)</small></h3>
+          <h3>Fast-forward speed <small>(normal play is 1&times; so the real music sounds right; hold Space to boost)</small></h3>
           <span class="seg" title="Speed while holding Space">
             <button class="spd" data-spd="3">3&times;</button>
             <button class="spd on" data-spd="4">4&times;</button>
@@ -581,12 +581,16 @@ FILTER_JS = r"""
 """
 
 
-# Game-speed control. Normal play runs at 2x (BASE). Holding Space "fast-forwards"
-# to the boost speed chosen in the menu (default 4x). window.__speed is what
-# player.js reads in its run loop; the background music ignores it (own clock).
+# Game-speed control. Normal play runs at 1x (BASE) so the game's REAL Pokemon
+# Red music and sound effects play at their true pitch/tempo (they're clocked by
+# the emulator, so any faster and they'd speed up). Holding Space "fast-forwards"
+# to the boost speed chosen in the menu (default 4x) for grinding; the real audio
+# is muted only while boosting (to avoid the chipmunk speed-up). window.__speed is
+# what player.js reads in its run loop; window.__boosting tells the audio code to
+# mute during a boost.
 SPEED_JS = r"""
 (function () {
-  var BASE = 2;                                   // normal play speed
+  var BASE = 1;                                   // normal play speed (real-time, so the real music sounds right)
   var btns = Array.prototype.slice.call(document.querySelectorAll('.spd'));
   var boost = 4;
   try { var v = parseInt(localStorage.getItem('pq_boost'), 10); if ([3,4,6,8].indexOf(v) >= 0) boost = v; } catch (e) {}
@@ -594,7 +598,8 @@ SPEED_JS = r"""
 
   function applySpeed() {
     window.__speed = boosting ? boost : BASE;
-    if (window.__applyVolume) window.__applyVolume();  // keep game audio muted / music running
+    window.__boosting = boosting;                      // audio mutes itself while fast-forwarding
+    if (window.__applyVolume) window.__applyVolume();  // unmute real audio at 1x, mute during boost
   }
   function setBoost(s) {
     boost = s;
@@ -606,7 +611,7 @@ SPEED_JS = r"""
   setBoost(boost);
   applySpeed();
 
-  // Hold Space to fast-forward; release to return to normal 2x. (Typing in a
+  // Hold Space to fast-forward; release to return to normal 1x. (Typing in a
   // text field, if any ever exists, is left alone.)
   function isTyping(e) { var t = e.target; return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA'); }
   window.addEventListener('keydown', function (e) {
@@ -692,20 +697,22 @@ PAUSE_JS = r"""
 """
 
 
-# Sound on/off switch. The game's own audio is kept muted (it would speed up
-# during fast-forward); instead the Sound button toggles the independent,
-# constant-tempo background music (see MUSIC_JS). "Replace all audio" mode.
+# Sound on/off switch. This plays the game's REAL Pokemon Red audio (the genuine
+# route/town/battle music, cries and effects emulated by binjgb), scaled through
+# vm.volume. It sounds correct only at 1x, so we mute it while fast-forwarding
+# (window.__boosting) and the Sound button turns it on/off.
 SOUND_JS = r"""
 (function () {
+  var LEVEL = 0.55;                                     // real-audio volume at 1x
   var btn = document.getElementById('btnSound');
   if (!btn) return;
   var on = true;
   try { if (localStorage.getItem('pq_sound') === '0') on = false; } catch (e) {}
   window.__soundOn = on;
   window.__applyVolume = function () {
-    if (window.__vm) window.__vm.volume = 0;            // game audio replaced by our track
-    if (on) { if (window.__musicStart) window.__musicStart(); }
-    else    { if (window.__musicStop)  window.__musicStop();  }
+    // Real Game Boy audio: on at normal speed, muted while boosting (it would
+    // speed up) and when Sound is off.
+    if (window.__vm) window.__vm.volume = (on && !window.__boosting) ? LEVEL : 0;
   };
   function apply() {
     window.__soundOn = on;
@@ -723,15 +730,16 @@ SOUND_JS = r"""
 """
 
 
-# Original, royalty-free chiptune that ALWAYS plays at normal tempo, independent
-# of the emulator's speed (the game's own audio stays muted). Inspired by the
-# original Pokemon Red soundtrack but built to sound fuller: a 4-voice engine
-# (two variable-duty pulse leads + a triangle bass + a noise-channel drum kit,
-# with an arpeggio shimmer) modelled on the Game Boy's APU. It is CONTEXT-AWARE
-# -- a poller reads the live game state from emulator RAM and crossfades between
-# eight tracks (town / route / cave / centre / wild / trainer / boss / rival),
-# plus a victory jingle. A separate SFX bus adds UI blips and correct/wrong
-# answer feedback. No copyrighted game audio is reproduced.
+# The game now plays its REAL Pokemon Red music and sound (see SOUND_JS, which
+# unmutes binjgb's emulated audio at 1x), so the old synthesized soundtrack is no
+# longer auto-started. This block is kept for two things it still provides:
+#   1. window.__sfx -- a tiny blip when the player taps our HTML chrome (toolbar /
+#      slide-up menu), which are NOT part of the game, so it never clashes with
+#      the real game audio.
+#   2. window.__music -- the pure context-aware track-selection helper (pick/read)
+#      that the headless music test exercises against live emulator RAM.
+# The full synth engine (__musicStart/__musicStop) remains defined but is never
+# auto-started; nothing calls it now.
 MUSIC_JS = r"""
 (function () {
   var AC = window.AudioContext || window.webkitAudioContext;
@@ -1033,11 +1041,9 @@ MUSIC_JS = r"""
   window.__music = { pick: pickTrack, read: readState, victory: playVictory,
                      get track() { return cur; } };
 
-  // Browsers block audio until a user gesture; start on the first tap/key if on.
-  function kick() { if (window.__soundOn !== false) window.__musicStart(); }
-  ['pointerdown', 'keydown', 'touchend'].forEach(function (ev) {
-    window.addEventListener(ev, kick);
-  });
+  // The real Game Boy audio is started/unlocked by binjgb's own gesture
+  // listeners and the Sound toggle, so we no longer auto-start the synth here.
+  // (window.__sfx still lazily creates its blip context on the first tap.)
 })();
 """
 

@@ -491,7 +491,7 @@ body.immersive #game canvas { width: min(98vw, calc((100vh - 30px) * 1.1111)); }
       <div id="menu_head"><span>&#9776; Menu</span><button id="btnMenuClose" title="Close">&#10005;</button></div>
       <div id="menu_body">
         <section class="card">
-          <h3>Fast-forward speed <small>(normal play is 2&times;; hold Space to boost)</small></h3>
+          <h3>Fast-forward speed <small>(normal play is 1&times; so the real music sounds right; hold Space to boost)</small></h3>
           <span class="seg" title="Speed while holding Space">
             <button class="spd" data-spd="3">3&times;</button>
             <button class="spd on" data-spd="4">4&times;</button>
@@ -1296,8 +1296,11 @@ class Audio {
       const channel0 = buffer.getChannelData(0);
       const channel1 = buffer.getChannelData(1);
       for (let i = 0; i < AUDIO_FRAMES; i++) {
-        channel0[i] = this.buffer[2 * i] * volume / 255;
-        channel1[i] = this.buffer[2 * i + 1] * volume / 255;
+        // The core emits 8-bit unsigned PCM (silence ~128). Center it before
+        // scaling so there's no DC offset and the full dynamic range is used --
+        // the real Game Boy music comes through clean instead of quiet & biased.
+        channel0[i] = (this.buffer[2 * i] - 128) * volume / 128;
+        channel1[i] = (this.buffer[2 * i + 1] - 128) * volume / 128;
       }
       const bufferSource = Audio.ctx.createBufferSource();
       bufferSource.buffer = buffer;
@@ -1586,7 +1589,7 @@ class Rewind {
   <script>
 
 (function () {
-  var BASE = 2;                                   // normal play speed
+  var BASE = 1;                                   // normal play speed (real-time, so the real music sounds right)
   var btns = Array.prototype.slice.call(document.querySelectorAll('.spd'));
   var boost = 4;
   try { var v = parseInt(localStorage.getItem('pq_boost'), 10); if ([3,4,6,8].indexOf(v) >= 0) boost = v; } catch (e) {}
@@ -1594,7 +1597,8 @@ class Rewind {
 
   function applySpeed() {
     window.__speed = boosting ? boost : BASE;
-    if (window.__applyVolume) window.__applyVolume();  // keep game audio muted / music running
+    window.__boosting = boosting;                      // audio mutes itself while fast-forwarding
+    if (window.__applyVolume) window.__applyVolume();  // unmute real audio at 1x, mute during boost
   }
   function setBoost(s) {
     boost = s;
@@ -1606,7 +1610,7 @@ class Rewind {
   setBoost(boost);
   applySpeed();
 
-  // Hold Space to fast-forward; release to return to normal 2x. (Typing in a
+  // Hold Space to fast-forward; release to return to normal 1x. (Typing in a
   // text field, if any ever exists, is left alone.)
   function isTyping(e) { var t = e.target; return t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA'); }
   window.addEventListener('keydown', function (e) {
@@ -1965,26 +1969,25 @@ class Rewind {
   window.__music = { pick: pickTrack, read: readState, victory: playVictory,
                      get track() { return cur; } };
 
-  // Browsers block audio until a user gesture; start on the first tap/key if on.
-  function kick() { if (window.__soundOn !== false) window.__musicStart(); }
-  ['pointerdown', 'keydown', 'touchend'].forEach(function (ev) {
-    window.addEventListener(ev, kick);
-  });
+  // The real Game Boy audio is started/unlocked by binjgb's own gesture
+  // listeners and the Sound toggle, so we no longer auto-start the synth here.
+  // (window.__sfx still lazily creates its blip context on the first tap.)
 })();
 
 </script>
   <script>
 
 (function () {
+  var LEVEL = 0.55;                                     // real-audio volume at 1x
   var btn = document.getElementById('btnSound');
   if (!btn) return;
   var on = true;
   try { if (localStorage.getItem('pq_sound') === '0') on = false; } catch (e) {}
   window.__soundOn = on;
   window.__applyVolume = function () {
-    if (window.__vm) window.__vm.volume = 0;            // game audio replaced by our track
-    if (on) { if (window.__musicStart) window.__musicStart(); }
-    else    { if (window.__musicStop)  window.__musicStop();  }
+    // Real Game Boy audio: on at normal speed, muted while boosting (it would
+    // speed up) and when Sound is off.
+    if (window.__vm) window.__vm.volume = (on && !window.__boosting) ? LEVEL : 0;
   };
   function apply() {
     window.__soundOn = on;

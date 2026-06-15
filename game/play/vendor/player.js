@@ -755,8 +755,11 @@ class Audio {
       const channel0 = buffer.getChannelData(0);
       const channel1 = buffer.getChannelData(1);
       for (let i = 0; i < AUDIO_FRAMES; i++) {
-        channel0[i] = this.buffer[2 * i] * volume / 255;
-        channel1[i] = this.buffer[2 * i + 1] * volume / 255;
+        // The core emits 8-bit unsigned PCM (silence ~128). Center it before
+        // scaling so there's no DC offset and the full dynamic range is used --
+        // the real Game Boy music comes through clean instead of quiet & biased.
+        channel0[i] = (this.buffer[2 * i] - 128) * volume / 128;
+        channel1[i] = (this.buffer[2 * i + 1] - 128) * volume / 128;
       }
       const bufferSource = Audio.ctx.createBufferSource();
       bufferSource.buffer = buffer;
