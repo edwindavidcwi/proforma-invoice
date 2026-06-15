@@ -42,6 +42,19 @@ QuizCorrectText::
 	text_ram wStringBuffer
 	text "<PROMPT>"
 
+; shown when the streak crosses a power milestone (x1.5 at 4, x2.0 at 8)
+QuizPowerUpText::
+	text "POWER UP!"
+	line "Streak @"
+	text_ram wStringBuffer
+	text "<PROMPT>"
+
+QuizMaxPowerText::
+	text "MAX POWER!"
+	line "Streak @"
+	text_ram wStringBuffer
+	text "<PROMPT>"
+
 QuizTryAgainText::
 	text "Hint:"
 	line "@"

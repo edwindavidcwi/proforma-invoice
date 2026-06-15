@@ -611,9 +611,22 @@ QuizAsk::
 	jr nc, .streakReady
 	inc a
 	ld [wQuizStreak], a
+	cp 8                           ; just reached x2.0 -> MAX POWER!
+	jr z, .maxPower
+	cp 4                           ; just reached x1.5 -> POWER UP!
+	jr z, .powerUp
 .streakReady
-	call QuizStreakToBuffer        ; wStringBuffer <- streak as text
+	call QuizStreakToBuffer        ; wStringBuffer <- "streak  xN.N"
 	ld hl, QuizCorrectText
+	jr .showCorrect
+.powerUp
+	call QuizStreakToBuffer
+	ld hl, QuizPowerUpText
+	jr .showCorrect
+.maxPower
+	call QuizStreakToBuffer
+	ld hl, QuizMaxPowerText
+.showCorrect
 	call PrintText
 	scf
 	ret
