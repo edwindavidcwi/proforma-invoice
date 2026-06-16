@@ -314,6 +314,37 @@ def math(g):
            mk("Round 3.2?",3,[4,2],"Under .5"),mk("Round 8.9?",9,[8,10],"Near 9")])
     return out
 
+# ===================== real-life skills (time / calendar / measure / money) ====
+def reallife(g):
+    # (min grade, question) -- higher grades cumulatively unlock harder items.
+    pool = [
+        (1, mk("Day after Sunday?", "Monday", ["Friday", "Tuesday", "Saturday"], "Days in order")),
+        (1, mk("First month?", "January", ["December", "March", "June"], "Year starts")),
+        (1, mk("Last month?", "December", ["November", "January", "October"], "Year ends")),
+        (1, num("Hour at 5:00?", 5, "Read the hour", [4, 6, 3])),
+        (1, mk("Bigger: km or m?", "km", ["m", "cm", "mm"], "km is longest")),
+        (2, mk("Half past 2?", "2:30", ["2:00", "3:30", "12:30"], "30 past the hour")),
+        (2, mk("Half past 6?", "6:30", ["6:00", "7:30", "5:30"], "30 past the hour")),
+        (2, mk("Month after May?", "June", ["July", "April", "March"], "Next month")),
+        (2, num("3 coins of 5?", 15, "5 and 5 and 5", [10, 20, 8])),
+        (2, num("cm in a meter?", 100, "100 cm", [10, 50, 1000])),
+        (3, mk("Quarter past 3?", "3:15", ["3:45", "2:15", "3:30"], "15 past")),
+        (3, mk("Quarter to 5?", "4:45", ["5:15", "4:15", "5:45"], "15 to 5")),
+        (3, num("mm in a cm?", 10, "10 mm", [100, 5, 1])),
+        (3, mk("Heavier: kg or g?", "kg", ["g", "mg", "ml"], "kg is heaviest")),
+        (3, num("2 coins of 10?", 20, "10 and 10", [15, 30, 12])),
+        (4, mk("1 hr after 7:00?", "8:00", ["7:30", "9:00", "6:00"], "Add one hour")),
+        (4, num("Grams in a kg?", 1000, "1000 g", [100, 500, 10])),
+        (4, num("ml in a litre?", 1000, "1000 ml", [100, 500, 10])),
+        (4, mk("Month before June?", "May", ["July", "April", "March"], "Month before")),
+        (5, mk("1 hr before 9:00?", "8:00", ["10:00", "9:30", "8:30"], "Take off an hour")),
+        (5, mk("Quarter to 12?", "11:45", ["12:15", "11:15", "12:45"], "15 to 12")),
+        (5, num("Half of 20 coins?", 10, "Split 20", [5, 15, 8])),
+        (5, mk("Longer: m or cm?", "m", ["cm", "mm", "ft"], "m is longer")),
+    ]
+    return [q for mg, q in pool if mg <= g]
+
+
 # ===================== assemble ~100/grade, balanced =====================
 def dedupe(qs):
     seen, out = set(), []
@@ -325,7 +356,8 @@ def dedupe(qs):
 banks = {g: [] for g in range(1, 6)}
 subject_of = {}  # (grade, question_text) -> subject name; for the content audit
 SUBJECT_CAPS = (("English", english, 20), ("Science & Nature", science, 20),
-                ("General Knowledge", gk, 20), ("Shapes & Colors", shapes, 20))
+                ("General Knowledge", gk, 20), ("Shapes & Colors", shapes, 20),
+                ("Real Life", reallife, 12))
 for g in range(1, 6):
     tagged = []  # (Q, subject) in emit order, before the final cross-dedupe
     for sname, builder, cap in SUBJECT_CAPS:
@@ -406,7 +438,7 @@ def emit():
     # QuizGradeTable) so the selector reads them without a bank switch. Used for
     # subject cycling: avoid two questions of the same subject in a row.
     SUBJECT_ID = {"English": 0, "Science & Nature": 1, "General Knowledge": 2,
-                  "Shapes & Colors": 3, "Math": 4}
+                  "Shapes & Colors": 3, "Math": 4, "Real Life": 5}
     w("; Subject id per question (parallel to Grade{n}Questions); for cycling.")
     w("QuizSubjectTable::")
     for g in range(1, 6):

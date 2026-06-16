@@ -1234,7 +1234,7 @@ PROGRESS_JS = r"""
 (function () {
   'use strict';
   var KEY = 'pq_report_v1';
-  var SUBJ = ['English', 'Science', 'Gen. Knowledge', 'Shapes & Colors', 'Math'];
+  var SUBJ = ['English', 'Science', 'Gen. Knowledge', 'Shapes & Colors', 'Math', 'Real Life'];
   function blank() { return { subj: {}, grade: {}, q: {}, correct: 0, wrong: 0, best: 0, recent: [] }; }
   var st; try { st = JSON.parse(localStorage.getItem(KEY)) || blank(); } catch (e) { st = blank(); }
   function save() { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch (e) {} }
@@ -1276,7 +1276,7 @@ PROGRESS_JS = r"""
     if (streak > st.best) st.best = streak;
     if (streak > lastStreak || (streak === 0 && lastStreak > 0)) {
       var ok = streak > lastStreak;                 // streak up = first-try correct
-      var subj = rd(0xdef4); if (subj > 4) subj = 4; // wQuizLastSubject
+      var subj = rd(0xdef4); if (subj > 5) subj = 5; // wQuizLastSubject
       var grade = Math.min(5, (popcount(rd(0xd356)) >> 1) + 1); // wObtainedBadges -> grade
       record(subj, grade, readQ(rd), ok, readAns(rd));
     }
@@ -1297,7 +1297,8 @@ PROGRESS_JS = r"""
     'Watch short nature clips and talk about animals, weather, and the body.',
     'Drill calendar & time facts — days, months, hours, and reading a clock.',
     'Use shape blocks and mix paint colours so shapes & colour-mixing feel real.',
-    'Five minutes a day of number bonds and times tables with counters or fingers.'
+    'Five minutes a day of number bonds and times tables with counters or fingers.',
+    'Practise real life: read a clock together, name the months & days, and count coins.'
   ];
   function clsOf(p) { return p >= 80 ? 'good' : p >= 50 ? 'mid' : 'low'; }
   function statTile(label, val, klass) {
@@ -1330,11 +1331,11 @@ PROGRESS_JS = r"""
     var acc = Math.round(100 * st.correct / tot);
     h += '<div class="pgStats">' + statTile('Answered', tot, '') + statTile('First&#8209;try', acc + '%', clsOf(acc)) + statTile('Best streak', st.best, '') + '</div>';
     h += '<div class="pgSec">By subject<span>tap to see misses</span></div>';
-    for (s = 0; s < 5; s++) if (st.subj[s]) h += group('s' + s, st.subj[s], SUBJ[s], missedList((function (sv) { return function (q) { return q.s === sv; }; })(s)));
+    for (s = 0; s < 6; s++) if (st.subj[s]) h += group('s' + s, st.subj[s], SUBJ[s], missedList((function (sv) { return function (q) { return q.s === sv; }; })(s)));
     h += '<div class="pgSec">By grade<span>tap to see misses</span></div>';
     for (g = 1; g <= 5; g++) if (st.grade[g]) h += group('g' + g, st.grade[g], 'Grade ' + g, missedList((function (gv) { return function (q) { return q.g === gv; }; })(g)));
     var weak = -1, wp = 101;
-    for (s = 0; s < 5; s++) { var o = st.subj[s]; if (o && (o.c + o.w) >= 3) { var p = pct(o); if (p < wp) { wp = p; weak = s; } } }
+    for (s = 0; s < 6; s++) { var o = st.subj[s]; if (o && (o.c + o.w) >= 3) { var p = pct(o); if (p < wp) { wp = p; weak = s; } } }
     h += '<div class="pgSec">How to help</div>';
     if (weak >= 0) {
       h += '<div class="pgPlan"><div class="pgPlanHd"><span>Focus area</span><b>' + SUBJ[weak] + '</b><span class="pgPct ' + clsOf(wp) + '">' + wp + '%</span></div>'
