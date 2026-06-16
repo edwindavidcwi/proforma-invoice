@@ -11,7 +11,8 @@ sHallOfFame:: ds HOF_TEAM * HOF_TEAM_CAPACITY
 
 SECTION "Save Data", SRAM
 
-	ds $598
+sQuizFocus:: ds 2     ; parent "focus": [0] = magic $5A (else ignored), [1] = bits 0-2 grade (0=auto,1-5) + bits 3-5 subject (0=any,1-6). Outside the save checksum.
+	ds $596
 
 sGameData::
 sPlayerName::  ds NAME_LENGTH

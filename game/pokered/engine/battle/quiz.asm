@@ -268,6 +268,14 @@ QuizSelectQuestion::
 	jr nc, .newQuestion            ; index out of range -> new question
 	jp QuizEntryFromIdx             ; load that exact question
 .newQuestion
+	; Parent focus setting (SRAM): a forced grade overrides the badge-derived one
+	; (and skips the adaptive nudge); a forced subject biases QuizPickGrade.
+	call QuizReadFocus
+	ld [wQuizFocusCache], a
+	and $07                        ; forced grade in bits 0-2 (0 = auto)
+	jr z, .autoGrade
+	jp QuizPickGrade               ; a = parent-forced grade 1-5
+.autoGrade
 	ld hl, wObtainedBadges
 	ld b, 1
 	call CountSetBits              ; -> [wNumSetBits]
@@ -490,8 +498,10 @@ QuizPickGrade:
 	ld [wQuizSubjBase], a
 	ld a, [hl]
 	ld [wQuizSubjBase + 1], a
-	; pick an index whose subject differs from the previous question (<=4 tries)
-	ld a, 4
+	; pick an index by subject: avoid repeating the last subject, or (if the
+	; parent forced a subject) keep trying to land on it. More tries so a forced
+	; subject is reliably found in the larger per-grade pools.
+	ld a, 24
 	ld [wQuizPickTries], a
 .pick
 	ld a, [wQuizPickCount]
@@ -514,6 +524,24 @@ QuizPickGrade:
 	ld d, 0
 	add hl, de
 	ld a, [hl]                      ; a = candidate subject id
+	ld c, a                         ; c = candidate subject (preserved)
+	; Parent forced-subject? (focus bits 3-5, 1-6). If set, require a match;
+	; otherwise just avoid repeating the previous subject.
+	ld a, [wQuizFocusCache]
+	srl a
+	srl a
+	srl a
+	and $07                         ; forced subject (0 = any, 1-6)
+	jr z, .anySubject
+	dec a                           ; target subject id 0-5
+	cp c
+	jr z, .accept                   ; candidate matches the forced subject
+	ld hl, wQuizPickTries
+	dec [hl]
+	jr nz, .pick
+	jr .accept                      ; ran out of tries -> accept this candidate
+.anySubject
+	ld a, c
 	ld hl, wQuizLastSubject
 	cp [hl]
 	jr nz, .accept                  ; different subject -> take it
@@ -521,7 +549,8 @@ QuizPickGrade:
 	dec [hl]
 	jr nz, .pick                    ; same subject, retry
 .accept
-	ld [wQuizLastSubject], a        ; a still holds the chosen subject id
+	ld a, c                         ; a = chosen subject id
+	ld [wQuizLastSubject], a
 	; hl = base + index*14
 	ld a, [wQuizPickBase]
 	ld l, a
@@ -1109,5 +1138,31 @@ QuizDrawClock::
 ; Tile offset (row*SCREEN_WIDTH + col) of the hour-hand tip for hours 1..12.
 ClockHandTable::
 	dw 205, 206, 226, 246, 245, 264, 243, 242, 222, 202, 203, 184
+
+; Read the parent "focus" setting from battery-backed SRAM (sQuizFocus):
+; bits 0-2 = forced grade (0 = auto, 1-5), bits 3-5 = forced subject (0 = any,
+; 1-6). The setting lives in SRAM so it persists and the offline player can
+; write it. Returns the byte in a.
+QuizReadFocus:
+	ld a, RAMG_SRAM_ENABLE
+	ld [rRAMG], a
+	ld a, BMODE_ADVANCED
+	ld [rBMODE], a
+	ld a, BANK("Save Data")
+	ld [rRAMB], a
+	ld a, [sQuizFocus]             ; magic byte
+	cp $5a
+	jr nz, .none                   ; no valid setting (uninitialized SRAM) -> auto/any
+	ld a, [sQuizFocus + 1]         ; the packed grade/subject value
+	jr .done
+.none
+	xor a
+.done
+	ld b, a
+	ld a, BMODE_SIMPLE
+	ld [rBMODE], a
+	ld [rRAMG], a                  ; BMODE_SIMPLE == RAMG_SRAM_DISABLE == 0 -> SRAM off
+	ld a, b
+	ret
 
 INCLUDE "engine/battle/quiz_data.asm"

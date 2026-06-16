@@ -2272,6 +2272,7 @@ wQuizReviewRing:: ds 8  ; 4 entries x (gradeIdx, index)
 wQuizReviewHead:: db    ; next write slot (masked to 0-3 on use)
 wQuizReviewFilled:: db  ; valid slot count (validated on use)
 wQuizClock:: db         ; 0 = normal question; 1-12 = draw an analog clock at that o'clock hour
+wQuizFocusCache:: db    ; cached copy of sQuizFocus (parent grade/subject focus), read once per question
 ENDU
 
 

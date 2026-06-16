@@ -539,6 +539,28 @@ BODY_HTML = r"""
           </div>
         </section>
         <section class="card">
+          <h3>Focus <small>(practice a level/subject; Auto follows badges)</small></h3>
+          <div class="btnrow">
+            <select id="pickGrade" class="pick" title="Force a grade level">
+              <option value="0">Level: Auto</option>
+              <option value="1">Grade 1</option>
+              <option value="2">Grade 2</option>
+              <option value="3">Grade 3</option>
+              <option value="4">Grade 4</option>
+              <option value="5">Grade 5</option>
+            </select>
+            <select id="pickSubject" class="pick" title="Focus on one subject">
+              <option value="0">Subject: Any</option>
+              <option value="1">English</option>
+              <option value="2">Science</option>
+              <option value="3">Gen. Knowledge</option>
+              <option value="4">Shapes &amp; Colors</option>
+              <option value="5">Math</option>
+              <option value="6">Real Life</option>
+            </select>
+          </div>
+        </section>
+        <section class="card">
           <h3>System</h3>
           <div class="btnrow">
             <button id="btnFull" title="Make the game fill the screen">&#9974; Big screen</button>
@@ -1560,6 +1582,49 @@ READALOUD_JS = r"""
 """
 
 
+# Parent "Focus" picker: force a grade level and/or a subject. The setting is
+# packed into one byte (bits 0-2 grade 0=auto/1-5, bits 3-5 subject 0=any/1-6) and
+# written into battery-backed SRAM (sQuizFocus, bank 1 $A000) the same way the ROM
+# reads it. Persisted in localStorage and re-applied so it survives reloads.
+PICKER_JS = r"""
+(function () {
+  var gSel = document.getElementById('pickGrade');
+  var sSel = document.getElementById('pickSubject');
+  if (!gSel || !sSel) return;
+  var grade = 0, subj = 0;
+  try { var v = parseInt(localStorage.getItem('pq_focus'), 10); if (v >= 0 && v <= 255) { grade = v & 0x07; subj = (v >> 3) & 0x07; } } catch (e) {}
+  if (grade > 5) grade = 0;
+  if (subj > 6) subj = 0;
+  gSel.value = String(grade);
+  sSel.value = String(subj);
+  function focusByte() { return (grade & 0x07) | ((subj & 0x07) << 3); }
+  // Write sQuizFocus into SRAM bank 1 the way the ROM accesses it. Runs between
+  // frames (JS is single-threaded) and leaves SRAM disabled afterwards.
+  function writeFocus() {
+    var em = window.__emulator;
+    if (!em || !em.module || em.e == null || typeof em.module._emulator_write_mem !== 'function') return;
+    var m = em.module, e = em.e, b = focusByte();
+    m._emulator_write_mem(e, 0x0000, 0x0a);   // SRAM enable
+    m._emulator_write_mem(e, 0x6000, 0x01);   // advanced banking mode
+    m._emulator_write_mem(e, 0x4000, 0x01);   // RAM bank 1 (Save Data)
+    m._emulator_write_mem(e, 0xa000, 0x5a);   // sQuizFocus magic (marks the setting valid)
+    m._emulator_write_mem(e, 0xa001, b);      // packed grade/subject
+    m._emulator_write_mem(e, 0x6000, 0x00);
+    m._emulator_write_mem(e, 0x0000, 0x00);   // SRAM disable
+  }
+  function onChange() {
+    grade = parseInt(gSel.value, 10) || 0;
+    subj = parseInt(sSel.value, 10) || 0;
+    try { localStorage.setItem('pq_focus', String(focusByte())); } catch (e) {}
+    writeFocus();
+  }
+  gSel.addEventListener('change', onChange);
+  sSel.addEventListener('change', onChange);
+  setInterval(writeFocus, 2000);             // re-apply (cheap) in case ext-ram reloads
+})();
+"""
+
+
 def read_text(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -1631,6 +1696,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -1653,6 +1719,7 @@ def main():
         VISUAL_JS,
         PROGRESS_JS,
         READALOUD_JS,
+        PICKER_JS,
     )
 
     with open(args.out, "w", encoding="utf-8") as f:
