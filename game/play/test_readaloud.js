@@ -74,6 +74,9 @@ check("division (spaced)", R.speakable("12 / 4?"), "12 divided by 4?");
 check("fraction (tight)", R.speakable("3/4 of 8?"), "3 over 4 of 8?");
 check("drops exclamation", R.speakable("CORRECT ANSWER!"), "CORRECT ANSWER");
 check("abbrev Sept", R.speakable("Days in Sept?"), "Days in September?");
+check("time o'clock", R.speakable("3:00"), "3 oclock");
+check("time half past", R.speakable("2:30"), "2 thirty");
+check("time quarter to", R.speakable("4:45"), "4 forty five");
 check("plain text untouched", R.speakable("Opposite of big?"), "Opposite of big?");
 
 console.log("\n-- buildPrompt (question + choices, gated, rotated order) --");

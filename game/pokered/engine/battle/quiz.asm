@@ -573,6 +573,23 @@ QuizLoadQuestion:
 	ld hl, wQuizEntry + 16         ; hint (offset 16)
 	ld de, wQuizHStr
 	call QuizFixupStr
+	; Read this question's clock tag (0 = normal; 1-12 = analog clock at that hour).
+	; QuizClockTable is in this (quiz) bank, parallel to QuizSubjectTable.
+	ld a, [wQuizGradeIdx]
+	add a
+	ld e, a
+	ld d, 0
+	ld hl, QuizClockTable
+	add hl, de
+	ld a, [hli]
+	ld h, [hl]
+	ld l, a                        ; hl = Grade{n}Clock base
+	ld a, [wQuizPickIdx]
+	ld e, a
+	ld d, 0
+	add hl, de
+	ld a, [hl]
+	ld [wQuizClock], a
 	ld hl, wQuizEntry
 	ret
 
@@ -844,6 +861,9 @@ QuizDrawScreen::
 	ld a, [wQuizQuestionText + 1]
 	ld d, a
 	call PlaceString
+	ld a, [wQuizClock]             ; clock question -> draw an analog clock on the left
+	and a
+	call nz, QuizDrawClock
 	call QuizPrintAnswers
 	xor a                          ; start at the top of the left column
 	ld [wQuizCol], a
@@ -890,6 +910,16 @@ QuizPrintAnswers::
 	ld a, [hl]
 	ld d, a                        ; de = answer string
 	push de                        ; save string pointer across the layout math
+	; Clock questions: the clock occupies the left, so stack all answers in a single
+	; right column (row = slot). Otherwise lay them across two columns.
+	ld a, [wQuizClock]
+	and a
+	jr z, .twoCol
+	ld a, [wQuizSlot]
+	ld b, a                        ; b = row = slot
+	hlcoord 11, 8                  ; right column base (single column)
+	jr .addRows
+.twoCol
 	; destination = base(col) + row * 2 rows.  leftN = (n + 1) / 2.
 	ld a, [wQuizNumAnswers]
 	inc a
@@ -926,6 +956,28 @@ QuizPrintAnswers::
 ; Left/Right switch columns. Returns the chosen ABSOLUTE slot in wCurrentMenuItem
 ; (so it can be compared to wQuizCorrectIndex). Only A confirms -- no B escape.
 QuizGridInput::
+	ld a, [wQuizClock]
+	and a
+	jr z, .grid
+	; Clock question: answers are stacked in one right column, so use a plain
+	; single-column Up/Down menu (A confirms; no Left/Right column switching).
+	ld a, 8
+	ld [wTopMenuItemY], a
+	ld a, 10
+	ld [wTopMenuItemX], a
+	ld a, [wQuizNumAnswers]
+	dec a
+	ld [wMaxMenuItem], a
+	ld a, PAD_A
+	ld [wMenuWatchedKeys], a
+	ld a, QUIZ_WRAP_MENU
+	ld [wMenuWrappingEnabled], a
+.clockWait
+	call HandleMenuInput
+	bit B_PAD_A, a
+	jr z, .clockWait
+	ret                            ; wCurrentMenuItem = chosen slot (single column)
+.grid
 .loop
 	call QuizSetupColumnCursor
 	call HandleMenuInput           ; handles Up/Down; returns pressed watched keys in a
@@ -1017,5 +1069,45 @@ QuizSetupColumnCursor::
 	ld a, QUIZ_WRAP_MENU
 	ld [wMenuWrappingEnabled], a
 	ret
+
+; Draw a simple, readable analog clock for wQuizClock (1-12 o'clock) on the left
+; of the quiz box: the 12 / 3 / 6 / 9 numbers, a centre pin, a minute hand
+; pointing up (o'clock), and a short hour hand snapped toward the hour.
+QuizDrawClock::
+	hlcoord 4, 8
+	ld [hl], CHARVAL("1")
+	inc hl
+	ld [hl], CHARVAL("2")          ; "12" at the top
+	hlcoord 7, 11
+	ld [hl], CHARVAL("3")
+	hlcoord 4, 14
+	ld [hl], CHARVAL("6")
+	hlcoord 1, 11
+	ld [hl], CHARVAL("9")
+	hlcoord 4, 11
+	ld [hl], CHARVAL("o")          ; centre pin
+	hlcoord 4, 10
+	ld [hl], CHARVAL("M")          ; minute hand (points up = o'clock)
+	hlcoord 4, 9
+	ld [hl], CHARVAL("M")
+	ld a, [wQuizClock]
+	dec a
+	add a                          ; (hour - 1) * 2
+	ld c, a
+	ld b, 0
+	ld hl, ClockHandTable
+	add hl, bc
+	ld a, [hli]
+	ld e, a
+	ld a, [hl]
+	ld d, a                        ; de = tile offset of this hour's short hand
+	hlcoord 0, 0                   ; hl = wTileMap
+	add hl, de
+	ld [hl], CHARVAL("H")          ; hour hand
+	ret
+
+; Tile offset (row*SCREEN_WIDTH + col) of the hour-hand tip for hours 1..12.
+ClockHandTable::
+	dw 205, 206, 226, 246, 245, 264, 243, 242, 222, 202, 203, 184
 
 INCLUDE "engine/battle/quiz_data.asm"

@@ -17,7 +17,7 @@ for (const line of fs.readFileSync(SYM, "utf8").split("\n")) {
 }
 const QPA = sym.QuizPlayerAttack;
 const hBank = sym.hLoadedROMBank.addr, wBadges = sym.wObtainedBadges.addr;
-const wTileMap = sym.wTileMap.addr, wQStr = sym.wQuizQStr.addr;
+const wTileMap = sym.wTileMap.addr, wQStr = sym.wQuizQStr.addr, wQuizClock = sym.wQuizClock.addr;
 const hRandA = sym.hRandomAdd.addr, hRandS = sym.hRandomSub.addr;
 
 function tile(b) {
@@ -78,9 +78,13 @@ for (let g = 1; g <= 5; g++) {
       const cell = (rr, c0, c1) => { let s = ""; for (let c = c0; c < c1; c++) s += tile(rd(wTileMap + rr * 20 + c)); return s.trim(); };
       let ans = null;
       if (exp) {
+        // Clock questions draw the clock on the left and stack answers in a single
+        // right column (rows 8/10/12/14); normal questions use two columns.
+        const clock = rd(wQuizClock);
         const leftN = (exp.n + 1) >> 1;
         ans = [];
         for (let s = 0; s < exp.n; s++) {
+          if (clock) { ans.push(cell(8 + s * 2, 11, 19)); continue; }
           const right = s >= leftN, row = 8 + (right ? s - leftN : s) * 2;
           ans.push(cell(row, right ? 11 : 2, right ? 19 : 10));
         }

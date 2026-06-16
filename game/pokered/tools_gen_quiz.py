@@ -39,12 +39,21 @@ class Q:
         if len(set(ans)) != len(ans):
             raise Bad()
         self.text, self.hint, self.answers, self.correct = text, hint, ans, correct
+        self.clock = 0   # 0 = normal; 1-12 = draw an analog clock at that o'clock hour
 
 def mk(text, correct, distractors, hint):
     try:
         return Q(text, correct, distractors, hint)
     except Bad:
         return None
+
+def clockq(prompt, hour, distractor_hours, hint):
+    """A 'read the analog clock' question: the prompt + time options, tagged so the
+    engine draws a clock at `hour` o'clock. Answers are H:00 time strings."""
+    q = mk(prompt, f"{hour}:00", [f"{h}:00" for h in distractor_hours], hint)
+    if q:
+        q.clock = hour
+    return q
 
 def num(text, correct, hint, distractors=None):
     c = int(correct)
@@ -317,7 +326,16 @@ def math(g):
 # ===================== real-life skills (time / calendar / measure / money) ====
 def reallife(g):
     # (min grade, question) -- higher grades cumulatively unlock harder items.
+    # Clock questions come FIRST so they survive the per-subject cap at every grade.
     pool = [
+        (1, clockq("What time is it?", 3, [6, 9, 12], "Read the hour hand")),
+        (1, clockq("Read the clock.", 6, [12, 3, 9], "Read the hour hand")),
+        (2, clockq("Tell the time.", 9, [12, 3, 6], "Read the hour hand")),
+        (2, clockq("Time on the clock?", 12, [3, 6, 9], "Read the hour hand")),
+        (3, clockq("What hour is it?", 2, [4, 8, 10], "Read the hour hand")),
+        (3, clockq("Clock shows what?", 5, [1, 7, 11], "Read the hour hand")),
+        (4, clockq("Time now?", 8, [2, 4, 10], "Read the hour hand")),
+        (5, clockq("The clock reads?", 11, [1, 5, 7], "Read the hour hand")),
         (1, mk("Day after Sunday?", "Monday", ["Friday", "Tuesday", "Saturday"], "Days in order")),
         (1, mk("First month?", "January", ["December", "March", "June"], "Year starts")),
         (1, mk("Last month?", "December", ["November", "January", "October"], "Year ends")),
@@ -447,6 +465,16 @@ def emit():
     for g in range(1, 6):
         ids = [str(SUBJECT_ID.get(subject_of[(g, q.text)], 4)) for q in banks[g]]
         w(f"Grade{g}Subjects:: db " + ", ".join(ids))
+    w("")
+    # Clock-time per question (parallel array): 0 = normal question, 1-12 = draw an
+    # analog clock at that o'clock hour. Read by the engine when a question loads.
+    w("; Clock hour per question (0 = normal; 1-12 = draw a clock at that o'clock).")
+    w("QuizClockTable::")
+    for g in range(1, 6):
+        w(f"\tdw Grade{g}Clock")
+    w("")
+    for g in range(1, 6):
+        w(f"Grade{g}Clock:: db " + ", ".join(str(getattr(q, "clock", 0)) for q in banks[g]))
     w("")
     for g in range(1, 6):
         w(f'SECTION "Quiz Data G{g}", ROMX')

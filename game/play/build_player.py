@@ -1425,6 +1425,10 @@ READALOUD_JS = r"""
                yr: 'year', sept: 'September', feb: 'February', sat: 'Saturday', sun: 'Sunday' };
   function speakable(t) {
     if (!t) return '';
+    t = t.replace(/(\d{1,2}):00\b/g, '$1 oclock');         // clock times read naturally
+    t = t.replace(/(\d{1,2}):15\b/g, '$1 fifteen');
+    t = t.replace(/(\d{1,2}):30\b/g, '$1 thirty');
+    t = t.replace(/(\d{1,2}):45\b/g, '$1 forty five');
     t = t.replace(/(\d)\s*x\s*(\d)/gi, '$1 times $2');      // 3 x 4 -> 3 times 4
     t = t.replace(/(\d)\s*-\s*(\d)/g, '$1 minus $2');       // 8 - 3 -> 8 minus 3
     t = t.replace(/(\d)(\s*)\/(\s*)(\d)/g, function (m, a, s1, s2, b) {
