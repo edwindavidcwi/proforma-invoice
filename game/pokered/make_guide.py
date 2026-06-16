@@ -64,16 +64,18 @@ h2 .e{font-size:27px;vertical-align:-2px;margin-right:6px}
 .rb{width:54px;height:54px;border-radius:50%;background:#be123c;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;box-shadow:0 3px 0 #7f1d1d}
 .keymap{font-size:15px}
 .keymap b{display:inline-block;min-width:74px}
-/* question bank -- compact: one line per question, flowed into columns */
-.subhead{display:flex;align-items:center;gap:9px;font-size:19px;font-weight:700;margin:14px 0 6px;padding:6px 12px;border-radius:10px;color:#fff;break-after:avoid}
-.qlist{columns:340px;column-gap:16px}
-.q{break-inside:avoid;border-bottom:1px solid var(--line);padding:5px 2px;font-size:15px;line-height:1.45}
-.qt{font-weight:700}
-.clk{background:#ccfbf1;color:#0f766e;border-radius:6px;padding:0 5px;font-size:12px;white-space:nowrap}
-.opt{color:#9ca3af;font-size:13px}
-.opt.ok{color:#15803d;font-weight:700;font-size:15px}
-.hint{color:var(--soft);font-style:italic;font-size:12px;display:block}
-.gradehd{font-size:26px;margin:22px 0 2px;text-align:center}
+/* question bank -- compact cards flowed into responsive columns, but every
+   detail kept readable: clear answer pills, the full hint, the clock note */
+.subhead{display:flex;align-items:center;gap:9px;font-size:20px;font-weight:700;margin:14px 0 8px;padding:7px 13px;border-radius:11px;color:#fff;break-after:avoid}
+.qlist{columns:360px;column-gap:16px}
+.q{break-inside:avoid;border:1px solid var(--line);border-radius:12px;padding:8px 11px;margin:0 0 9px;background:var(--cream)}
+.qt{font-size:16px;font-weight:700}
+.clk{display:block;background:#ccfbf1;color:#0f766e;border-radius:7px;padding:2px 8px;font-size:12.5px;margin-top:3px}
+.opts{margin:6px 0 3px;line-height:2}
+.opt{display:inline-block;background:#eef2f7;color:#374151;border-radius:999px;padding:3px 11px;margin:0 5px 2px 0;font-size:14px}
+.opt.ok{background:#16a34a;color:#fff;font-weight:700}
+.hint{color:var(--soft);font-style:italic;font-size:13.5px}
+.gradehd{font-size:27px;margin:22px 0 2px;text-align:center}
 .count{color:var(--soft);text-align:center;margin-bottom:6px;font-size:14px}
 .foot{text-align:center;color:#6b7280;font-size:14px;margin:26px 0}
 /* Print: clean black-on-white workbook. Each grade starts a fresh page, each
@@ -95,10 +97,10 @@ h2 .e{font-size:27px;vertical-align:-2px;margin-right:6px}
   /* a fresh page per grade is plenty; subjects flow to keep the page count down */
   .subhead{break-after:avoid;color:#000 !important;background:#fff !important;border:1px solid #000}
   .qlist{columns:2;column-gap:14px}
-  .q{break-inside:avoid;border-bottom:1px solid #ccc}
-  .opt{color:#555}
-  .opt.ok{color:#000 !important;font-weight:700;text-decoration:underline}
-  .hint{color:#444}
+  .q{break-inside:avoid;background:#fff;border:1px solid #bbb}
+  .opt{background:#fff;border:1px solid #999;color:#000}
+  .opt.ok{background:#fff !important;color:#000 !important;border:2px solid #000;font-weight:700;text-decoration:underline}
+  .hint{color:#333}
   .clk{background:#fff;border:1px solid #000;color:#000}
   /* don't waste a page: the first grade follows the bank intro, not a blank sheet */
   .gradehd:first-of-type{break-before:auto}
@@ -110,12 +112,14 @@ def esc(s): return html.escape(str(s))
 def question_html(q):
     clk = ""
     if getattr(q, "clock", 0):
-        clk = f' <span class="clk">\U0001F550 {q.clock}:00</span>'
-    # other choices, kept subtle so the eye lands on the green answer first
-    others = " ".join(f'<span class="opt">{esc(a)}</span>' for a in q.answers if a != q.correct)
-    return (f'<div class="q"><span class="qt">{esc(q.text)}{clk}</span> '
-            f'<span class="opt ok">✓ {esc(q.correct)}</span> {others}'
-            f'<span class="hint">\U0001F4A1 {esc(q.hint)}</span></div>')
+        clk = f'<span class="clk">\U0001F550 a clock showing {q.clock} o’clock is drawn on screen</span>'
+    opts = [f'<span class="opt ok">✓ {esc(q.correct)}</span>']
+    for a in q.answers:
+        if a != q.correct:
+            opts.append(f'<span class="opt">{esc(a)}</span>')
+    return (f'<div class="q"><div class="qt">{esc(q.text)}{clk}</div>'
+            f'<div class="opts">{"".join(opts)}</div>'
+            f'<div class="hint">\U0001F4A1 {esc(q.hint)}</div></div>')
 
 def subject_block(grade, subject):
     emoji, color, _ = SUBJ[subject]
