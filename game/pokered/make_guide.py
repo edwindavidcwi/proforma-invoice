@@ -33,14 +33,14 @@ body{margin:0;font-family:"Comic Sans MS","Chalkboard SE","Segoe UI Rounded","Se
 .cover p{font-size:18px;opacity:.95;margin:.3em 0}
 .badgeRow{margin-top:14px}
 .badgeRow span{display:inline-block;background:rgba(255,255,255,.18);border-radius:999px;padding:6px 13px;margin:4px;font-size:15px}
-.card{background:#fff;border-radius:20px;padding:20px 22px;margin:18px 0;box-shadow:0 6px 18px rgba(0,0,0,.08)}
-h2{font-size:26px;margin:.2em 0 .5em}
-h2 .e{font-size:30px;vertical-align:-2px;margin-right:6px}
-.lead{font-size:18px}
-.tip{background:#ecfdf5;border-left:6px solid #10b981;border-radius:12px;padding:12px 16px;margin:12px 0;font-size:16px}
-.note{background:#fff7ed;border-left:6px solid #f59e0b;border-radius:12px;padding:12px 16px;margin:12px 0}
+.card{background:#fff;border-radius:18px;padding:14px 18px;margin:12px 0;box-shadow:0 6px 18px rgba(0,0,0,.08)}
+h2{font-size:23px;margin:.1em 0 .4em}
+h2 .e{font-size:27px;vertical-align:-2px;margin-right:6px}
+.lead{font-size:16px;margin:.3em 0}
+.tip{background:#ecfdf5;border-left:6px solid #10b981;border-radius:10px;padding:9px 14px;margin:8px 0;font-size:15px}
+.note{background:#fff7ed;border-left:6px solid #f59e0b;border-radius:10px;padding:9px 14px;margin:8px 0;font-size:15px}
 .steps{counter-reset:s;list-style:none;padding:0;margin:0}
-.steps li{position:relative;padding:10px 0 10px 52px;font-size:17px;border-bottom:1px dashed var(--line)}
+.steps li{position:relative;padding:7px 0 7px 48px;font-size:15px;border-bottom:1px dashed var(--line)}
 .steps li:last-child{border-bottom:0}
 .steps li::before{counter-increment:s;content:counter(s);position:absolute;left:0;top:8px;width:36px;height:36px;
   background:#6d28d9;color:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700}
@@ -64,17 +64,17 @@ h2 .e{font-size:30px;vertical-align:-2px;margin-right:6px}
 .rb{width:54px;height:54px;border-radius:50%;background:#be123c;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:20px;box-shadow:0 3px 0 #7f1d1d}
 .keymap{font-size:15px}
 .keymap b{display:inline-block;min-width:74px}
-/* question bank */
-.subhead{display:flex;align-items:center;gap:10px;font-size:22px;font-weight:700;margin:18px 0 8px;padding:8px 14px;border-radius:12px;color:#fff}
-.q{border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0;background:var(--cream)}
-.qt{font-size:17px;font-weight:700}
-.clk{display:inline-block;background:#ccfbf1;color:#0f766e;border-radius:8px;padding:1px 8px;font-size:13px;margin-left:6px}
-.opts{margin:8px 0 4px}
-.opt{display:inline-block;background:#eef2f7;color:#374151;border-radius:999px;padding:4px 12px;margin:3px 5px 3px 0;font-size:15px}
-.opt.ok{background:#16a34a;color:#fff;font-weight:700}
-.hint{color:var(--soft);font-style:italic;font-size:14px}
-.gradehd{font-size:30px;margin:26px 0 4px;text-align:center}
-.count{color:var(--soft);text-align:center;margin-bottom:8px}
+/* question bank -- compact: one line per question, flowed into columns */
+.subhead{display:flex;align-items:center;gap:9px;font-size:19px;font-weight:700;margin:14px 0 6px;padding:6px 12px;border-radius:10px;color:#fff;break-after:avoid}
+.qlist{columns:340px;column-gap:16px}
+.q{break-inside:avoid;border-bottom:1px solid var(--line);padding:5px 2px;font-size:15px;line-height:1.45}
+.qt{font-weight:700}
+.clk{background:#ccfbf1;color:#0f766e;border-radius:6px;padding:0 5px;font-size:12px;white-space:nowrap}
+.opt{color:#9ca3af;font-size:13px}
+.opt.ok{color:#15803d;font-weight:700;font-size:15px}
+.hint{color:var(--soft);font-style:italic;font-size:12px;display:block}
+.gradehd{font-size:26px;margin:22px 0 2px;text-align:center}
+.count{color:var(--soft);text-align:center;margin-bottom:6px;font-size:14px}
 .foot{text-align:center;color:#6b7280;font-size:14px;margin:26px 0}
 /* Print: clean black-on-white workbook. Each grade starts a fresh page, each
    subject starts a fresh page, and a question never splits across a page.
@@ -92,13 +92,13 @@ h2 .e{font-size:30px;vertical-align:-2px;margin-right:6px}
   .gb{background:#fff;border:1px solid #000}
   .gbscreen{background:#fff}
   .gradehd{break-before:page;border-bottom:3px solid #000;padding-bottom:4px}
-  .subhead{break-before:page;break-after:avoid;color:#000 !important;background:#fff !important;border:2px solid #000;border-bottom:3px solid #000}
-  /* the first subject of a grade rides along on the grade's page (no blank sheet) */
-  .card > .subhead:first-child{break-before:auto}
-  .q{break-inside:avoid;background:#fff;border:1px solid #bbb}
-  .opt{background:#fff;border:1px solid #888;color:#000}
-  .opt.ok{background:#fff !important;color:#000 !important;border:2px solid #000;text-decoration:underline}
-  .hint{color:#333}
+  /* a fresh page per grade is plenty; subjects flow to keep the page count down */
+  .subhead{break-after:avoid;color:#000 !important;background:#fff !important;border:1px solid #000}
+  .qlist{columns:2;column-gap:14px}
+  .q{break-inside:avoid;border-bottom:1px solid #ccc}
+  .opt{color:#555}
+  .opt.ok{color:#000 !important;font-weight:700;text-decoration:underline}
+  .hint{color:#444}
   .clk{background:#fff;border:1px solid #000;color:#000}
   /* don't waste a page: the first grade follows the bank intro, not a blank sheet */
   .gradehd:first-of-type{break-before:auto}
@@ -108,25 +108,22 @@ h2 .e{font-size:30px;vertical-align:-2px;margin-right:6px}
 def esc(s): return html.escape(str(s))
 
 def question_html(q):
-    cls = ""
     clk = ""
     if getattr(q, "clock", 0):
-        clk = f'<span class="clk">\U0001F550 a clock showing {q.clock} o’clock is drawn</span>'
-    opts = [f'<span class="opt ok">✓ {esc(q.correct)}</span>']
-    for a in q.answers:
-        if a != q.correct:
-            opts.append(f'<span class="opt">{esc(a)}</span>')
-    return (f'<div class="q"><div class="qt">{esc(q.text)}{clk}</div>'
-            f'<div class="opts">{"".join(opts)}</div>'
-            f'<div class="hint">\U0001F4A1 {esc(q.hint)}</div></div>')
+        clk = f' <span class="clk">\U0001F550 {q.clock}:00</span>'
+    # other choices, kept subtle so the eye lands on the green answer first
+    others = " ".join(f'<span class="opt">{esc(a)}</span>' for a in q.answers if a != q.correct)
+    return (f'<div class="q"><span class="qt">{esc(q.text)}{clk}</span> '
+            f'<span class="opt ok">✓ {esc(q.correct)}</span> {others}'
+            f'<span class="hint">\U0001F4A1 {esc(q.hint)}</span></div>')
 
 def subject_block(grade, subject):
     emoji, color, _ = SUBJ[subject]
     qs = [q for q in T.banks[grade] if T.subject_of[(grade, q.text)] == subject]
     if not qs:
         return ""
-    h = f'<div class="subhead" style="background:{color}"><span>{emoji}</span> {esc(subject)} <span style="font-weight:400;font-size:15px">({len(qs)})</span></div>'
-    return h + "".join(question_html(q) for q in qs)
+    h = f'<div class="subhead" style="background:{color}"><span>{emoji}</span> {esc(subject)} <span style="font-weight:400;font-size:14px">({len(qs)})</span></div>'
+    return h + '<div class="qlist">' + "".join(question_html(q) for q in qs) + '</div>'
 
 def guide_html():
     rows = "".join(
