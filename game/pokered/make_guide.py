@@ -68,6 +68,10 @@ h2 .e{font-size:27px;vertical-align:-2px;margin-right:6px}
    detail kept readable: clear answer pills, the full hint, the clock note */
 .subhead{display:flex;align-items:center;gap:9px;font-size:20px;font-weight:700;margin:14px 0 8px;padding:7px 13px;border-radius:11px;color:#fff;break-after:avoid}
 .qlist{columns:360px;column-gap:16px}
+/* Math: short numeric items -> denser grid + tighter cards */
+.qlist.compact{columns:210px;column-gap:12px}
+.qlist.compact .q{padding:6px 9px;margin:0 0 7px}
+.qlist.compact .qt{font-size:15px}
 .q{break-inside:avoid;border:1px solid var(--line);border-radius:12px;padding:8px 11px;margin:0 0 9px;background:var(--cream)}
 .qt{font-size:16px;font-weight:700}
 .clk{display:block;background:#ccfbf1;color:#0f766e;border-radius:7px;padding:2px 8px;font-size:12.5px;margin-top:3px}
@@ -97,6 +101,7 @@ h2 .e{font-size:27px;vertical-align:-2px;margin-right:6px}
   /* a fresh page per grade is plenty; subjects flow to keep the page count down */
   .subhead{break-after:avoid;color:#000 !important;background:#fff !important;border:1px solid #000}
   .qlist{columns:2;column-gap:14px}
+  .qlist.compact{columns:3;column-gap:12px}
   .q{break-inside:avoid;background:#fff;border:1px solid #bbb}
   .opt{background:#fff;border:1px solid #999;color:#000}
   .opt.ok{background:#fff !important;color:#000 !important;border:2px solid #000;font-weight:700;text-decoration:underline}
@@ -127,7 +132,9 @@ def subject_block(grade, subject):
     if not qs:
         return ""
     h = f'<div class="subhead" style="background:{color}"><span>{emoji}</span> {esc(subject)} <span style="font-weight:400;font-size:14px">({len(qs)})</span></div>'
-    return h + '<div class="qlist">' + "".join(question_html(q) for q in qs) + '</div>'
+    # Math answers are short (numbers) -> pack denser (more, narrower columns).
+    cls = "qlist compact" if subject == "Math" else "qlist"
+    return h + f'<div class="{cls}">' + "".join(question_html(q) for q in qs) + '</div>'
 
 def guide_html():
     rows = "".join(
