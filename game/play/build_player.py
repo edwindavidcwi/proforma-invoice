@@ -1330,6 +1330,17 @@ PROGRESS_JS = r"""
       + '<p class="pgDim">Play a few quiz battles, then come back &mdash; you\'ll see which subjects, grades and questions your child finds tricky, plus tips to help.</p></div>';
     var acc = Math.round(100 * st.correct / tot);
     h += '<div class="pgStats">' + statTile('Answered', tot, '') + statTile('First&#8209;try', acc + '%', clsOf(acc)) + statTile('Best streak', st.best, '') + '</div>';
+    // Mastery badges: a subject is "mastered" at >=80% first-try over >=5 answers.
+    var badges = [];
+    for (s = 0; s < 6; s++) { var bo = st.subj[s]; if (bo && (bo.c + bo.w) >= 5 && pct(bo) >= 80) badges.push(SUBJ[s]); }
+    h += '<div class="pgSec">Badges earned <span>' + badges.length + ' of 6 subjects</span></div>';
+    if (badges.length) {
+      h += '<div style="display:flex;flex-wrap:wrap;gap:6px;padding:2px 2px 6px">'
+        + badges.map(function (b) { return '<span style="background:#ffcb05;color:#06141c;border-radius:12px;padding:3px 10px;font-weight:700;font-size:12px">&#11088; ' + b + '</span>'; }).join('')
+        + '</div>';
+    } else {
+      h += '<div class="pgNone">Master a subject (80%+ over 5+ questions) to earn a &#11088; badge!</div>';
+    }
     h += '<div class="pgSec">By subject<span>tap to see misses</span></div>';
     for (s = 0; s < 6; s++) if (st.subj[s]) h += group('s' + s, st.subj[s], SUBJ[s], missedList((function (sv) { return function (q) { return q.s === sv; }; })(s)));
     h += '<div class="pgSec">By grade<span>tap to see misses</span></div>';
