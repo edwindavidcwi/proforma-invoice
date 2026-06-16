@@ -63,7 +63,7 @@ function tile(b) {
     // Two-column layout: left answers at cols 2-9, right answers at cols 11-18, rows 8/10/12.
     const cell = (r, c0, c1) => { let s = ""; for (let c = c0; c < c1; c++) s += tile(rd(wTileMap + r * 20 + c)); return s.trim(); };
     const answers = [];
-    for (const r of [8, 10, 12]) { const L = cell(r, 2, 10), R = cell(r, 11, 19); if (L) answers.push(L); if (R) answers.push(R); }
+    for (const r of [9, 11, 13]) { const L = cell(r, 2, 10), R = cell(r, 11, 19); if (L) answers.push(L); if (R) answers.push(R); }
     const ok = q.length > 1 && answers.length >= 2 && !(q + answers.join("")).includes("~");
     if (!ok) failures++;
     console.log(`${ok ? "PASS" : "FAIL"}  ${label} (bank ${rd(wQuizDataBank)}): "${q}"  ->  ${answers.join(" / ")}`);

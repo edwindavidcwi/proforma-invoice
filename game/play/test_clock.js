@@ -72,7 +72,7 @@ const fail = (m) => { console.log("FAIL  " + m); failures++; };
       // hour hand in the mapped cell
       if (tm(HAND[hour - 1]) !== C["H"]) fail(`hour ${hour}: hand not at expected cell ${HAND[hour - 1]}`);
       // answers stacked in the right column (col 11, row 8 = offset 171)
-      if (tm(8 * 20 + 11) === C[" "]) fail(`hour ${hour}: no answer in right column`);
+      if (tm(9 * 20 + 11) === C[" "]) fail(`hour ${hour}: no answer in right column`);
       // correct answer text = "<hour>:00"
       let ans = ""; for (let i = 0; i < 8; i++) { const b = rd(wQuizA0 + i); if (b === 0x50) break; ans += dec(b); }
       if (ans !== hour + ":00") fail(`hour ${hour}: correct answer is "${ans}", expected "${hour}:00"`);

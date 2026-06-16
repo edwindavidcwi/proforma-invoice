@@ -946,7 +946,7 @@ QuizPrintAnswers::
 	jr z, .twoCol
 	ld a, [wQuizSlot]
 	ld b, a                        ; b = row = slot
-	hlcoord 11, 8                  ; right column base (single column)
+	hlcoord 11, 9                  ; right column base (single column)
 	jr .addRows
 .twoCol
 	; destination = base(col) + row * 2 rows.  leftN = (n + 1) / 2.
@@ -959,11 +959,11 @@ QuizPrintAnswers::
 	jr c, .leftCol
 	sub c                          ; row = slot - leftN
 	ld b, a                        ; b = row
-	hlcoord 11, 8                  ; right column base
+	hlcoord 11, 9                  ; right column base
 	jr .addRows
 .leftCol
 	ld b, a                        ; b = row = slot
-	hlcoord 2, 8                   ; left column base
+	hlcoord 2, 9                   ; left column base
 .addRows
 	ld a, b
 	and a
@@ -985,12 +985,25 @@ QuizPrintAnswers::
 ; Left/Right switch columns. Returns the chosen ABSOLUTE slot in wCurrentMenuItem
 ; (so it can be compared to wQuizCorrectIndex). Only A confirms -- no B escape.
 QuizGridInput::
+	; Drop any button still held from the action that opened the quiz (e.g. the A
+	; press that chose the move), so it can't accidentally select the cursor's
+	; option. Wait until nothing is held (capped at ~0.5s), then take fresh input.
+	ld c, 30
+.flush
+	call DelayFrame
+	call Joypad
+	ldh a, [hJoyHeld]
+	and a
+	jr z, .flushed
+	dec c
+	jr nz, .flush
+.flushed
 	ld a, [wQuizClock]
 	and a
 	jr z, .grid
 	; Clock question: answers are stacked in one right column, so use a plain
 	; single-column Up/Down menu (A confirms; no Left/Right column switching).
-	ld a, 8
+	ld a, 9
 	ld [wTopMenuItemY], a
 	ld a, 10
 	ld [wTopMenuItemX], a
@@ -1067,9 +1080,9 @@ QuizGridInput::
 	ret
 
 ; Point HandleMenuInput at the current column: cursor X (1 = left, 10 = right),
-; top row 8, and the number of items in that column.
+; top row 9 (a blank line below the question), and the number of items in that column.
 QuizSetupColumnCursor::
-	ld a, 8
+	ld a, 9
 	ld [wTopMenuItemY], a
 	ld a, [wQuizCol]
 	and a

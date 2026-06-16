@@ -84,8 +84,8 @@ for (let g = 1; g <= 5; g++) {
         const leftN = (exp.n + 1) >> 1;
         ans = [];
         for (let s = 0; s < exp.n; s++) {
-          if (clock) { ans.push(cell(8 + s * 2, 11, 19)); continue; }
-          const right = s >= leftN, row = 8 + (right ? s - leftN : s) * 2;
+          if (clock) { ans.push(cell(9 + s * 2, 11, 19)); continue; }
+          const right = s >= leftN, row = 9 + (right ? s - leftN : s) * 2;
           ans.push(cell(row, right ? 11 : 2, right ? 19 : 10));
         }
       }

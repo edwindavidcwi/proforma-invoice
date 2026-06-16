@@ -97,7 +97,7 @@ const check = (name, cond, detail) => {
 
   // ---- Check 1b: 2-column setup picks the right cursor column + item count ----
   // QuizSetupColumnCursor reads wQuizNumAnswers + wQuizCol and sets the cursor X
-  // (left col -> 1, right col -> 10), top row 8, and the column's item count.
+  // (left col -> 1, right col -> 10), top row 9, and the column's item count.
   // leftN = ceil(n/2); rightN = n - leftN.
   console.log("\n-- 2-column answer grid (QuizSetupColumnCursor) --");
   const QuizSetupColumnCursor = S("QuizSetupColumnCursor"), quizBank = BANK("QuizSetupColumnCursor");
@@ -120,10 +120,10 @@ const check = (name, cond, detail) => {
   for (const n of [2, 3, 4, 5, 6]) {
     const leftN = (n + 1) >> 1, rightN = n - leftN;
     const L = setupCol(n, 0), R = setupCol(n, 1);
-    check(`n=${n}: left column at X=1, Y=8, ${leftN} item(s)`,
-          L.x === 1 && L.y === 8 && L.max === leftN - 1, `x=${L.x} y=${L.y} max=${L.max}`);
-    check(`n=${n}: right column at X=10, Y=8, ${rightN} item(s)`,
-          R.x === 10 && R.y === 8 && R.max === rightN - 1, `x=${R.x} y=${R.y} max=${R.max}`);
+    check(`n=${n}: left column at X=1, Y=9, ${leftN} item(s)`,
+          L.x === 1 && L.y === 9 && L.max === leftN - 1, `x=${L.x} y=${L.y} max=${L.max}`);
+    check(`n=${n}: right column at X=10, Y=9, ${rightN} item(s)`,
+          R.x === 10 && R.y === 9 && R.max === rightN - 1, `x=${R.x} y=${R.y} max=${R.max}`);
   }
 
   // ---- Check 2: boot stability soak ----
