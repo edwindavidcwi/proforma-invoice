@@ -44,7 +44,7 @@ const fail = (m) => { console.log("FAIL  " + m); failures++; };
   const size = (rom.length + 0x7fff) & ~0x7fff;
   const seen = {};
 
-  for (let t = 0; t < 200 && Object.keys(seen).length < 6; t++) {
+  for (let t = 0; t < 500 && Object.keys(seen).length < 6; t++) {
     const rp = module._malloc(size);
     module.HEAPU8.fill(0, rp, rp + size);
     module.HEAPU8.set(rom, rp);
@@ -52,7 +52,7 @@ const fail = (m) => { console.log("FAIL  " + m); failures++; };
     const rd = (a) => module._emulator_read_mem(e, a);
     const ticks = () => module._emulator_get_ticks_f64(e);
     const run = (n) => { for (let i = 0; i < n; i++) module._emulator_run_until_f64(e, ticks() + TPF); };
-    run(380 + (t % 60));
+    run(300 + t);          // unique boot length per trial -> varied RNG -> varied questions
     module._emulator_write_mem(e, wObtainedBadges, 0xff);   // Grade 5: most clock questions
     module._emulator_write_mem(e, 0x2000, QPA.bank);
     module._emulator_write_mem(e, hLoadedROMBank, QPA.bank);

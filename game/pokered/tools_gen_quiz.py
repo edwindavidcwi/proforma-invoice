@@ -13,7 +13,7 @@ import os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 OUT = os.path.join(HERE, "engine", "battle", "quiz_data.asm")
-TARGET = 100
+TARGET = 200
 
 ALLOWED = set("0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz "
               "-/x.:?!")
@@ -477,7 +477,9 @@ def emit():
         w(f"Grade{g}Clock:: db " + ", ".join(str(getattr(q, "clock", 0)) for q in banks[g]))
     w("")
     for g in range(1, 6):
-        w(f'SECTION "Quiz Data G{g}", ROMX')
+        # ALIGN[14] = start of a ROM bank, so each grade gets a dedicated 16 KB
+        # bank (room for ~200 questions) instead of sharing leftover space.
+        w(f'SECTION "Quiz Data G{g}", ROMX, ALIGN[14]')
         w(f"Grade{g}Questions::")
         LET = "ABCDEF"
         for i, q in enumerate(banks[g], 1):

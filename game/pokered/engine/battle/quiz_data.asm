@@ -13,19 +13,19 @@
 
 QuizGradeTable::
 	dw Grade1Questions
-	db 100
+	db 180
 	db BANK(Grade1Questions)
 	dw Grade2Questions
-	db 100
+	db 160
 	db BANK(Grade2Questions)
 	dw Grade3Questions
-	db 100
+	db 148
 	db BANK(Grade3Questions)
 	dw Grade4Questions
-	db 100
+	db 131
 	db BANK(Grade4Questions)
 	dw Grade5Questions
-	db 100
+	db 152
 	db BANK(Grade5Questions)
 
 ; ---- result messages (shown via PrintText) ----
@@ -72,11 +72,11 @@ QuizSubjectTable::
 	dw Grade4Subjects
 	dw Grade5Subjects
 
-Grade1Subjects:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
-Grade2Subjects:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
-Grade3Subjects:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
-Grade4Subjects:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
-Grade5Subjects:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+Grade1Subjects:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+Grade2Subjects:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+Grade3Subjects:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+Grade4Subjects:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
+Grade5Subjects:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 5, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4
 
 ; Clock hour per question (0 = normal; 1-12 = draw a clock at that o'clock).
 QuizClockTable::
@@ -86,13 +86,13 @@ QuizClockTable::
 	dw Grade4Clock
 	dw Grade5Clock
 
-Grade1Clock:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-Grade2Clock:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 9, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-Grade3Clock:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 9, 12, 2, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-Grade4Clock:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 9, 12, 2, 5, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
-Grade5Clock:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 9, 12, 2, 5, 8, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+Grade1Clock:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+Grade2Clock:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 9, 12, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+Grade3Clock:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 9, 12, 2, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+Grade4Clock:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 9, 12, 2, 5, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
+Grade5Clock:: db 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 6, 9, 12, 2, 5, 8, 11, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
 
-SECTION "Quiz Data G1", ROMX
+SECTION "Quiz Data G1", ROMX, ALIGN[14]
 Grade1Questions::
 	dw G1Q1
 	db 0
@@ -594,6 +594,406 @@ Grade1Questions::
 	db 6
 	dw G1Q100A, G1Q100B, G1Q100C, G1Q100D, G1Q100E, G1Q100F
 	dw G1Q100H
+	dw G1Q101
+	db 0
+	db 6
+	dw G1Q101A, G1Q101B, G1Q101C, G1Q101D, G1Q101E, G1Q101F
+	dw G1Q101H
+	dw G1Q102
+	db 0
+	db 6
+	dw G1Q102A, G1Q102B, G1Q102C, G1Q102D, G1Q102E, G1Q102F
+	dw G1Q102H
+	dw G1Q103
+	db 0
+	db 6
+	dw G1Q103A, G1Q103B, G1Q103C, G1Q103D, G1Q103E, G1Q103F
+	dw G1Q103H
+	dw G1Q104
+	db 0
+	db 6
+	dw G1Q104A, G1Q104B, G1Q104C, G1Q104D, G1Q104E, G1Q104F
+	dw G1Q104H
+	dw G1Q105
+	db 0
+	db 6
+	dw G1Q105A, G1Q105B, G1Q105C, G1Q105D, G1Q105E, G1Q105F
+	dw G1Q105H
+	dw G1Q106
+	db 0
+	db 6
+	dw G1Q106A, G1Q106B, G1Q106C, G1Q106D, G1Q106E, G1Q106F
+	dw G1Q106H
+	dw G1Q107
+	db 0
+	db 6
+	dw G1Q107A, G1Q107B, G1Q107C, G1Q107D, G1Q107E, G1Q107F
+	dw G1Q107H
+	dw G1Q108
+	db 0
+	db 6
+	dw G1Q108A, G1Q108B, G1Q108C, G1Q108D, G1Q108E, G1Q108F
+	dw G1Q108H
+	dw G1Q109
+	db 0
+	db 6
+	dw G1Q109A, G1Q109B, G1Q109C, G1Q109D, G1Q109E, G1Q109F
+	dw G1Q109H
+	dw G1Q110
+	db 0
+	db 6
+	dw G1Q110A, G1Q110B, G1Q110C, G1Q110D, G1Q110E, G1Q110F
+	dw G1Q110H
+	dw G1Q111
+	db 0
+	db 6
+	dw G1Q111A, G1Q111B, G1Q111C, G1Q111D, G1Q111E, G1Q111F
+	dw G1Q111H
+	dw G1Q112
+	db 0
+	db 6
+	dw G1Q112A, G1Q112B, G1Q112C, G1Q112D, G1Q112E, G1Q112F
+	dw G1Q112H
+	dw G1Q113
+	db 0
+	db 6
+	dw G1Q113A, G1Q113B, G1Q113C, G1Q113D, G1Q113E, G1Q113F
+	dw G1Q113H
+	dw G1Q114
+	db 0
+	db 6
+	dw G1Q114A, G1Q114B, G1Q114C, G1Q114D, G1Q114E, G1Q114F
+	dw G1Q114H
+	dw G1Q115
+	db 0
+	db 6
+	dw G1Q115A, G1Q115B, G1Q115C, G1Q115D, G1Q115E, G1Q115F
+	dw G1Q115H
+	dw G1Q116
+	db 0
+	db 6
+	dw G1Q116A, G1Q116B, G1Q116C, G1Q116D, G1Q116E, G1Q116F
+	dw G1Q116H
+	dw G1Q117
+	db 0
+	db 6
+	dw G1Q117A, G1Q117B, G1Q117C, G1Q117D, G1Q117E, G1Q117F
+	dw G1Q117H
+	dw G1Q118
+	db 0
+	db 6
+	dw G1Q118A, G1Q118B, G1Q118C, G1Q118D, G1Q118E, G1Q118F
+	dw G1Q118H
+	dw G1Q119
+	db 0
+	db 6
+	dw G1Q119A, G1Q119B, G1Q119C, G1Q119D, G1Q119E, G1Q119F
+	dw G1Q119H
+	dw G1Q120
+	db 0
+	db 6
+	dw G1Q120A, G1Q120B, G1Q120C, G1Q120D, G1Q120E, G1Q120F
+	dw G1Q120H
+	dw G1Q121
+	db 0
+	db 6
+	dw G1Q121A, G1Q121B, G1Q121C, G1Q121D, G1Q121E, G1Q121F
+	dw G1Q121H
+	dw G1Q122
+	db 0
+	db 6
+	dw G1Q122A, G1Q122B, G1Q122C, G1Q122D, G1Q122E, G1Q122F
+	dw G1Q122H
+	dw G1Q123
+	db 0
+	db 6
+	dw G1Q123A, G1Q123B, G1Q123C, G1Q123D, G1Q123E, G1Q123F
+	dw G1Q123H
+	dw G1Q124
+	db 0
+	db 6
+	dw G1Q124A, G1Q124B, G1Q124C, G1Q124D, G1Q124E, G1Q124F
+	dw G1Q124H
+	dw G1Q125
+	db 0
+	db 6
+	dw G1Q125A, G1Q125B, G1Q125C, G1Q125D, G1Q125E, G1Q125F
+	dw G1Q125H
+	dw G1Q126
+	db 0
+	db 6
+	dw G1Q126A, G1Q126B, G1Q126C, G1Q126D, G1Q126E, G1Q126F
+	dw G1Q126H
+	dw G1Q127
+	db 0
+	db 6
+	dw G1Q127A, G1Q127B, G1Q127C, G1Q127D, G1Q127E, G1Q127F
+	dw G1Q127H
+	dw G1Q128
+	db 0
+	db 6
+	dw G1Q128A, G1Q128B, G1Q128C, G1Q128D, G1Q128E, G1Q128F
+	dw G1Q128H
+	dw G1Q129
+	db 0
+	db 6
+	dw G1Q129A, G1Q129B, G1Q129C, G1Q129D, G1Q129E, G1Q129F
+	dw G1Q129H
+	dw G1Q130
+	db 0
+	db 6
+	dw G1Q130A, G1Q130B, G1Q130C, G1Q130D, G1Q130E, G1Q130F
+	dw G1Q130H
+	dw G1Q131
+	db 0
+	db 6
+	dw G1Q131A, G1Q131B, G1Q131C, G1Q131D, G1Q131E, G1Q131F
+	dw G1Q131H
+	dw G1Q132
+	db 0
+	db 6
+	dw G1Q132A, G1Q132B, G1Q132C, G1Q132D, G1Q132E, G1Q132F
+	dw G1Q132H
+	dw G1Q133
+	db 0
+	db 6
+	dw G1Q133A, G1Q133B, G1Q133C, G1Q133D, G1Q133E, G1Q133F
+	dw G1Q133H
+	dw G1Q134
+	db 0
+	db 6
+	dw G1Q134A, G1Q134B, G1Q134C, G1Q134D, G1Q134E, G1Q134F
+	dw G1Q134H
+	dw G1Q135
+	db 0
+	db 6
+	dw G1Q135A, G1Q135B, G1Q135C, G1Q135D, G1Q135E, G1Q135F
+	dw G1Q135H
+	dw G1Q136
+	db 0
+	db 6
+	dw G1Q136A, G1Q136B, G1Q136C, G1Q136D, G1Q136E, G1Q136F
+	dw G1Q136H
+	dw G1Q137
+	db 0
+	db 6
+	dw G1Q137A, G1Q137B, G1Q137C, G1Q137D, G1Q137E, G1Q137F
+	dw G1Q137H
+	dw G1Q138
+	db 0
+	db 6
+	dw G1Q138A, G1Q138B, G1Q138C, G1Q138D, G1Q138E, G1Q138F
+	dw G1Q138H
+	dw G1Q139
+	db 0
+	db 6
+	dw G1Q139A, G1Q139B, G1Q139C, G1Q139D, G1Q139E, G1Q139F
+	dw G1Q139H
+	dw G1Q140
+	db 0
+	db 6
+	dw G1Q140A, G1Q140B, G1Q140C, G1Q140D, G1Q140E, G1Q140F
+	dw G1Q140H
+	dw G1Q141
+	db 0
+	db 6
+	dw G1Q141A, G1Q141B, G1Q141C, G1Q141D, G1Q141E, G1Q141F
+	dw G1Q141H
+	dw G1Q142
+	db 0
+	db 6
+	dw G1Q142A, G1Q142B, G1Q142C, G1Q142D, G1Q142E, G1Q142F
+	dw G1Q142H
+	dw G1Q143
+	db 0
+	db 6
+	dw G1Q143A, G1Q143B, G1Q143C, G1Q143D, G1Q143E, G1Q143F
+	dw G1Q143H
+	dw G1Q144
+	db 0
+	db 6
+	dw G1Q144A, G1Q144B, G1Q144C, G1Q144D, G1Q144E, G1Q144F
+	dw G1Q144H
+	dw G1Q145
+	db 0
+	db 6
+	dw G1Q145A, G1Q145B, G1Q145C, G1Q145D, G1Q145E, G1Q145F
+	dw G1Q145H
+	dw G1Q146
+	db 0
+	db 6
+	dw G1Q146A, G1Q146B, G1Q146C, G1Q146D, G1Q146E, G1Q146F
+	dw G1Q146H
+	dw G1Q147
+	db 0
+	db 6
+	dw G1Q147A, G1Q147B, G1Q147C, G1Q147D, G1Q147E, G1Q147F
+	dw G1Q147H
+	dw G1Q148
+	db 0
+	db 6
+	dw G1Q148A, G1Q148B, G1Q148C, G1Q148D, G1Q148E, G1Q148F
+	dw G1Q148H
+	dw G1Q149
+	db 0
+	db 6
+	dw G1Q149A, G1Q149B, G1Q149C, G1Q149D, G1Q149E, G1Q149F
+	dw G1Q149H
+	dw G1Q150
+	db 0
+	db 6
+	dw G1Q150A, G1Q150B, G1Q150C, G1Q150D, G1Q150E, G1Q150F
+	dw G1Q150H
+	dw G1Q151
+	db 0
+	db 6
+	dw G1Q151A, G1Q151B, G1Q151C, G1Q151D, G1Q151E, G1Q151F
+	dw G1Q151H
+	dw G1Q152
+	db 0
+	db 6
+	dw G1Q152A, G1Q152B, G1Q152C, G1Q152D, G1Q152E, G1Q152F
+	dw G1Q152H
+	dw G1Q153
+	db 0
+	db 6
+	dw G1Q153A, G1Q153B, G1Q153C, G1Q153D, G1Q153E, G1Q153F
+	dw G1Q153H
+	dw G1Q154
+	db 0
+	db 6
+	dw G1Q154A, G1Q154B, G1Q154C, G1Q154D, G1Q154E, G1Q154F
+	dw G1Q154H
+	dw G1Q155
+	db 0
+	db 6
+	dw G1Q155A, G1Q155B, G1Q155C, G1Q155D, G1Q155E, G1Q155F
+	dw G1Q155H
+	dw G1Q156
+	db 0
+	db 6
+	dw G1Q156A, G1Q156B, G1Q156C, G1Q156D, G1Q156E, G1Q156F
+	dw G1Q156H
+	dw G1Q157
+	db 0
+	db 6
+	dw G1Q157A, G1Q157B, G1Q157C, G1Q157D, G1Q157E, G1Q157F
+	dw G1Q157H
+	dw G1Q158
+	db 0
+	db 6
+	dw G1Q158A, G1Q158B, G1Q158C, G1Q158D, G1Q158E, G1Q158F
+	dw G1Q158H
+	dw G1Q159
+	db 0
+	db 6
+	dw G1Q159A, G1Q159B, G1Q159C, G1Q159D, G1Q159E, G1Q159F
+	dw G1Q159H
+	dw G1Q160
+	db 0
+	db 6
+	dw G1Q160A, G1Q160B, G1Q160C, G1Q160D, G1Q160E, G1Q160F
+	dw G1Q160H
+	dw G1Q161
+	db 0
+	db 6
+	dw G1Q161A, G1Q161B, G1Q161C, G1Q161D, G1Q161E, G1Q161F
+	dw G1Q161H
+	dw G1Q162
+	db 0
+	db 6
+	dw G1Q162A, G1Q162B, G1Q162C, G1Q162D, G1Q162E, G1Q162F
+	dw G1Q162H
+	dw G1Q163
+	db 0
+	db 6
+	dw G1Q163A, G1Q163B, G1Q163C, G1Q163D, G1Q163E, G1Q163F
+	dw G1Q163H
+	dw G1Q164
+	db 0
+	db 6
+	dw G1Q164A, G1Q164B, G1Q164C, G1Q164D, G1Q164E, G1Q164F
+	dw G1Q164H
+	dw G1Q165
+	db 0
+	db 6
+	dw G1Q165A, G1Q165B, G1Q165C, G1Q165D, G1Q165E, G1Q165F
+	dw G1Q165H
+	dw G1Q166
+	db 0
+	db 6
+	dw G1Q166A, G1Q166B, G1Q166C, G1Q166D, G1Q166E, G1Q166F
+	dw G1Q166H
+	dw G1Q167
+	db 0
+	db 6
+	dw G1Q167A, G1Q167B, G1Q167C, G1Q167D, G1Q167E, G1Q167F
+	dw G1Q167H
+	dw G1Q168
+	db 0
+	db 6
+	dw G1Q168A, G1Q168B, G1Q168C, G1Q168D, G1Q168E, G1Q168F
+	dw G1Q168H
+	dw G1Q169
+	db 0
+	db 6
+	dw G1Q169A, G1Q169B, G1Q169C, G1Q169D, G1Q169E, G1Q169F
+	dw G1Q169H
+	dw G1Q170
+	db 0
+	db 6
+	dw G1Q170A, G1Q170B, G1Q170C, G1Q170D, G1Q170E, G1Q170F
+	dw G1Q170H
+	dw G1Q171
+	db 0
+	db 6
+	dw G1Q171A, G1Q171B, G1Q171C, G1Q171D, G1Q171E, G1Q171F
+	dw G1Q171H
+	dw G1Q172
+	db 0
+	db 6
+	dw G1Q172A, G1Q172B, G1Q172C, G1Q172D, G1Q172E, G1Q172F
+	dw G1Q172H
+	dw G1Q173
+	db 0
+	db 6
+	dw G1Q173A, G1Q173B, G1Q173C, G1Q173D, G1Q173E, G1Q173F
+	dw G1Q173H
+	dw G1Q174
+	db 0
+	db 6
+	dw G1Q174A, G1Q174B, G1Q174C, G1Q174D, G1Q174E, G1Q174F
+	dw G1Q174H
+	dw G1Q175
+	db 0
+	db 6
+	dw G1Q175A, G1Q175B, G1Q175C, G1Q175D, G1Q175E, G1Q175F
+	dw G1Q175H
+	dw G1Q176
+	db 0
+	db 6
+	dw G1Q176A, G1Q176B, G1Q176C, G1Q176D, G1Q176E, G1Q176F
+	dw G1Q176H
+	dw G1Q177
+	db 0
+	db 3
+	dw G1Q177A, G1Q177B, G1Q177C, G1Q177C, G1Q177C, G1Q177C
+	dw G1Q177H
+	dw G1Q178
+	db 0
+	db 3
+	dw G1Q178A, G1Q178B, G1Q178C, G1Q178C, G1Q178C, G1Q178C
+	dw G1Q178H
+	dw G1Q179
+	db 0
+	db 3
+	dw G1Q179A, G1Q179B, G1Q179C, G1Q179C, G1Q179C, G1Q179C
+	dw G1Q179H
+	dw G1Q180
+	db 0
+	db 3
+	dw G1Q180A, G1Q180B, G1Q180C, G1Q180C, G1Q180C, G1Q180C
+	dw G1Q180H
 G1Q1: db "Opposite of big?@"
 G1Q1A: db "small@"
 G1Q1B: db "down@"
@@ -1338,8 +1738,636 @@ G1Q100D: db "21@"
 G1Q100E: db "9@"
 G1Q100F: db "13@"
 G1Q100H: db "Count from 6@"
+G1Q101: db "6 plus 6?@"
+G1Q101A: db "12@"
+G1Q101B: db "0@"
+G1Q101C: db "13@"
+G1Q101D: db "22@"
+G1Q101E: db "10@"
+G1Q101F: db "14@"
+G1Q101H: db "Count from 6@"
+G1Q102: db "7 plus 1?@"
+G1Q102A: db "8@"
+G1Q102B: db "6@"
+G1Q102C: db "9@"
+G1Q102D: db "18@"
+G1Q102E: db "10@"
+G1Q102F: db "7@"
+G1Q102H: db "Count from 7@"
+G1Q103: db "7 plus 2?@"
+G1Q103A: db "9@"
+G1Q103B: db "5@"
+G1Q103C: db "10@"
+G1Q103D: db "19@"
+G1Q103E: db "7@"
+G1Q103F: db "11@"
+G1Q103H: db "Count from 7@"
+G1Q104: db "7 plus 3?@"
+G1Q104A: db "10@"
+G1Q104B: db "4@"
+G1Q104C: db "11@"
+G1Q104D: db "20@"
+G1Q104E: db "8@"
+G1Q104F: db "12@"
+G1Q104H: db "Count from 7@"
+G1Q105: db "7 plus 4?@"
+G1Q105A: db "11@"
+G1Q105B: db "3@"
+G1Q105C: db "12@"
+G1Q105D: db "21@"
+G1Q105E: db "9@"
+G1Q105F: db "13@"
+G1Q105H: db "Count from 7@"
+G1Q106: db "7 plus 5?@"
+G1Q106A: db "12@"
+G1Q106B: db "2@"
+G1Q106C: db "13@"
+G1Q106D: db "22@"
+G1Q106E: db "10@"
+G1Q106F: db "14@"
+G1Q106H: db "Count from 7@"
+G1Q107: db "8 plus 1?@"
+G1Q107A: db "9@"
+G1Q107B: db "7@"
+G1Q107C: db "10@"
+G1Q107D: db "19@"
+G1Q107E: db "11@"
+G1Q107F: db "8@"
+G1Q107H: db "Count from 8@"
+G1Q108: db "8 plus 2?@"
+G1Q108A: db "10@"
+G1Q108B: db "6@"
+G1Q108C: db "11@"
+G1Q108D: db "20@"
+G1Q108E: db "8@"
+G1Q108F: db "12@"
+G1Q108H: db "Count from 8@"
+G1Q109: db "8 plus 3?@"
+G1Q109A: db "11@"
+G1Q109B: db "5@"
+G1Q109C: db "12@"
+G1Q109D: db "21@"
+G1Q109E: db "9@"
+G1Q109F: db "13@"
+G1Q109H: db "Count from 8@"
+G1Q110: db "8 plus 4?@"
+G1Q110A: db "12@"
+G1Q110B: db "4@"
+G1Q110C: db "13@"
+G1Q110D: db "22@"
+G1Q110E: db "10@"
+G1Q110F: db "14@"
+G1Q110H: db "Count from 8@"
+G1Q111: db "9 plus 1?@"
+G1Q111A: db "10@"
+G1Q111B: db "8@"
+G1Q111C: db "11@"
+G1Q111D: db "20@"
+G1Q111E: db "12@"
+G1Q111F: db "9@"
+G1Q111H: db "Count from 9@"
+G1Q112: db "9 plus 2?@"
+G1Q112A: db "11@"
+G1Q112B: db "7@"
+G1Q112C: db "12@"
+G1Q112D: db "21@"
+G1Q112E: db "9@"
+G1Q112F: db "13@"
+G1Q112H: db "Count from 9@"
+G1Q113: db "9 plus 3?@"
+G1Q113A: db "12@"
+G1Q113B: db "6@"
+G1Q113C: db "13@"
+G1Q113D: db "22@"
+G1Q113E: db "10@"
+G1Q113F: db "14@"
+G1Q113H: db "Count from 9@"
+G1Q114: db "2 - 1?@"
+G1Q114A: db "1@"
+G1Q114B: db "3@"
+G1Q114C: db "2@"
+G1Q114D: db "11@"
+G1Q114E: db "0@"
+G1Q114F: db "6@"
+G1Q114H: db "1 less than 2@"
+G1Q115: db "3 - 1?@"
+G1Q115A: db "2@"
+G1Q115B: db "4@"
+G1Q115C: db "3@"
+G1Q115D: db "12@"
+G1Q115E: db "1@"
+G1Q115F: db "0@"
+G1Q115H: db "1 less than 3@"
+G1Q116: db "3 - 2?@"
+G1Q116A: db "1@"
+G1Q116B: db "5@"
+G1Q116C: db "2@"
+G1Q116D: db "11@"
+G1Q116E: db "0@"
+G1Q116F: db "3@"
+G1Q116H: db "2 less than 3@"
+G1Q117: db "4 - 1?@"
+G1Q117A: db "3@"
+G1Q117B: db "5@"
+G1Q117C: db "4@"
+G1Q117D: db "13@"
+G1Q117E: db "2@"
+G1Q117F: db "1@"
+G1Q117H: db "1 less than 4@"
+G1Q118: db "4 - 2?@"
+G1Q118A: db "2@"
+G1Q118B: db "6@"
+G1Q118C: db "3@"
+G1Q118D: db "12@"
+G1Q118E: db "1@"
+G1Q118F: db "4@"
+G1Q118H: db "2 less than 4@"
+G1Q119: db "4 - 3?@"
+G1Q119A: db "1@"
+G1Q119B: db "7@"
+G1Q119C: db "2@"
+G1Q119D: db "11@"
+G1Q119E: db "0@"
+G1Q119F: db "3@"
+G1Q119H: db "3 less than 4@"
+G1Q120: db "5 - 1?@"
+G1Q120A: db "4@"
+G1Q120B: db "6@"
+G1Q120C: db "5@"
+G1Q120D: db "14@"
+G1Q120E: db "3@"
+G1Q120F: db "2@"
+G1Q120H: db "1 less than 5@"
+G1Q121: db "5 - 2?@"
+G1Q121A: db "3@"
+G1Q121B: db "7@"
+G1Q121C: db "4@"
+G1Q121D: db "13@"
+G1Q121E: db "2@"
+G1Q121F: db "5@"
+G1Q121H: db "2 less than 5@"
+G1Q122: db "5 - 3?@"
+G1Q122A: db "2@"
+G1Q122B: db "8@"
+G1Q122C: db "3@"
+G1Q122D: db "12@"
+G1Q122E: db "1@"
+G1Q122F: db "4@"
+G1Q122H: db "3 less than 5@"
+G1Q123: db "5 - 4?@"
+G1Q123A: db "1@"
+G1Q123B: db "9@"
+G1Q123C: db "2@"
+G1Q123D: db "11@"
+G1Q123E: db "0@"
+G1Q123F: db "3@"
+G1Q123H: db "4 less than 5@"
+G1Q124: db "6 - 1?@"
+G1Q124A: db "5@"
+G1Q124B: db "7@"
+G1Q124C: db "6@"
+G1Q124D: db "15@"
+G1Q124E: db "4@"
+G1Q124F: db "3@"
+G1Q124H: db "1 less than 6@"
+G1Q125: db "6 - 2?@"
+G1Q125A: db "4@"
+G1Q125B: db "8@"
+G1Q125C: db "5@"
+G1Q125D: db "14@"
+G1Q125E: db "3@"
+G1Q125F: db "6@"
+G1Q125H: db "2 less than 6@"
+G1Q126: db "6 - 3?@"
+G1Q126A: db "3@"
+G1Q126B: db "9@"
+G1Q126C: db "4@"
+G1Q126D: db "13@"
+G1Q126E: db "2@"
+G1Q126F: db "5@"
+G1Q126H: db "3 less than 6@"
+G1Q127: db "6 - 4?@"
+G1Q127A: db "2@"
+G1Q127B: db "10@"
+G1Q127C: db "3@"
+G1Q127D: db "12@"
+G1Q127E: db "1@"
+G1Q127F: db "4@"
+G1Q127H: db "4 less than 6@"
+G1Q128: db "6 - 5?@"
+G1Q128A: db "1@"
+G1Q128B: db "11@"
+G1Q128C: db "2@"
+G1Q128D: db "0@"
+G1Q128E: db "3@"
+G1Q128F: db "6@"
+G1Q128H: db "5 less than 6@"
+G1Q129: db "7 - 1?@"
+G1Q129A: db "6@"
+G1Q129B: db "8@"
+G1Q129C: db "7@"
+G1Q129D: db "16@"
+G1Q129E: db "5@"
+G1Q129F: db "4@"
+G1Q129H: db "1 less than 7@"
+G1Q130: db "7 - 2?@"
+G1Q130A: db "5@"
+G1Q130B: db "9@"
+G1Q130C: db "6@"
+G1Q130D: db "15@"
+G1Q130E: db "4@"
+G1Q130F: db "7@"
+G1Q130H: db "2 less than 7@"
+G1Q131: db "7 - 3?@"
+G1Q131A: db "4@"
+G1Q131B: db "10@"
+G1Q131C: db "5@"
+G1Q131D: db "14@"
+G1Q131E: db "3@"
+G1Q131F: db "6@"
+G1Q131H: db "3 less than 7@"
+G1Q132: db "7 - 4?@"
+G1Q132A: db "3@"
+G1Q132B: db "11@"
+G1Q132C: db "4@"
+G1Q132D: db "13@"
+G1Q132E: db "2@"
+G1Q132F: db "5@"
+G1Q132H: db "4 less than 7@"
+G1Q133: db "7 - 5?@"
+G1Q133A: db "2@"
+G1Q133B: db "12@"
+G1Q133C: db "3@"
+G1Q133D: db "1@"
+G1Q133E: db "4@"
+G1Q133F: db "0@"
+G1Q133H: db "5 less than 7@"
+G1Q134: db "7 - 6?@"
+G1Q134A: db "1@"
+G1Q134B: db "13@"
+G1Q134C: db "2@"
+G1Q134D: db "11@"
+G1Q134E: db "0@"
+G1Q134F: db "3@"
+G1Q134H: db "6 less than 7@"
+G1Q135: db "8 - 1?@"
+G1Q135A: db "7@"
+G1Q135B: db "9@"
+G1Q135C: db "8@"
+G1Q135D: db "17@"
+G1Q135E: db "6@"
+G1Q135F: db "5@"
+G1Q135H: db "1 less than 8@"
+G1Q136: db "8 - 2?@"
+G1Q136A: db "6@"
+G1Q136B: db "10@"
+G1Q136C: db "7@"
+G1Q136D: db "16@"
+G1Q136E: db "5@"
+G1Q136F: db "8@"
+G1Q136H: db "2 less than 8@"
+G1Q137: db "8 - 3?@"
+G1Q137A: db "5@"
+G1Q137B: db "11@"
+G1Q137C: db "6@"
+G1Q137D: db "15@"
+G1Q137E: db "4@"
+G1Q137F: db "7@"
+G1Q137H: db "3 less than 8@"
+G1Q138: db "8 - 4?@"
+G1Q138A: db "4@"
+G1Q138B: db "12@"
+G1Q138C: db "5@"
+G1Q138D: db "14@"
+G1Q138E: db "3@"
+G1Q138F: db "6@"
+G1Q138H: db "4 less than 8@"
+G1Q139: db "8 - 5?@"
+G1Q139A: db "3@"
+G1Q139B: db "13@"
+G1Q139C: db "4@"
+G1Q139D: db "2@"
+G1Q139E: db "5@"
+G1Q139F: db "1@"
+G1Q139H: db "5 less than 8@"
+G1Q140: db "8 - 6?@"
+G1Q140A: db "2@"
+G1Q140B: db "14@"
+G1Q140C: db "3@"
+G1Q140D: db "12@"
+G1Q140E: db "1@"
+G1Q140F: db "4@"
+G1Q140H: db "6 less than 8@"
+G1Q141: db "8 - 7?@"
+G1Q141A: db "1@"
+G1Q141B: db "15@"
+G1Q141C: db "2@"
+G1Q141D: db "11@"
+G1Q141E: db "0@"
+G1Q141F: db "3@"
+G1Q141H: db "7 less than 8@"
+G1Q142: db "9 - 1?@"
+G1Q142A: db "8@"
+G1Q142B: db "10@"
+G1Q142C: db "9@"
+G1Q142D: db "18@"
+G1Q142E: db "7@"
+G1Q142F: db "6@"
+G1Q142H: db "1 less than 9@"
+G1Q143: db "9 - 2?@"
+G1Q143A: db "7@"
+G1Q143B: db "11@"
+G1Q143C: db "8@"
+G1Q143D: db "17@"
+G1Q143E: db "6@"
+G1Q143F: db "9@"
+G1Q143H: db "2 less than 9@"
+G1Q144: db "9 - 3?@"
+G1Q144A: db "6@"
+G1Q144B: db "12@"
+G1Q144C: db "7@"
+G1Q144D: db "16@"
+G1Q144E: db "5@"
+G1Q144F: db "8@"
+G1Q144H: db "3 less than 9@"
+G1Q145: db "9 - 4?@"
+G1Q145A: db "5@"
+G1Q145B: db "13@"
+G1Q145C: db "6@"
+G1Q145D: db "15@"
+G1Q145E: db "4@"
+G1Q145F: db "7@"
+G1Q145H: db "4 less than 9@"
+G1Q146: db "9 - 5?@"
+G1Q146A: db "4@"
+G1Q146B: db "14@"
+G1Q146C: db "5@"
+G1Q146D: db "3@"
+G1Q146E: db "6@"
+G1Q146F: db "2@"
+G1Q146H: db "5 less than 9@"
+G1Q147: db "9 - 6?@"
+G1Q147A: db "3@"
+G1Q147B: db "15@"
+G1Q147C: db "4@"
+G1Q147D: db "13@"
+G1Q147E: db "2@"
+G1Q147F: db "5@"
+G1Q147H: db "6 less than 9@"
+G1Q148: db "9 - 7?@"
+G1Q148A: db "2@"
+G1Q148B: db "16@"
+G1Q148C: db "3@"
+G1Q148D: db "12@"
+G1Q148E: db "1@"
+G1Q148F: db "4@"
+G1Q148H: db "7 less than 9@"
+G1Q149: db "9 - 8?@"
+G1Q149A: db "1@"
+G1Q149B: db "17@"
+G1Q149C: db "2@"
+G1Q149D: db "11@"
+G1Q149E: db "0@"
+G1Q149F: db "3@"
+G1Q149H: db "8 less than 9@"
+G1Q150: db "10 - 1?@"
+G1Q150A: db "9@"
+G1Q150B: db "11@"
+G1Q150C: db "10@"
+G1Q150D: db "19@"
+G1Q150E: db "8@"
+G1Q150F: db "7@"
+G1Q150H: db "1 less than 10@"
+G1Q151: db "10 - 2?@"
+G1Q151A: db "8@"
+G1Q151B: db "12@"
+G1Q151C: db "9@"
+G1Q151D: db "18@"
+G1Q151E: db "7@"
+G1Q151F: db "10@"
+G1Q151H: db "2 less than 10@"
+G1Q152: db "10 - 3?@"
+G1Q152A: db "7@"
+G1Q152B: db "13@"
+G1Q152C: db "8@"
+G1Q152D: db "17@"
+G1Q152E: db "6@"
+G1Q152F: db "9@"
+G1Q152H: db "3 less than 10@"
+G1Q153: db "10 - 4?@"
+G1Q153A: db "6@"
+G1Q153B: db "14@"
+G1Q153C: db "7@"
+G1Q153D: db "16@"
+G1Q153E: db "5@"
+G1Q153F: db "8@"
+G1Q153H: db "4 less than 10@"
+G1Q154: db "10 - 5?@"
+G1Q154A: db "5@"
+G1Q154B: db "15@"
+G1Q154C: db "6@"
+G1Q154D: db "4@"
+G1Q154E: db "7@"
+G1Q154F: db "3@"
+G1Q154H: db "5 less than 10@"
+G1Q155: db "10 - 6?@"
+G1Q155A: db "4@"
+G1Q155B: db "16@"
+G1Q155C: db "5@"
+G1Q155D: db "14@"
+G1Q155E: db "3@"
+G1Q155F: db "6@"
+G1Q155H: db "6 less than 10@"
+G1Q156: db "10 - 7?@"
+G1Q156A: db "3@"
+G1Q156B: db "17@"
+G1Q156C: db "4@"
+G1Q156D: db "13@"
+G1Q156E: db "2@"
+G1Q156F: db "5@"
+G1Q156H: db "7 less than 10@"
+G1Q157: db "10 - 8?@"
+G1Q157A: db "2@"
+G1Q157B: db "18@"
+G1Q157C: db "3@"
+G1Q157D: db "12@"
+G1Q157E: db "1@"
+G1Q157F: db "4@"
+G1Q157H: db "8 less than 10@"
+G1Q158: db "10 - 9?@"
+G1Q158A: db "1@"
+G1Q158B: db "19@"
+G1Q158C: db "2@"
+G1Q158D: db "11@"
+G1Q158E: db "0@"
+G1Q158F: db "3@"
+G1Q158H: db "9 less than 10@"
+G1Q159: db "11 - 2?@"
+G1Q159A: db "9@"
+G1Q159B: db "13@"
+G1Q159C: db "10@"
+G1Q159D: db "19@"
+G1Q159E: db "8@"
+G1Q159F: db "11@"
+G1Q159H: db "2 less than 11@"
+G1Q160: db "11 - 3?@"
+G1Q160A: db "8@"
+G1Q160B: db "14@"
+G1Q160C: db "9@"
+G1Q160D: db "18@"
+G1Q160E: db "7@"
+G1Q160F: db "10@"
+G1Q160H: db "3 less than 11@"
+G1Q161: db "11 - 4?@"
+G1Q161A: db "7@"
+G1Q161B: db "15@"
+G1Q161C: db "8@"
+G1Q161D: db "17@"
+G1Q161E: db "6@"
+G1Q161F: db "9@"
+G1Q161H: db "4 less than 11@"
+G1Q162: db "11 - 5?@"
+G1Q162A: db "6@"
+G1Q162B: db "16@"
+G1Q162C: db "7@"
+G1Q162D: db "5@"
+G1Q162E: db "8@"
+G1Q162F: db "4@"
+G1Q162H: db "5 less than 11@"
+G1Q163: db "11 - 6?@"
+G1Q163A: db "5@"
+G1Q163B: db "17@"
+G1Q163C: db "6@"
+G1Q163D: db "15@"
+G1Q163E: db "4@"
+G1Q163F: db "7@"
+G1Q163H: db "6 less than 11@"
+G1Q164: db "11 - 7?@"
+G1Q164A: db "4@"
+G1Q164B: db "18@"
+G1Q164C: db "5@"
+G1Q164D: db "14@"
+G1Q164E: db "3@"
+G1Q164F: db "6@"
+G1Q164H: db "7 less than 11@"
+G1Q165: db "11 - 8?@"
+G1Q165A: db "3@"
+G1Q165B: db "19@"
+G1Q165C: db "4@"
+G1Q165D: db "13@"
+G1Q165E: db "2@"
+G1Q165F: db "5@"
+G1Q165H: db "8 less than 11@"
+G1Q166: db "11 - 9?@"
+G1Q166A: db "2@"
+G1Q166B: db "20@"
+G1Q166C: db "3@"
+G1Q166D: db "12@"
+G1Q166E: db "1@"
+G1Q166F: db "4@"
+G1Q166H: db "9 less than 11@"
+G1Q167: db "11 - 10?@"
+G1Q167A: db "1@"
+G1Q167B: db "21@"
+G1Q167C: db "2@"
+G1Q167D: db "11@"
+G1Q167E: db "0@"
+G1Q167F: db "3@"
+G1Q167H: db "10 less than 11@"
+G1Q168: db "12 - 3?@"
+G1Q168A: db "9@"
+G1Q168B: db "15@"
+G1Q168C: db "10@"
+G1Q168D: db "19@"
+G1Q168E: db "8@"
+G1Q168F: db "11@"
+G1Q168H: db "3 less than 12@"
+G1Q169: db "12 - 4?@"
+G1Q169A: db "8@"
+G1Q169B: db "16@"
+G1Q169C: db "9@"
+G1Q169D: db "18@"
+G1Q169E: db "7@"
+G1Q169F: db "10@"
+G1Q169H: db "4 less than 12@"
+G1Q170: db "12 - 5?@"
+G1Q170A: db "7@"
+G1Q170B: db "17@"
+G1Q170C: db "8@"
+G1Q170D: db "6@"
+G1Q170E: db "9@"
+G1Q170F: db "5@"
+G1Q170H: db "5 less than 12@"
+G1Q171: db "12 - 6?@"
+G1Q171A: db "6@"
+G1Q171B: db "18@"
+G1Q171C: db "7@"
+G1Q171D: db "16@"
+G1Q171E: db "5@"
+G1Q171F: db "8@"
+G1Q171H: db "6 less than 12@"
+G1Q172: db "12 - 7?@"
+G1Q172A: db "5@"
+G1Q172B: db "19@"
+G1Q172C: db "6@"
+G1Q172D: db "15@"
+G1Q172E: db "4@"
+G1Q172F: db "7@"
+G1Q172H: db "7 less than 12@"
+G1Q173: db "12 - 8?@"
+G1Q173A: db "4@"
+G1Q173B: db "20@"
+G1Q173C: db "5@"
+G1Q173D: db "14@"
+G1Q173E: db "3@"
+G1Q173F: db "6@"
+G1Q173H: db "8 less than 12@"
+G1Q174: db "12 - 9?@"
+G1Q174A: db "3@"
+G1Q174B: db "21@"
+G1Q174C: db "4@"
+G1Q174D: db "13@"
+G1Q174E: db "2@"
+G1Q174F: db "5@"
+G1Q174H: db "9 less than 12@"
+G1Q175: db "12 - 10?@"
+G1Q175A: db "2@"
+G1Q175B: db "22@"
+G1Q175C: db "3@"
+G1Q175D: db "12@"
+G1Q175E: db "1@"
+G1Q175F: db "4@"
+G1Q175H: db "10 less than 12@"
+G1Q176: db "12 - 11?@"
+G1Q176A: db "1@"
+G1Q176B: db "23@"
+G1Q176C: db "2@"
+G1Q176D: db "11@"
+G1Q176E: db "0@"
+G1Q176F: db "3@"
+G1Q176H: db "11 less than 12@"
+G1Q177: db "Next: 1 2 3 ?@"
+G1Q177A: db "4@"
+G1Q177B: db "5@"
+G1Q177C: db "3@"
+G1Q177H: db "Count by 1@"
+G1Q178: db "Next: 2 4 6 ?@"
+G1Q178A: db "8@"
+G1Q178B: db "10@"
+G1Q178C: db "7@"
+G1Q178H: db "By 2s@"
+G1Q179: db "Next: 5 6 7 ?@"
+G1Q179A: db "8@"
+G1Q179B: db "9@"
+G1Q179C: db "6@"
+G1Q179H: db "Count by 1@"
+G1Q180: db "Next: 3 4 5 ?@"
+G1Q180A: db "6@"
+G1Q180B: db "7@"
+G1Q180C: db "4@"
+G1Q180H: db "Count by 1@"
 
-SECTION "Quiz Data G2", ROMX
+SECTION "Quiz Data G2", ROMX, ALIGN[14]
 Grade2Questions::
 	dw G2Q1
 	db 0
@@ -1841,6 +2869,306 @@ Grade2Questions::
 	db 6
 	dw G2Q100A, G2Q100B, G2Q100C, G2Q100D, G2Q100E, G2Q100F
 	dw G2Q100H
+	dw G2Q101
+	db 0
+	db 6
+	dw G2Q101A, G2Q101B, G2Q101C, G2Q101D, G2Q101E, G2Q101F
+	dw G2Q101H
+	dw G2Q102
+	db 0
+	db 6
+	dw G2Q102A, G2Q102B, G2Q102C, G2Q102D, G2Q102E, G2Q102F
+	dw G2Q102H
+	dw G2Q103
+	db 0
+	db 6
+	dw G2Q103A, G2Q103B, G2Q103C, G2Q103D, G2Q103E, G2Q103F
+	dw G2Q103H
+	dw G2Q104
+	db 0
+	db 6
+	dw G2Q104A, G2Q104B, G2Q104C, G2Q104D, G2Q104E, G2Q104F
+	dw G2Q104H
+	dw G2Q105
+	db 0
+	db 6
+	dw G2Q105A, G2Q105B, G2Q105C, G2Q105D, G2Q105E, G2Q105F
+	dw G2Q105H
+	dw G2Q106
+	db 0
+	db 6
+	dw G2Q106A, G2Q106B, G2Q106C, G2Q106D, G2Q106E, G2Q106F
+	dw G2Q106H
+	dw G2Q107
+	db 0
+	db 6
+	dw G2Q107A, G2Q107B, G2Q107C, G2Q107D, G2Q107E, G2Q107F
+	dw G2Q107H
+	dw G2Q108
+	db 0
+	db 6
+	dw G2Q108A, G2Q108B, G2Q108C, G2Q108D, G2Q108E, G2Q108F
+	dw G2Q108H
+	dw G2Q109
+	db 0
+	db 6
+	dw G2Q109A, G2Q109B, G2Q109C, G2Q109D, G2Q109E, G2Q109F
+	dw G2Q109H
+	dw G2Q110
+	db 0
+	db 6
+	dw G2Q110A, G2Q110B, G2Q110C, G2Q110D, G2Q110E, G2Q110F
+	dw G2Q110H
+	dw G2Q111
+	db 0
+	db 6
+	dw G2Q111A, G2Q111B, G2Q111C, G2Q111D, G2Q111E, G2Q111F
+	dw G2Q111H
+	dw G2Q112
+	db 0
+	db 6
+	dw G2Q112A, G2Q112B, G2Q112C, G2Q112D, G2Q112E, G2Q112F
+	dw G2Q112H
+	dw G2Q113
+	db 0
+	db 6
+	dw G2Q113A, G2Q113B, G2Q113C, G2Q113D, G2Q113E, G2Q113F
+	dw G2Q113H
+	dw G2Q114
+	db 0
+	db 6
+	dw G2Q114A, G2Q114B, G2Q114C, G2Q114D, G2Q114E, G2Q114F
+	dw G2Q114H
+	dw G2Q115
+	db 0
+	db 6
+	dw G2Q115A, G2Q115B, G2Q115C, G2Q115D, G2Q115E, G2Q115F
+	dw G2Q115H
+	dw G2Q116
+	db 0
+	db 6
+	dw G2Q116A, G2Q116B, G2Q116C, G2Q116D, G2Q116E, G2Q116F
+	dw G2Q116H
+	dw G2Q117
+	db 0
+	db 6
+	dw G2Q117A, G2Q117B, G2Q117C, G2Q117D, G2Q117E, G2Q117F
+	dw G2Q117H
+	dw G2Q118
+	db 0
+	db 6
+	dw G2Q118A, G2Q118B, G2Q118C, G2Q118D, G2Q118E, G2Q118F
+	dw G2Q118H
+	dw G2Q119
+	db 0
+	db 6
+	dw G2Q119A, G2Q119B, G2Q119C, G2Q119D, G2Q119E, G2Q119F
+	dw G2Q119H
+	dw G2Q120
+	db 0
+	db 6
+	dw G2Q120A, G2Q120B, G2Q120C, G2Q120D, G2Q120E, G2Q120F
+	dw G2Q120H
+	dw G2Q121
+	db 0
+	db 6
+	dw G2Q121A, G2Q121B, G2Q121C, G2Q121D, G2Q121E, G2Q121F
+	dw G2Q121H
+	dw G2Q122
+	db 0
+	db 6
+	dw G2Q122A, G2Q122B, G2Q122C, G2Q122D, G2Q122E, G2Q122F
+	dw G2Q122H
+	dw G2Q123
+	db 0
+	db 6
+	dw G2Q123A, G2Q123B, G2Q123C, G2Q123D, G2Q123E, G2Q123F
+	dw G2Q123H
+	dw G2Q124
+	db 0
+	db 6
+	dw G2Q124A, G2Q124B, G2Q124C, G2Q124D, G2Q124E, G2Q124F
+	dw G2Q124H
+	dw G2Q125
+	db 0
+	db 6
+	dw G2Q125A, G2Q125B, G2Q125C, G2Q125D, G2Q125E, G2Q125F
+	dw G2Q125H
+	dw G2Q126
+	db 0
+	db 6
+	dw G2Q126A, G2Q126B, G2Q126C, G2Q126D, G2Q126E, G2Q126F
+	dw G2Q126H
+	dw G2Q127
+	db 0
+	db 6
+	dw G2Q127A, G2Q127B, G2Q127C, G2Q127D, G2Q127E, G2Q127F
+	dw G2Q127H
+	dw G2Q128
+	db 0
+	db 6
+	dw G2Q128A, G2Q128B, G2Q128C, G2Q128D, G2Q128E, G2Q128F
+	dw G2Q128H
+	dw G2Q129
+	db 0
+	db 6
+	dw G2Q129A, G2Q129B, G2Q129C, G2Q129D, G2Q129E, G2Q129F
+	dw G2Q129H
+	dw G2Q130
+	db 0
+	db 6
+	dw G2Q130A, G2Q130B, G2Q130C, G2Q130D, G2Q130E, G2Q130F
+	dw G2Q130H
+	dw G2Q131
+	db 0
+	db 6
+	dw G2Q131A, G2Q131B, G2Q131C, G2Q131D, G2Q131E, G2Q131F
+	dw G2Q131H
+	dw G2Q132
+	db 0
+	db 6
+	dw G2Q132A, G2Q132B, G2Q132C, G2Q132D, G2Q132E, G2Q132F
+	dw G2Q132H
+	dw G2Q133
+	db 0
+	db 6
+	dw G2Q133A, G2Q133B, G2Q133C, G2Q133D, G2Q133E, G2Q133F
+	dw G2Q133H
+	dw G2Q134
+	db 0
+	db 6
+	dw G2Q134A, G2Q134B, G2Q134C, G2Q134D, G2Q134E, G2Q134F
+	dw G2Q134H
+	dw G2Q135
+	db 0
+	db 6
+	dw G2Q135A, G2Q135B, G2Q135C, G2Q135D, G2Q135E, G2Q135F
+	dw G2Q135H
+	dw G2Q136
+	db 0
+	db 6
+	dw G2Q136A, G2Q136B, G2Q136C, G2Q136D, G2Q136E, G2Q136F
+	dw G2Q136H
+	dw G2Q137
+	db 0
+	db 6
+	dw G2Q137A, G2Q137B, G2Q137C, G2Q137D, G2Q137E, G2Q137F
+	dw G2Q137H
+	dw G2Q138
+	db 0
+	db 6
+	dw G2Q138A, G2Q138B, G2Q138C, G2Q138D, G2Q138E, G2Q138F
+	dw G2Q138H
+	dw G2Q139
+	db 0
+	db 6
+	dw G2Q139A, G2Q139B, G2Q139C, G2Q139D, G2Q139E, G2Q139F
+	dw G2Q139H
+	dw G2Q140
+	db 0
+	db 6
+	dw G2Q140A, G2Q140B, G2Q140C, G2Q140D, G2Q140E, G2Q140F
+	dw G2Q140H
+	dw G2Q141
+	db 0
+	db 6
+	dw G2Q141A, G2Q141B, G2Q141C, G2Q141D, G2Q141E, G2Q141F
+	dw G2Q141H
+	dw G2Q142
+	db 0
+	db 6
+	dw G2Q142A, G2Q142B, G2Q142C, G2Q142D, G2Q142E, G2Q142F
+	dw G2Q142H
+	dw G2Q143
+	db 0
+	db 6
+	dw G2Q143A, G2Q143B, G2Q143C, G2Q143D, G2Q143E, G2Q143F
+	dw G2Q143H
+	dw G2Q144
+	db 0
+	db 6
+	dw G2Q144A, G2Q144B, G2Q144C, G2Q144D, G2Q144E, G2Q144F
+	dw G2Q144H
+	dw G2Q145
+	db 0
+	db 6
+	dw G2Q145A, G2Q145B, G2Q145C, G2Q145D, G2Q145E, G2Q145F
+	dw G2Q145H
+	dw G2Q146
+	db 0
+	db 6
+	dw G2Q146A, G2Q146B, G2Q146C, G2Q146D, G2Q146E, G2Q146F
+	dw G2Q146H
+	dw G2Q147
+	db 0
+	db 6
+	dw G2Q147A, G2Q147B, G2Q147C, G2Q147D, G2Q147E, G2Q147F
+	dw G2Q147H
+	dw G2Q148
+	db 0
+	db 6
+	dw G2Q148A, G2Q148B, G2Q148C, G2Q148D, G2Q148E, G2Q148F
+	dw G2Q148H
+	dw G2Q149
+	db 0
+	db 6
+	dw G2Q149A, G2Q149B, G2Q149C, G2Q149D, G2Q149E, G2Q149F
+	dw G2Q149H
+	dw G2Q150
+	db 0
+	db 6
+	dw G2Q150A, G2Q150B, G2Q150C, G2Q150D, G2Q150E, G2Q150F
+	dw G2Q150H
+	dw G2Q151
+	db 0
+	db 6
+	dw G2Q151A, G2Q151B, G2Q151C, G2Q151D, G2Q151E, G2Q151F
+	dw G2Q151H
+	dw G2Q152
+	db 0
+	db 6
+	dw G2Q152A, G2Q152B, G2Q152C, G2Q152D, G2Q152E, G2Q152F
+	dw G2Q152H
+	dw G2Q153
+	db 0
+	db 6
+	dw G2Q153A, G2Q153B, G2Q153C, G2Q153D, G2Q153E, G2Q153F
+	dw G2Q153H
+	dw G2Q154
+	db 0
+	db 6
+	dw G2Q154A, G2Q154B, G2Q154C, G2Q154D, G2Q154E, G2Q154F
+	dw G2Q154H
+	dw G2Q155
+	db 0
+	db 6
+	dw G2Q155A, G2Q155B, G2Q155C, G2Q155D, G2Q155E, G2Q155F
+	dw G2Q155H
+	dw G2Q156
+	db 0
+	db 6
+	dw G2Q156A, G2Q156B, G2Q156C, G2Q156D, G2Q156E, G2Q156F
+	dw G2Q156H
+	dw G2Q157
+	db 0
+	db 6
+	dw G2Q157A, G2Q157B, G2Q157C, G2Q157D, G2Q157E, G2Q157F
+	dw G2Q157H
+	dw G2Q158
+	db 0
+	db 6
+	dw G2Q158A, G2Q158B, G2Q158C, G2Q158D, G2Q158E, G2Q158F
+	dw G2Q158H
+	dw G2Q159
+	db 0
+	db 6
+	dw G2Q159A, G2Q159B, G2Q159C, G2Q159D, G2Q159E, G2Q159F
+	dw G2Q159H
+	dw G2Q160
+	db 0
+	db 6
+	dw G2Q160A, G2Q160B, G2Q160C, G2Q160D, G2Q160E, G2Q160F
+	dw G2Q160H
 G2Q1: db "Opposite of happy?@"
 G2Q1A: db "sad@"
 G2Q1B: db "small@"
@@ -2573,8 +3901,488 @@ G2Q100D: db "21@"
 G2Q100E: db "10@"
 G2Q100F: db "13@"
 G2Q100H: db "Tens then ones@"
+G2Q101: db "36 - 31?@"
+G2Q101A: db "5@"
+G2Q101B: db "67@"
+G2Q101C: db "6@"
+G2Q101D: db "15@"
+G2Q101E: db "4@"
+G2Q101F: db "7@"
+G2Q101H: db "Tens then ones@"
+G2Q102: db "44 - 7?@"
+G2Q102A: db "37@"
+G2Q102B: db "51@"
+G2Q102C: db "38@"
+G2Q102D: db "47@"
+G2Q102E: db "36@"
+G2Q102F: db "39@"
+G2Q102H: db "Tens then ones@"
+G2Q103: db "44 - 13?@"
+G2Q103A: db "31@"
+G2Q103B: db "57@"
+G2Q103C: db "32@"
+G2Q103D: db "41@"
+G2Q103E: db "30@"
+G2Q103F: db "33@"
+G2Q103H: db "Tens then ones@"
+G2Q104: db "44 - 19?@"
+G2Q104A: db "25@"
+G2Q104B: db "63@"
+G2Q104C: db "26@"
+G2Q104D: db "35@"
+G2Q104E: db "24@"
+G2Q104F: db "27@"
+G2Q104H: db "Tens then ones@"
+G2Q105: db "44 - 25?@"
+G2Q105A: db "19@"
+G2Q105B: db "69@"
+G2Q105C: db "20@"
+G2Q105D: db "29@"
+G2Q105E: db "18@"
+G2Q105F: db "21@"
+G2Q105H: db "Tens then ones@"
+G2Q106: db "44 - 31?@"
+G2Q106A: db "13@"
+G2Q106B: db "75@"
+G2Q106C: db "14@"
+G2Q106D: db "23@"
+G2Q106E: db "12@"
+G2Q106F: db "15@"
+G2Q106H: db "Tens then ones@"
+G2Q107: db "44 - 37?@"
+G2Q107A: db "7@"
+G2Q107B: db "81@"
+G2Q107C: db "8@"
+G2Q107D: db "17@"
+G2Q107E: db "6@"
+G2Q107F: db "9@"
+G2Q107H: db "Tens then ones@"
+G2Q108: db "52 - 7?@"
+G2Q108A: db "45@"
+G2Q108B: db "59@"
+G2Q108C: db "46@"
+G2Q108D: db "55@"
+G2Q108E: db "44@"
+G2Q108F: db "47@"
+G2Q108H: db "Tens then ones@"
+G2Q109: db "52 - 13?@"
+G2Q109A: db "39@"
+G2Q109B: db "65@"
+G2Q109C: db "40@"
+G2Q109D: db "49@"
+G2Q109E: db "38@"
+G2Q109F: db "41@"
+G2Q109H: db "Tens then ones@"
+G2Q110: db "52 - 19?@"
+G2Q110A: db "33@"
+G2Q110B: db "71@"
+G2Q110C: db "34@"
+G2Q110D: db "43@"
+G2Q110E: db "32@"
+G2Q110F: db "35@"
+G2Q110H: db "Tens then ones@"
+G2Q111: db "52 - 25?@"
+G2Q111A: db "27@"
+G2Q111B: db "77@"
+G2Q111C: db "28@"
+G2Q111D: db "37@"
+G2Q111E: db "26@"
+G2Q111F: db "29@"
+G2Q111H: db "Tens then ones@"
+G2Q112: db "52 - 31?@"
+G2Q112A: db "21@"
+G2Q112B: db "83@"
+G2Q112C: db "22@"
+G2Q112D: db "31@"
+G2Q112E: db "20@"
+G2Q112F: db "23@"
+G2Q112H: db "Tens then ones@"
+G2Q113: db "52 - 37?@"
+G2Q113A: db "15@"
+G2Q113B: db "89@"
+G2Q113C: db "16@"
+G2Q113D: db "25@"
+G2Q113E: db "14@"
+G2Q113F: db "17@"
+G2Q113H: db "Tens then ones@"
+G2Q114: db "60 - 7?@"
+G2Q114A: db "53@"
+G2Q114B: db "67@"
+G2Q114C: db "54@"
+G2Q114D: db "63@"
+G2Q114E: db "52@"
+G2Q114F: db "55@"
+G2Q114H: db "Tens then ones@"
+G2Q115: db "60 - 13?@"
+G2Q115A: db "47@"
+G2Q115B: db "73@"
+G2Q115C: db "48@"
+G2Q115D: db "57@"
+G2Q115E: db "46@"
+G2Q115F: db "49@"
+G2Q115H: db "Tens then ones@"
+G2Q116: db "60 - 19?@"
+G2Q116A: db "41@"
+G2Q116B: db "79@"
+G2Q116C: db "42@"
+G2Q116D: db "51@"
+G2Q116E: db "40@"
+G2Q116F: db "43@"
+G2Q116H: db "Tens then ones@"
+G2Q117: db "60 - 25?@"
+G2Q117A: db "35@"
+G2Q117B: db "85@"
+G2Q117C: db "36@"
+G2Q117D: db "45@"
+G2Q117E: db "34@"
+G2Q117F: db "37@"
+G2Q117H: db "Tens then ones@"
+G2Q118: db "60 - 31?@"
+G2Q118A: db "29@"
+G2Q118B: db "91@"
+G2Q118C: db "30@"
+G2Q118D: db "39@"
+G2Q118E: db "28@"
+G2Q118F: db "31@"
+G2Q118H: db "Tens then ones@"
+G2Q119: db "60 - 37?@"
+G2Q119A: db "23@"
+G2Q119B: db "97@"
+G2Q119C: db "24@"
+G2Q119D: db "33@"
+G2Q119E: db "22@"
+G2Q119F: db "25@"
+G2Q119H: db "Tens then ones@"
+G2Q120: db "68 - 7?@"
+G2Q120A: db "61@"
+G2Q120B: db "75@"
+G2Q120C: db "62@"
+G2Q120D: db "71@"
+G2Q120E: db "60@"
+G2Q120F: db "63@"
+G2Q120H: db "Tens then ones@"
+G2Q121: db "68 - 13?@"
+G2Q121A: db "55@"
+G2Q121B: db "81@"
+G2Q121C: db "56@"
+G2Q121D: db "65@"
+G2Q121E: db "54@"
+G2Q121F: db "57@"
+G2Q121H: db "Tens then ones@"
+G2Q122: db "68 - 19?@"
+G2Q122A: db "49@"
+G2Q122B: db "87@"
+G2Q122C: db "50@"
+G2Q122D: db "59@"
+G2Q122E: db "48@"
+G2Q122F: db "51@"
+G2Q122H: db "Tens then ones@"
+G2Q123: db "68 - 25?@"
+G2Q123A: db "43@"
+G2Q123B: db "93@"
+G2Q123C: db "44@"
+G2Q123D: db "53@"
+G2Q123E: db "42@"
+G2Q123F: db "45@"
+G2Q123H: db "Tens then ones@"
+G2Q124: db "68 - 31?@"
+G2Q124A: db "37@"
+G2Q124B: db "99@"
+G2Q124C: db "38@"
+G2Q124D: db "47@"
+G2Q124E: db "36@"
+G2Q124F: db "39@"
+G2Q124H: db "Tens then ones@"
+G2Q125: db "68 - 37?@"
+G2Q125A: db "31@"
+G2Q125B: db "105@"
+G2Q125C: db "32@"
+G2Q125D: db "41@"
+G2Q125E: db "30@"
+G2Q125F: db "33@"
+G2Q125H: db "Tens then ones@"
+G2Q126: db "76 - 7?@"
+G2Q126A: db "69@"
+G2Q126B: db "83@"
+G2Q126C: db "70@"
+G2Q126D: db "79@"
+G2Q126E: db "68@"
+G2Q126F: db "71@"
+G2Q126H: db "Tens then ones@"
+G2Q127: db "76 - 13?@"
+G2Q127A: db "63@"
+G2Q127B: db "89@"
+G2Q127C: db "64@"
+G2Q127D: db "73@"
+G2Q127E: db "62@"
+G2Q127F: db "65@"
+G2Q127H: db "Tens then ones@"
+G2Q128: db "76 - 19?@"
+G2Q128A: db "57@"
+G2Q128B: db "95@"
+G2Q128C: db "58@"
+G2Q128D: db "67@"
+G2Q128E: db "56@"
+G2Q128F: db "59@"
+G2Q128H: db "Tens then ones@"
+G2Q129: db "76 - 25?@"
+G2Q129A: db "51@"
+G2Q129B: db "101@"
+G2Q129C: db "52@"
+G2Q129D: db "61@"
+G2Q129E: db "50@"
+G2Q129F: db "53@"
+G2Q129H: db "Tens then ones@"
+G2Q130: db "76 - 31?@"
+G2Q130A: db "45@"
+G2Q130B: db "107@"
+G2Q130C: db "46@"
+G2Q130D: db "55@"
+G2Q130E: db "44@"
+G2Q130F: db "47@"
+G2Q130H: db "Tens then ones@"
+G2Q131: db "76 - 37?@"
+G2Q131A: db "39@"
+G2Q131B: db "113@"
+G2Q131C: db "40@"
+G2Q131D: db "49@"
+G2Q131E: db "38@"
+G2Q131F: db "41@"
+G2Q131H: db "Tens then ones@"
+G2Q132: db "84 - 7?@"
+G2Q132A: db "77@"
+G2Q132B: db "91@"
+G2Q132C: db "78@"
+G2Q132D: db "87@"
+G2Q132E: db "76@"
+G2Q132F: db "79@"
+G2Q132H: db "Tens then ones@"
+G2Q133: db "84 - 13?@"
+G2Q133A: db "71@"
+G2Q133B: db "97@"
+G2Q133C: db "72@"
+G2Q133D: db "81@"
+G2Q133E: db "70@"
+G2Q133F: db "73@"
+G2Q133H: db "Tens then ones@"
+G2Q134: db "84 - 19?@"
+G2Q134A: db "65@"
+G2Q134B: db "103@"
+G2Q134C: db "66@"
+G2Q134D: db "75@"
+G2Q134E: db "64@"
+G2Q134F: db "67@"
+G2Q134H: db "Tens then ones@"
+G2Q135: db "84 - 25?@"
+G2Q135A: db "59@"
+G2Q135B: db "109@"
+G2Q135C: db "60@"
+G2Q135D: db "69@"
+G2Q135E: db "58@"
+G2Q135F: db "61@"
+G2Q135H: db "Tens then ones@"
+G2Q136: db "84 - 31?@"
+G2Q136A: db "53@"
+G2Q136B: db "115@"
+G2Q136C: db "54@"
+G2Q136D: db "63@"
+G2Q136E: db "52@"
+G2Q136F: db "55@"
+G2Q136H: db "Tens then ones@"
+G2Q137: db "84 - 37?@"
+G2Q137A: db "47@"
+G2Q137B: db "121@"
+G2Q137C: db "48@"
+G2Q137D: db "57@"
+G2Q137E: db "46@"
+G2Q137F: db "49@"
+G2Q137H: db "Tens then ones@"
+G2Q138: db "92 - 7?@"
+G2Q138A: db "85@"
+G2Q138B: db "99@"
+G2Q138C: db "86@"
+G2Q138D: db "95@"
+G2Q138E: db "84@"
+G2Q138F: db "87@"
+G2Q138H: db "Tens then ones@"
+G2Q139: db "92 - 13?@"
+G2Q139A: db "79@"
+G2Q139B: db "105@"
+G2Q139C: db "80@"
+G2Q139D: db "89@"
+G2Q139E: db "78@"
+G2Q139F: db "81@"
+G2Q139H: db "Tens then ones@"
+G2Q140: db "92 - 19?@"
+G2Q140A: db "73@"
+G2Q140B: db "111@"
+G2Q140C: db "74@"
+G2Q140D: db "83@"
+G2Q140E: db "72@"
+G2Q140F: db "75@"
+G2Q140H: db "Tens then ones@"
+G2Q141: db "92 - 25?@"
+G2Q141A: db "67@"
+G2Q141B: db "117@"
+G2Q141C: db "68@"
+G2Q141D: db "77@"
+G2Q141E: db "66@"
+G2Q141F: db "69@"
+G2Q141H: db "Tens then ones@"
+G2Q142: db "92 - 31?@"
+G2Q142A: db "61@"
+G2Q142B: db "123@"
+G2Q142C: db "62@"
+G2Q142D: db "71@"
+G2Q142E: db "60@"
+G2Q142F: db "63@"
+G2Q142H: db "Tens then ones@"
+G2Q143: db "92 - 37?@"
+G2Q143A: db "55@"
+G2Q143B: db "129@"
+G2Q143C: db "56@"
+G2Q143D: db "65@"
+G2Q143E: db "54@"
+G2Q143F: db "57@"
+G2Q143H: db "Tens then ones@"
+G2Q144: db "Tens in 20?@"
+G2Q144A: db "2@"
+G2Q144B: db "3@"
+G2Q144C: db "7@"
+G2Q144D: db "4@"
+G2Q144E: db "12@"
+G2Q144F: db "1@"
+G2Q144H: db "20 is 2 tens@"
+G2Q145: db "Tens in 30?@"
+G2Q145A: db "3@"
+G2Q145B: db "4@"
+G2Q145C: db "8@"
+G2Q145D: db "0@"
+G2Q145E: db "6@"
+G2Q145F: db "13@"
+G2Q145H: db "30 is 3 tens@"
+G2Q146: db "Tens in 40?@"
+G2Q146A: db "4@"
+G2Q146B: db "5@"
+G2Q146C: db "9@"
+G2Q146D: db "1@"
+G2Q146E: db "8@"
+G2Q146F: db "14@"
+G2Q146H: db "40 is 4 tens@"
+G2Q147: db "Tens in 50?@"
+G2Q147A: db "5@"
+G2Q147B: db "6@"
+G2Q147C: db "10@"
+G2Q147D: db "2@"
+G2Q147E: db "15@"
+G2Q147F: db "4@"
+G2Q147H: db "50 is 5 tens@"
+G2Q148: db "Tens in 60?@"
+G2Q148A: db "6@"
+G2Q148B: db "7@"
+G2Q148C: db "11@"
+G2Q148D: db "3@"
+G2Q148E: db "12@"
+G2Q148F: db "16@"
+G2Q148H: db "60 is 6 tens@"
+G2Q149: db "Tens in 70?@"
+G2Q149A: db "7@"
+G2Q149B: db "8@"
+G2Q149C: db "12@"
+G2Q149D: db "4@"
+G2Q149E: db "14@"
+G2Q149F: db "17@"
+G2Q149H: db "70 is 7 tens@"
+G2Q150: db "Tens in 80?@"
+G2Q150A: db "8@"
+G2Q150B: db "9@"
+G2Q150C: db "13@"
+G2Q150D: db "5@"
+G2Q150E: db "16@"
+G2Q150F: db "18@"
+G2Q150H: db "80 is 8 tens@"
+G2Q151: db "Tens in 90?@"
+G2Q151A: db "9@"
+G2Q151B: db "10@"
+G2Q151C: db "14@"
+G2Q151D: db "6@"
+G2Q151E: db "18@"
+G2Q151F: db "19@"
+G2Q151H: db "90 is 9 tens@"
+G2Q152: db "6 plus 6?@"
+G2Q152A: db "12@"
+G2Q152B: db "0@"
+G2Q152C: db "13@"
+G2Q152D: db "22@"
+G2Q152E: db "10@"
+G2Q152F: db "14@"
+G2Q152H: db "Double 6@"
+G2Q153: db "7 plus 7?@"
+G2Q153A: db "14@"
+G2Q153B: db "0@"
+G2Q153C: db "15@"
+G2Q153D: db "24@"
+G2Q153E: db "12@"
+G2Q153F: db "16@"
+G2Q153H: db "Double 7@"
+G2Q154: db "8 plus 8?@"
+G2Q154A: db "16@"
+G2Q154B: db "0@"
+G2Q154C: db "17@"
+G2Q154D: db "26@"
+G2Q154E: db "14@"
+G2Q154F: db "18@"
+G2Q154H: db "Double 8@"
+G2Q155: db "9 plus 9?@"
+G2Q155A: db "18@"
+G2Q155B: db "0@"
+G2Q155C: db "19@"
+G2Q155D: db "28@"
+G2Q155E: db "16@"
+G2Q155F: db "20@"
+G2Q155H: db "Double 9@"
+G2Q156: db "10 plus 10?@"
+G2Q156A: db "20@"
+G2Q156B: db "0@"
+G2Q156C: db "21@"
+G2Q156D: db "30@"
+G2Q156E: db "18@"
+G2Q156F: db "22@"
+G2Q156H: db "Double 10@"
+G2Q157: db "11 plus 11?@"
+G2Q157A: db "22@"
+G2Q157B: db "0@"
+G2Q157C: db "23@"
+G2Q157D: db "32@"
+G2Q157E: db "20@"
+G2Q157F: db "24@"
+G2Q157H: db "Double 11@"
+G2Q158: db "12 plus 12?@"
+G2Q158A: db "24@"
+G2Q158B: db "0@"
+G2Q158C: db "25@"
+G2Q158D: db "34@"
+G2Q158E: db "22@"
+G2Q158F: db "26@"
+G2Q158H: db "Double 12@"
+G2Q159: db "13 plus 13?@"
+G2Q159A: db "26@"
+G2Q159B: db "0@"
+G2Q159C: db "27@"
+G2Q159D: db "36@"
+G2Q159E: db "24@"
+G2Q159F: db "28@"
+G2Q159H: db "Double 13@"
+G2Q160: db "14 plus 14?@"
+G2Q160A: db "28@"
+G2Q160B: db "0@"
+G2Q160C: db "29@"
+G2Q160D: db "38@"
+G2Q160E: db "26@"
+G2Q160F: db "30@"
+G2Q160H: db "Double 14@"
 
-SECTION "Quiz Data G3", ROMX
+SECTION "Quiz Data G3", ROMX, ALIGN[14]
 Grade3Questions::
 	dw G3Q1
 	db 0
@@ -3076,6 +4884,246 @@ Grade3Questions::
 	db 6
 	dw G3Q100A, G3Q100B, G3Q100C, G3Q100D, G3Q100E, G3Q100F
 	dw G3Q100H
+	dw G3Q101
+	db 0
+	db 6
+	dw G3Q101A, G3Q101B, G3Q101C, G3Q101D, G3Q101E, G3Q101F
+	dw G3Q101H
+	dw G3Q102
+	db 0
+	db 6
+	dw G3Q102A, G3Q102B, G3Q102C, G3Q102D, G3Q102E, G3Q102F
+	dw G3Q102H
+	dw G3Q103
+	db 0
+	db 6
+	dw G3Q103A, G3Q103B, G3Q103C, G3Q103D, G3Q103E, G3Q103F
+	dw G3Q103H
+	dw G3Q104
+	db 0
+	db 6
+	dw G3Q104A, G3Q104B, G3Q104C, G3Q104D, G3Q104E, G3Q104F
+	dw G3Q104H
+	dw G3Q105
+	db 0
+	db 6
+	dw G3Q105A, G3Q105B, G3Q105C, G3Q105D, G3Q105E, G3Q105F
+	dw G3Q105H
+	dw G3Q106
+	db 0
+	db 6
+	dw G3Q106A, G3Q106B, G3Q106C, G3Q106D, G3Q106E, G3Q106F
+	dw G3Q106H
+	dw G3Q107
+	db 0
+	db 6
+	dw G3Q107A, G3Q107B, G3Q107C, G3Q107D, G3Q107E, G3Q107F
+	dw G3Q107H
+	dw G3Q108
+	db 0
+	db 6
+	dw G3Q108A, G3Q108B, G3Q108C, G3Q108D, G3Q108E, G3Q108F
+	dw G3Q108H
+	dw G3Q109
+	db 0
+	db 6
+	dw G3Q109A, G3Q109B, G3Q109C, G3Q109D, G3Q109E, G3Q109F
+	dw G3Q109H
+	dw G3Q110
+	db 0
+	db 6
+	dw G3Q110A, G3Q110B, G3Q110C, G3Q110D, G3Q110E, G3Q110F
+	dw G3Q110H
+	dw G3Q111
+	db 0
+	db 6
+	dw G3Q111A, G3Q111B, G3Q111C, G3Q111D, G3Q111E, G3Q111F
+	dw G3Q111H
+	dw G3Q112
+	db 0
+	db 6
+	dw G3Q112A, G3Q112B, G3Q112C, G3Q112D, G3Q112E, G3Q112F
+	dw G3Q112H
+	dw G3Q113
+	db 0
+	db 6
+	dw G3Q113A, G3Q113B, G3Q113C, G3Q113D, G3Q113E, G3Q113F
+	dw G3Q113H
+	dw G3Q114
+	db 0
+	db 6
+	dw G3Q114A, G3Q114B, G3Q114C, G3Q114D, G3Q114E, G3Q114F
+	dw G3Q114H
+	dw G3Q115
+	db 0
+	db 6
+	dw G3Q115A, G3Q115B, G3Q115C, G3Q115D, G3Q115E, G3Q115F
+	dw G3Q115H
+	dw G3Q116
+	db 0
+	db 6
+	dw G3Q116A, G3Q116B, G3Q116C, G3Q116D, G3Q116E, G3Q116F
+	dw G3Q116H
+	dw G3Q117
+	db 0
+	db 6
+	dw G3Q117A, G3Q117B, G3Q117C, G3Q117D, G3Q117E, G3Q117F
+	dw G3Q117H
+	dw G3Q118
+	db 0
+	db 6
+	dw G3Q118A, G3Q118B, G3Q118C, G3Q118D, G3Q118E, G3Q118F
+	dw G3Q118H
+	dw G3Q119
+	db 0
+	db 6
+	dw G3Q119A, G3Q119B, G3Q119C, G3Q119D, G3Q119E, G3Q119F
+	dw G3Q119H
+	dw G3Q120
+	db 0
+	db 6
+	dw G3Q120A, G3Q120B, G3Q120C, G3Q120D, G3Q120E, G3Q120F
+	dw G3Q120H
+	dw G3Q121
+	db 0
+	db 6
+	dw G3Q121A, G3Q121B, G3Q121C, G3Q121D, G3Q121E, G3Q121F
+	dw G3Q121H
+	dw G3Q122
+	db 0
+	db 6
+	dw G3Q122A, G3Q122B, G3Q122C, G3Q122D, G3Q122E, G3Q122F
+	dw G3Q122H
+	dw G3Q123
+	db 0
+	db 6
+	dw G3Q123A, G3Q123B, G3Q123C, G3Q123D, G3Q123E, G3Q123F
+	dw G3Q123H
+	dw G3Q124
+	db 0
+	db 6
+	dw G3Q124A, G3Q124B, G3Q124C, G3Q124D, G3Q124E, G3Q124F
+	dw G3Q124H
+	dw G3Q125
+	db 0
+	db 6
+	dw G3Q125A, G3Q125B, G3Q125C, G3Q125D, G3Q125E, G3Q125F
+	dw G3Q125H
+	dw G3Q126
+	db 0
+	db 6
+	dw G3Q126A, G3Q126B, G3Q126C, G3Q126D, G3Q126E, G3Q126F
+	dw G3Q126H
+	dw G3Q127
+	db 0
+	db 6
+	dw G3Q127A, G3Q127B, G3Q127C, G3Q127D, G3Q127E, G3Q127F
+	dw G3Q127H
+	dw G3Q128
+	db 0
+	db 6
+	dw G3Q128A, G3Q128B, G3Q128C, G3Q128D, G3Q128E, G3Q128F
+	dw G3Q128H
+	dw G3Q129
+	db 0
+	db 6
+	dw G3Q129A, G3Q129B, G3Q129C, G3Q129D, G3Q129E, G3Q129F
+	dw G3Q129H
+	dw G3Q130
+	db 0
+	db 6
+	dw G3Q130A, G3Q130B, G3Q130C, G3Q130D, G3Q130E, G3Q130F
+	dw G3Q130H
+	dw G3Q131
+	db 0
+	db 6
+	dw G3Q131A, G3Q131B, G3Q131C, G3Q131D, G3Q131E, G3Q131F
+	dw G3Q131H
+	dw G3Q132
+	db 0
+	db 6
+	dw G3Q132A, G3Q132B, G3Q132C, G3Q132D, G3Q132E, G3Q132F
+	dw G3Q132H
+	dw G3Q133
+	db 0
+	db 6
+	dw G3Q133A, G3Q133B, G3Q133C, G3Q133D, G3Q133E, G3Q133F
+	dw G3Q133H
+	dw G3Q134
+	db 0
+	db 6
+	dw G3Q134A, G3Q134B, G3Q134C, G3Q134D, G3Q134E, G3Q134F
+	dw G3Q134H
+	dw G3Q135
+	db 0
+	db 6
+	dw G3Q135A, G3Q135B, G3Q135C, G3Q135D, G3Q135E, G3Q135F
+	dw G3Q135H
+	dw G3Q136
+	db 0
+	db 6
+	dw G3Q136A, G3Q136B, G3Q136C, G3Q136D, G3Q136E, G3Q136F
+	dw G3Q136H
+	dw G3Q137
+	db 0
+	db 6
+	dw G3Q137A, G3Q137B, G3Q137C, G3Q137D, G3Q137E, G3Q137F
+	dw G3Q137H
+	dw G3Q138
+	db 0
+	db 6
+	dw G3Q138A, G3Q138B, G3Q138C, G3Q138D, G3Q138E, G3Q138F
+	dw G3Q138H
+	dw G3Q139
+	db 0
+	db 6
+	dw G3Q139A, G3Q139B, G3Q139C, G3Q139D, G3Q139E, G3Q139F
+	dw G3Q139H
+	dw G3Q140
+	db 0
+	db 6
+	dw G3Q140A, G3Q140B, G3Q140C, G3Q140D, G3Q140E, G3Q140F
+	dw G3Q140H
+	dw G3Q141
+	db 0
+	db 6
+	dw G3Q141A, G3Q141B, G3Q141C, G3Q141D, G3Q141E, G3Q141F
+	dw G3Q141H
+	dw G3Q142
+	db 0
+	db 6
+	dw G3Q142A, G3Q142B, G3Q142C, G3Q142D, G3Q142E, G3Q142F
+	dw G3Q142H
+	dw G3Q143
+	db 0
+	db 6
+	dw G3Q143A, G3Q143B, G3Q143C, G3Q143D, G3Q143E, G3Q143F
+	dw G3Q143H
+	dw G3Q144
+	db 0
+	db 6
+	dw G3Q144A, G3Q144B, G3Q144C, G3Q144D, G3Q144E, G3Q144F
+	dw G3Q144H
+	dw G3Q145
+	db 0
+	db 6
+	dw G3Q145A, G3Q145B, G3Q145C, G3Q145D, G3Q145E, G3Q145F
+	dw G3Q145H
+	dw G3Q146
+	db 0
+	db 6
+	dw G3Q146A, G3Q146B, G3Q146C, G3Q146D, G3Q146E, G3Q146F
+	dw G3Q146H
+	dw G3Q147
+	db 0
+	db 6
+	dw G3Q147A, G3Q147B, G3Q147C, G3Q147D, G3Q147E, G3Q147F
+	dw G3Q147H
+	dw G3Q148
+	db 0
+	db 6
+	dw G3Q148A, G3Q148B, G3Q148C, G3Q148D, G3Q148E, G3Q148F
+	dw G3Q148H
 G3Q1: db "Opposite of good?@"
 G3Q1A: db "bad@"
 G3Q1B: db "sad@"
@@ -3810,8 +5858,392 @@ G3Q100D: db "6@"
 G3Q100E: db "3@"
 G3Q100F: db "7@"
 G3Q100H: db "2 x what is 8@"
+G3Q101: db "10 / 2?@"
+G3Q101A: db "5@"
+G3Q101B: db "6@"
+G3Q101C: db "2@"
+G3Q101D: db "7@"
+G3Q101E: db "4@"
+G3Q101F: db "8@"
+G3Q101H: db "2 x what is 10@"
+G3Q102: db "12 / 2?@"
+G3Q102A: db "6@"
+G3Q102B: db "7@"
+G3Q102C: db "2@"
+G3Q102D: db "8@"
+G3Q102E: db "5@"
+G3Q102F: db "9@"
+G3Q102H: db "2 x what is 12@"
+G3Q103: db "6 / 3?@"
+G3Q103A: db "2@"
+G3Q103B: db "3@"
+G3Q103C: db "4@"
+G3Q103D: db "1@"
+G3Q103E: db "5@"
+G3Q103F: db "0@"
+G3Q103H: db "3 x what is 6@"
+G3Q104: db "9 / 3?@"
+G3Q104A: db "3@"
+G3Q104B: db "4@"
+G3Q104C: db "5@"
+G3Q104D: db "2@"
+G3Q104E: db "6@"
+G3Q104F: db "1@"
+G3Q104H: db "3 x what is 9@"
+G3Q105: db "12 / 3?@"
+G3Q105A: db "4@"
+G3Q105B: db "5@"
+G3Q105C: db "3@"
+G3Q105D: db "6@"
+G3Q105E: db "7@"
+G3Q105F: db "2@"
+G3Q105H: db "3 x what is 12@"
+G3Q106: db "15 / 3?@"
+G3Q106A: db "5@"
+G3Q106B: db "6@"
+G3Q106C: db "3@"
+G3Q106D: db "7@"
+G3Q106E: db "4@"
+G3Q106F: db "8@"
+G3Q106H: db "3 x what is 15@"
+G3Q107: db "18 / 3?@"
+G3Q107A: db "6@"
+G3Q107B: db "7@"
+G3Q107C: db "3@"
+G3Q107D: db "8@"
+G3Q107E: db "5@"
+G3Q107F: db "9@"
+G3Q107H: db "3 x what is 18@"
+G3Q108: db "8 / 4?@"
+G3Q108A: db "2@"
+G3Q108B: db "3@"
+G3Q108C: db "4@"
+G3Q108D: db "1@"
+G3Q108E: db "5@"
+G3Q108F: db "0@"
+G3Q108H: db "4 x what is 8@"
+G3Q109: db "12 / 4?@"
+G3Q109A: db "3@"
+G3Q109B: db "4@"
+G3Q109C: db "5@"
+G3Q109D: db "2@"
+G3Q109E: db "6@"
+G3Q109F: db "1@"
+G3Q109H: db "4 x what is 12@"
+G3Q110: db "16 / 4?@"
+G3Q110A: db "4@"
+G3Q110B: db "5@"
+G3Q110C: db "6@"
+G3Q110D: db "3@"
+G3Q110E: db "7@"
+G3Q110F: db "2@"
+G3Q110H: db "4 x what is 16@"
+G3Q111: db "20 / 4?@"
+G3Q111A: db "5@"
+G3Q111B: db "6@"
+G3Q111C: db "4@"
+G3Q111D: db "7@"
+G3Q111E: db "8@"
+G3Q111F: db "3@"
+G3Q111H: db "4 x what is 20@"
+G3Q112: db "24 / 4?@"
+G3Q112A: db "6@"
+G3Q112B: db "7@"
+G3Q112C: db "4@"
+G3Q112D: db "8@"
+G3Q112E: db "5@"
+G3Q112F: db "9@"
+G3Q112H: db "4 x what is 24@"
+G3Q113: db "10 / 5?@"
+G3Q113A: db "2@"
+G3Q113B: db "3@"
+G3Q113C: db "5@"
+G3Q113D: db "4@"
+G3Q113E: db "1@"
+G3Q113F: db "0@"
+G3Q113H: db "5 x what is 10@"
+G3Q114: db "15 / 5?@"
+G3Q114A: db "3@"
+G3Q114B: db "4@"
+G3Q114C: db "5@"
+G3Q114D: db "2@"
+G3Q114E: db "6@"
+G3Q114F: db "1@"
+G3Q114H: db "5 x what is 15@"
+G3Q115: db "20 / 5?@"
+G3Q115A: db "4@"
+G3Q115B: db "5@"
+G3Q115C: db "6@"
+G3Q115D: db "3@"
+G3Q115E: db "7@"
+G3Q115F: db "2@"
+G3Q115H: db "5 x what is 20@"
+G3Q116: db "25 / 5?@"
+G3Q116A: db "5@"
+G3Q116B: db "6@"
+G3Q116C: db "7@"
+G3Q116D: db "4@"
+G3Q116E: db "8@"
+G3Q116F: db "3@"
+G3Q116H: db "5 x what is 25@"
+G3Q117: db "30 / 5?@"
+G3Q117A: db "6@"
+G3Q117B: db "7@"
+G3Q117C: db "5@"
+G3Q117D: db "8@"
+G3Q117E: db "9@"
+G3Q117F: db "4@"
+G3Q117H: db "5 x what is 30@"
+G3Q118: db "12 / 6?@"
+G3Q118A: db "2@"
+G3Q118B: db "3@"
+G3Q118C: db "6@"
+G3Q118D: db "4@"
+G3Q118E: db "1@"
+G3Q118F: db "5@"
+G3Q118H: db "6 x what is 12@"
+G3Q119: db "18 / 6?@"
+G3Q119A: db "3@"
+G3Q119B: db "4@"
+G3Q119C: db "6@"
+G3Q119D: db "5@"
+G3Q119E: db "2@"
+G3Q119F: db "1@"
+G3Q119H: db "6 x what is 18@"
+G3Q120: db "24 / 6?@"
+G3Q120A: db "4@"
+G3Q120B: db "5@"
+G3Q120C: db "6@"
+G3Q120D: db "3@"
+G3Q120E: db "7@"
+G3Q120F: db "2@"
+G3Q120H: db "6 x what is 24@"
+G3Q121: db "30 / 6?@"
+G3Q121A: db "5@"
+G3Q121B: db "6@"
+G3Q121C: db "7@"
+G3Q121D: db "4@"
+G3Q121E: db "8@"
+G3Q121F: db "3@"
+G3Q121H: db "6 x what is 30@"
+G3Q122: db "36 / 6?@"
+G3Q122A: db "6@"
+G3Q122B: db "7@"
+G3Q122C: db "8@"
+G3Q122D: db "5@"
+G3Q122E: db "9@"
+G3Q122F: db "4@"
+G3Q122H: db "6 x what is 36@"
+G3Q123: db "14 / 7?@"
+G3Q123A: db "2@"
+G3Q123B: db "3@"
+G3Q123C: db "7@"
+G3Q123D: db "4@"
+G3Q123E: db "1@"
+G3Q123F: db "5@"
+G3Q123H: db "7 x what is 14@"
+G3Q124: db "21 / 7?@"
+G3Q124A: db "3@"
+G3Q124B: db "4@"
+G3Q124C: db "7@"
+G3Q124D: db "5@"
+G3Q124E: db "2@"
+G3Q124F: db "6@"
+G3Q124H: db "7 x what is 21@"
+G3Q125: db "28 / 7?@"
+G3Q125A: db "4@"
+G3Q125B: db "5@"
+G3Q125C: db "7@"
+G3Q125D: db "6@"
+G3Q125E: db "3@"
+G3Q125F: db "2@"
+G3Q125H: db "7 x what is 28@"
+G3Q126: db "35 / 7?@"
+G3Q126A: db "5@"
+G3Q126B: db "6@"
+G3Q126C: db "7@"
+G3Q126D: db "4@"
+G3Q126E: db "8@"
+G3Q126F: db "3@"
+G3Q126H: db "7 x what is 35@"
+G3Q127: db "42 / 7?@"
+G3Q127A: db "6@"
+G3Q127B: db "7@"
+G3Q127C: db "8@"
+G3Q127D: db "5@"
+G3Q127E: db "9@"
+G3Q127F: db "4@"
+G3Q127H: db "7 x what is 42@"
+G3Q128: db "16 / 8?@"
+G3Q128A: db "2@"
+G3Q128B: db "3@"
+G3Q128C: db "8@"
+G3Q128D: db "4@"
+G3Q128E: db "1@"
+G3Q128F: db "5@"
+G3Q128H: db "8 x what is 16@"
+G3Q129: db "24 / 8?@"
+G3Q129A: db "3@"
+G3Q129B: db "4@"
+G3Q129C: db "8@"
+G3Q129D: db "5@"
+G3Q129E: db "2@"
+G3Q129F: db "6@"
+G3Q129H: db "8 x what is 24@"
+G3Q130: db "32 / 8?@"
+G3Q130A: db "4@"
+G3Q130B: db "5@"
+G3Q130C: db "8@"
+G3Q130D: db "6@"
+G3Q130E: db "3@"
+G3Q130F: db "7@"
+G3Q130H: db "8 x what is 32@"
+G3Q131: db "40 / 8?@"
+G3Q131A: db "5@"
+G3Q131B: db "6@"
+G3Q131C: db "8@"
+G3Q131D: db "7@"
+G3Q131E: db "4@"
+G3Q131F: db "3@"
+G3Q131H: db "8 x what is 40@"
+G3Q132: db "48 / 8?@"
+G3Q132A: db "6@"
+G3Q132B: db "7@"
+G3Q132C: db "8@"
+G3Q132D: db "5@"
+G3Q132E: db "9@"
+G3Q132F: db "4@"
+G3Q132H: db "8 x what is 48@"
+G3Q133: db "18 / 9?@"
+G3Q133A: db "2@"
+G3Q133B: db "3@"
+G3Q133C: db "9@"
+G3Q133D: db "4@"
+G3Q133E: db "1@"
+G3Q133F: db "5@"
+G3Q133H: db "9 x what is 18@"
+G3Q134: db "27 / 9?@"
+G3Q134A: db "3@"
+G3Q134B: db "4@"
+G3Q134C: db "9@"
+G3Q134D: db "5@"
+G3Q134E: db "2@"
+G3Q134F: db "6@"
+G3Q134H: db "9 x what is 27@"
+G3Q135: db "36 / 9?@"
+G3Q135A: db "4@"
+G3Q135B: db "5@"
+G3Q135C: db "9@"
+G3Q135D: db "6@"
+G3Q135E: db "3@"
+G3Q135F: db "7@"
+G3Q135H: db "9 x what is 36@"
+G3Q136: db "45 / 9?@"
+G3Q136A: db "5@"
+G3Q136B: db "6@"
+G3Q136C: db "9@"
+G3Q136D: db "7@"
+G3Q136E: db "4@"
+G3Q136F: db "8@"
+G3Q136H: db "9 x what is 45@"
+G3Q137: db "54 / 9?@"
+G3Q137A: db "6@"
+G3Q137B: db "7@"
+G3Q137C: db "9@"
+G3Q137D: db "8@"
+G3Q137E: db "5@"
+G3Q137F: db "4@"
+G3Q137H: db "9 x what is 54@"
+G3Q138: db "Half of 10?@"
+G3Q138A: db "5@"
+G3Q138B: db "6@"
+G3Q138C: db "10@"
+G3Q138D: db "2@"
+G3Q138E: db "15@"
+G3Q138F: db "4@"
+G3Q138H: db "Split 10@"
+G3Q139: db "Half of 12?@"
+G3Q139A: db "6@"
+G3Q139B: db "7@"
+G3Q139C: db "11@"
+G3Q139D: db "3@"
+G3Q139E: db "12@"
+G3Q139F: db "16@"
+G3Q139H: db "Split 12@"
+G3Q140: db "Half of 14?@"
+G3Q140A: db "7@"
+G3Q140B: db "8@"
+G3Q140C: db "12@"
+G3Q140D: db "4@"
+G3Q140E: db "14@"
+G3Q140F: db "17@"
+G3Q140H: db "Split 14@"
+G3Q141: db "Half of 16?@"
+G3Q141A: db "8@"
+G3Q141B: db "9@"
+G3Q141C: db "13@"
+G3Q141D: db "5@"
+G3Q141E: db "16@"
+G3Q141F: db "18@"
+G3Q141H: db "Split 16@"
+G3Q142: db "Half of 18?@"
+G3Q142A: db "9@"
+G3Q142B: db "10@"
+G3Q142C: db "14@"
+G3Q142D: db "6@"
+G3Q142E: db "18@"
+G3Q142F: db "19@"
+G3Q142H: db "Split 18@"
+G3Q143: db "Half of 20?@"
+G3Q143A: db "10@"
+G3Q143B: db "11@"
+G3Q143C: db "15@"
+G3Q143D: db "7@"
+G3Q143E: db "20@"
+G3Q143F: db "9@"
+G3Q143H: db "Split 20@"
+G3Q144: db "Half of 22?@"
+G3Q144A: db "11@"
+G3Q144B: db "12@"
+G3Q144C: db "16@"
+G3Q144D: db "8@"
+G3Q144E: db "22@"
+G3Q144F: db "21@"
+G3Q144H: db "Split 22@"
+G3Q145: db "Half of 24?@"
+G3Q145A: db "12@"
+G3Q145B: db "13@"
+G3Q145C: db "17@"
+G3Q145D: db "9@"
+G3Q145E: db "24@"
+G3Q145F: db "22@"
+G3Q145H: db "Split 24@"
+G3Q146: db "Half of 26?@"
+G3Q146A: db "13@"
+G3Q146B: db "14@"
+G3Q146C: db "18@"
+G3Q146D: db "10@"
+G3Q146E: db "26@"
+G3Q146F: db "23@"
+G3Q146H: db "Split 26@"
+G3Q147: db "Half of 28?@"
+G3Q147A: db "14@"
+G3Q147B: db "15@"
+G3Q147C: db "19@"
+G3Q147D: db "11@"
+G3Q147E: db "28@"
+G3Q147F: db "24@"
+G3Q147H: db "Split 28@"
+G3Q148: db "Half of 30?@"
+G3Q148A: db "15@"
+G3Q148B: db "16@"
+G3Q148C: db "20@"
+G3Q148D: db "12@"
+G3Q148E: db "30@"
+G3Q148F: db "25@"
+G3Q148H: db "Split 30@"
 
-SECTION "Quiz Data G4", ROMX
+SECTION "Quiz Data G4", ROMX, ALIGN[14]
 Grade4Questions::
 	dw G4Q1
 	db 0
@@ -4313,6 +6745,161 @@ Grade4Questions::
 	db 6
 	dw G4Q100A, G4Q100B, G4Q100C, G4Q100D, G4Q100E, G4Q100F
 	dw G4Q100H
+	dw G4Q101
+	db 0
+	db 6
+	dw G4Q101A, G4Q101B, G4Q101C, G4Q101D, G4Q101E, G4Q101F
+	dw G4Q101H
+	dw G4Q102
+	db 0
+	db 6
+	dw G4Q102A, G4Q102B, G4Q102C, G4Q102D, G4Q102E, G4Q102F
+	dw G4Q102H
+	dw G4Q103
+	db 0
+	db 6
+	dw G4Q103A, G4Q103B, G4Q103C, G4Q103D, G4Q103E, G4Q103F
+	dw G4Q103H
+	dw G4Q104
+	db 0
+	db 6
+	dw G4Q104A, G4Q104B, G4Q104C, G4Q104D, G4Q104E, G4Q104F
+	dw G4Q104H
+	dw G4Q105
+	db 0
+	db 6
+	dw G4Q105A, G4Q105B, G4Q105C, G4Q105D, G4Q105E, G4Q105F
+	dw G4Q105H
+	dw G4Q106
+	db 0
+	db 6
+	dw G4Q106A, G4Q106B, G4Q106C, G4Q106D, G4Q106E, G4Q106F
+	dw G4Q106H
+	dw G4Q107
+	db 0
+	db 6
+	dw G4Q107A, G4Q107B, G4Q107C, G4Q107D, G4Q107E, G4Q107F
+	dw G4Q107H
+	dw G4Q108
+	db 0
+	db 6
+	dw G4Q108A, G4Q108B, G4Q108C, G4Q108D, G4Q108E, G4Q108F
+	dw G4Q108H
+	dw G4Q109
+	db 0
+	db 6
+	dw G4Q109A, G4Q109B, G4Q109C, G4Q109D, G4Q109E, G4Q109F
+	dw G4Q109H
+	dw G4Q110
+	db 0
+	db 6
+	dw G4Q110A, G4Q110B, G4Q110C, G4Q110D, G4Q110E, G4Q110F
+	dw G4Q110H
+	dw G4Q111
+	db 0
+	db 6
+	dw G4Q111A, G4Q111B, G4Q111C, G4Q111D, G4Q111E, G4Q111F
+	dw G4Q111H
+	dw G4Q112
+	db 0
+	db 6
+	dw G4Q112A, G4Q112B, G4Q112C, G4Q112D, G4Q112E, G4Q112F
+	dw G4Q112H
+	dw G4Q113
+	db 0
+	db 6
+	dw G4Q113A, G4Q113B, G4Q113C, G4Q113D, G4Q113E, G4Q113F
+	dw G4Q113H
+	dw G4Q114
+	db 0
+	db 6
+	dw G4Q114A, G4Q114B, G4Q114C, G4Q114D, G4Q114E, G4Q114F
+	dw G4Q114H
+	dw G4Q115
+	db 0
+	db 6
+	dw G4Q115A, G4Q115B, G4Q115C, G4Q115D, G4Q115E, G4Q115F
+	dw G4Q115H
+	dw G4Q116
+	db 0
+	db 6
+	dw G4Q116A, G4Q116B, G4Q116C, G4Q116D, G4Q116E, G4Q116F
+	dw G4Q116H
+	dw G4Q117
+	db 0
+	db 6
+	dw G4Q117A, G4Q117B, G4Q117C, G4Q117D, G4Q117E, G4Q117F
+	dw G4Q117H
+	dw G4Q118
+	db 0
+	db 6
+	dw G4Q118A, G4Q118B, G4Q118C, G4Q118D, G4Q118E, G4Q118F
+	dw G4Q118H
+	dw G4Q119
+	db 0
+	db 6
+	dw G4Q119A, G4Q119B, G4Q119C, G4Q119D, G4Q119E, G4Q119F
+	dw G4Q119H
+	dw G4Q120
+	db 0
+	db 6
+	dw G4Q120A, G4Q120B, G4Q120C, G4Q120D, G4Q120E, G4Q120F
+	dw G4Q120H
+	dw G4Q121
+	db 0
+	db 6
+	dw G4Q121A, G4Q121B, G4Q121C, G4Q121D, G4Q121E, G4Q121F
+	dw G4Q121H
+	dw G4Q122
+	db 0
+	db 6
+	dw G4Q122A, G4Q122B, G4Q122C, G4Q122D, G4Q122E, G4Q122F
+	dw G4Q122H
+	dw G4Q123
+	db 0
+	db 6
+	dw G4Q123A, G4Q123B, G4Q123C, G4Q123D, G4Q123E, G4Q123F
+	dw G4Q123H
+	dw G4Q124
+	db 0
+	db 6
+	dw G4Q124A, G4Q124B, G4Q124C, G4Q124D, G4Q124E, G4Q124F
+	dw G4Q124H
+	dw G4Q125
+	db 0
+	db 6
+	dw G4Q125A, G4Q125B, G4Q125C, G4Q125D, G4Q125E, G4Q125F
+	dw G4Q125H
+	dw G4Q126
+	db 0
+	db 3
+	dw G4Q126A, G4Q126B, G4Q126C, G4Q126C, G4Q126C, G4Q126C
+	dw G4Q126H
+	dw G4Q127
+	db 0
+	db 3
+	dw G4Q127A, G4Q127B, G4Q127C, G4Q127C, G4Q127C, G4Q127C
+	dw G4Q127H
+	dw G4Q128
+	db 0
+	db 3
+	dw G4Q128A, G4Q128B, G4Q128C, G4Q128C, G4Q128C, G4Q128C
+	dw G4Q128H
+	dw G4Q129
+	db 0
+	db 3
+	dw G4Q129A, G4Q129B, G4Q129C, G4Q129C, G4Q129C, G4Q129C
+	dw G4Q129H
+	dw G4Q130
+	db 0
+	db 3
+	dw G4Q130A, G4Q130B, G4Q130C, G4Q130C, G4Q130C, G4Q130C
+	dw G4Q130H
+	dw G4Q131
+	db 0
+	db 3
+	dw G4Q131A, G4Q131B, G4Q131C, G4Q131C, G4Q131C, G4Q131C
+	dw G4Q131H
 G4Q1: db "Opposite of loud?@"
 G4Q1A: db "quiet@"
 G4Q1B: db "small@"
@@ -5026,8 +7613,238 @@ G4Q100D: db "84@"
 G4Q100E: db "71@"
 G4Q100F: db "69@"
 G4Q100H: db "Break it up@"
+G4Q101: db "14 x 6?@"
+G4Q101A: db "84@"
+G4Q101B: db "70@"
+G4Q101C: db "20@"
+G4Q101D: db "98@"
+G4Q101E: db "85@"
+G4Q101F: db "83@"
+G4Q101H: db "Break it up@"
+G4Q102: db "14 x 7?@"
+G4Q102A: db "98@"
+G4Q102B: db "84@"
+G4Q102C: db "21@"
+G4Q102D: db "112@"
+G4Q102E: db "99@"
+G4Q102F: db "97@"
+G4Q102H: db "Break it up@"
+G4Q103: db "14 x 8?@"
+G4Q103A: db "112@"
+G4Q103B: db "98@"
+G4Q103C: db "22@"
+G4Q103D: db "126@"
+G4Q103E: db "113@"
+G4Q103F: db "111@"
+G4Q103H: db "Break it up@"
+G4Q104: db "14 x 9?@"
+G4Q104A: db "126@"
+G4Q104B: db "112@"
+G4Q104C: db "23@"
+G4Q104D: db "140@"
+G4Q104E: db "127@"
+G4Q104F: db "125@"
+G4Q104H: db "Break it up@"
+G4Q105: db "15 x 4?@"
+G4Q105A: db "60@"
+G4Q105B: db "45@"
+G4Q105C: db "19@"
+G4Q105D: db "75@"
+G4Q105E: db "61@"
+G4Q105F: db "59@"
+G4Q105H: db "Break it up@"
+G4Q106: db "15 x 5?@"
+G4Q106A: db "75@"
+G4Q106B: db "60@"
+G4Q106C: db "20@"
+G4Q106D: db "90@"
+G4Q106E: db "76@"
+G4Q106F: db "74@"
+G4Q106H: db "Break it up@"
+G4Q107: db "15 x 6?@"
+G4Q107A: db "90@"
+G4Q107B: db "75@"
+G4Q107C: db "21@"
+G4Q107D: db "105@"
+G4Q107E: db "91@"
+G4Q107F: db "89@"
+G4Q107H: db "Break it up@"
+G4Q108: db "15 x 7?@"
+G4Q108A: db "105@"
+G4Q108B: db "90@"
+G4Q108C: db "22@"
+G4Q108D: db "120@"
+G4Q108E: db "106@"
+G4Q108F: db "104@"
+G4Q108H: db "Break it up@"
+G4Q109: db "15 x 8?@"
+G4Q109A: db "120@"
+G4Q109B: db "105@"
+G4Q109C: db "23@"
+G4Q109D: db "135@"
+G4Q109E: db "121@"
+G4Q109F: db "119@"
+G4Q109H: db "Break it up@"
+G4Q110: db "15 x 9?@"
+G4Q110A: db "135@"
+G4Q110B: db "120@"
+G4Q110C: db "24@"
+G4Q110D: db "150@"
+G4Q110E: db "136@"
+G4Q110F: db "134@"
+G4Q110H: db "Break it up@"
+G4Q111: db "54 / 6?@"
+G4Q111A: db "9@"
+G4Q111B: db "10@"
+G4Q111C: db "6@"
+G4Q111D: db "11@"
+G4Q111E: db "8@"
+G4Q111F: db "12@"
+G4Q111H: db "6 x what is 54@"
+G4Q112: db "66 / 6?@"
+G4Q112A: db "11@"
+G4Q112B: db "12@"
+G4Q112C: db "6@"
+G4Q112D: db "13@"
+G4Q112E: db "10@"
+G4Q112F: db "14@"
+G4Q112H: db "6 x what is 66@"
+G4Q113: db "72 / 6?@"
+G4Q113A: db "12@"
+G4Q113B: db "13@"
+G4Q113C: db "6@"
+G4Q113D: db "14@"
+G4Q113E: db "11@"
+G4Q113F: db "15@"
+G4Q113H: db "6 x what is 72@"
+G4Q114: db "72 / 8?@"
+G4Q114A: db "9@"
+G4Q114B: db "10@"
+G4Q114C: db "8@"
+G4Q114D: db "11@"
+G4Q114E: db "12@"
+G4Q114F: db "7@"
+G4Q114H: db "8 x what is 72@"
+G4Q115: db "88 / 8?@"
+G4Q115A: db "11@"
+G4Q115B: db "12@"
+G4Q115C: db "8@"
+G4Q115D: db "13@"
+G4Q115E: db "10@"
+G4Q115F: db "14@"
+G4Q115H: db "8 x what is 88@"
+G4Q116: db "96 / 8?@"
+G4Q116A: db "12@"
+G4Q116B: db "13@"
+G4Q116C: db "8@"
+G4Q116D: db "14@"
+G4Q116E: db "11@"
+G4Q116F: db "15@"
+G4Q116H: db "8 x what is 96@"
+G4Q117: db "81 / 9?@"
+G4Q117A: db "9@"
+G4Q117B: db "10@"
+G4Q117C: db "11@"
+G4Q117D: db "8@"
+G4Q117E: db "12@"
+G4Q117F: db "7@"
+G4Q117H: db "9 x what is 81@"
+G4Q118: db "99 / 9?@"
+G4Q118A: db "11@"
+G4Q118B: db "12@"
+G4Q118C: db "9@"
+G4Q118D: db "13@"
+G4Q118E: db "10@"
+G4Q118F: db "14@"
+G4Q118H: db "9 x what is 99@"
+G4Q119: db "108 / 9?@"
+G4Q119A: db "12@"
+G4Q119B: db "13@"
+G4Q119C: db "9@"
+G4Q119D: db "14@"
+G4Q119E: db "11@"
+G4Q119F: db "15@"
+G4Q119H: db "9 x what is 108@"
+G4Q120: db "99 / 11?@"
+G4Q120A: db "9@"
+G4Q120B: db "10@"
+G4Q120C: db "11@"
+G4Q120D: db "8@"
+G4Q120E: db "12@"
+G4Q120F: db "7@"
+G4Q120H: db "11 x what is 99@"
+G4Q121: db "121 / 11?@"
+G4Q121A: db "11@"
+G4Q121B: db "12@"
+G4Q121C: db "13@"
+G4Q121D: db "10@"
+G4Q121E: db "14@"
+G4Q121F: db "9@"
+G4Q121H: db "11 x what is 121@"
+G4Q122: db "132 / 11?@"
+G4Q122A: db "12@"
+G4Q122B: db "13@"
+G4Q122C: db "11@"
+G4Q122D: db "14@"
+G4Q122E: db "15@"
+G4Q122F: db "10@"
+G4Q122H: db "11 x what is 132@"
+G4Q123: db "108 / 12?@"
+G4Q123A: db "9@"
+G4Q123B: db "10@"
+G4Q123C: db "12@"
+G4Q123D: db "11@"
+G4Q123E: db "8@"
+G4Q123F: db "7@"
+G4Q123H: db "12 x what is 108@"
+G4Q124: db "132 / 12?@"
+G4Q124A: db "11@"
+G4Q124B: db "12@"
+G4Q124C: db "13@"
+G4Q124D: db "10@"
+G4Q124E: db "14@"
+G4Q124F: db "9@"
+G4Q124H: db "12 x what is 132@"
+G4Q125: db "144 / 12?@"
+G4Q125A: db "12@"
+G4Q125B: db "13@"
+G4Q125C: db "14@"
+G4Q125D: db "11@"
+G4Q125E: db "15@"
+G4Q125F: db "10@"
+G4Q125H: db "12 x what is 144@"
+G4Q126: db "2/4 equals?@"
+G4Q126A: db "1/2@"
+G4Q126B: db "1/3@"
+G4Q126C: db "1/4@"
+G4Q126H: db "Halve both@"
+G4Q127: db "3/6 equals?@"
+G4Q127A: db "1/2@"
+G4Q127B: db "1/3@"
+G4Q127C: db "2/6@"
+G4Q127H: db "Halve both@"
+G4Q128: db "3/4 of 8?@"
+G4Q128A: db "6@"
+G4Q128B: db "5@"
+G4Q128C: db "7@"
+G4Q128H: db "8 /4 x3@"
+G4Q129: db "1/2 of 10?@"
+G4Q129A: db "5@"
+G4Q129B: db "4@"
+G4Q129C: db "6@"
+G4Q129H: db "Split 10@"
+G4Q130: db "Half of 1.0?@"
+G4Q130A: db "0.5@"
+G4Q130B: db "0.2@"
+G4Q130C: db "5.0@"
+G4Q130H: db "Split 1.0@"
+G4Q131: db "0.5 plus 0.5?@"
+G4Q131A: db "1.0@"
+G4Q131B: db "0.5@"
+G4Q131C: db "1.5@"
+G4Q131H: db "Two halves@"
 
-SECTION "Quiz Data G5", ROMX
+SECTION "Quiz Data G5", ROMX, ALIGN[14]
 Grade5Questions::
 	dw G5Q1
 	db 0
@@ -5529,6 +8346,266 @@ Grade5Questions::
 	db 3
 	dw G5Q100A, G5Q100B, G5Q100C, G5Q100C, G5Q100C, G5Q100C
 	dw G5Q100H
+	dw G5Q101
+	db 0
+	db 3
+	dw G5Q101A, G5Q101B, G5Q101C, G5Q101C, G5Q101C, G5Q101C
+	dw G5Q101H
+	dw G5Q102
+	db 0
+	db 3
+	dw G5Q102A, G5Q102B, G5Q102C, G5Q102C, G5Q102C, G5Q102C
+	dw G5Q102H
+	dw G5Q103
+	db 0
+	db 3
+	dw G5Q103A, G5Q103B, G5Q103C, G5Q103C, G5Q103C, G5Q103C
+	dw G5Q103H
+	dw G5Q104
+	db 0
+	db 3
+	dw G5Q104A, G5Q104B, G5Q104C, G5Q104C, G5Q104C, G5Q104C
+	dw G5Q104H
+	dw G5Q105
+	db 0
+	db 3
+	dw G5Q105A, G5Q105B, G5Q105C, G5Q105C, G5Q105C, G5Q105C
+	dw G5Q105H
+	dw G5Q106
+	db 0
+	db 3
+	dw G5Q106A, G5Q106B, G5Q106C, G5Q106C, G5Q106C, G5Q106C
+	dw G5Q106H
+	dw G5Q107
+	db 0
+	db 3
+	dw G5Q107A, G5Q107B, G5Q107C, G5Q107C, G5Q107C, G5Q107C
+	dw G5Q107H
+	dw G5Q108
+	db 0
+	db 3
+	dw G5Q108A, G5Q108B, G5Q108C, G5Q108C, G5Q108C, G5Q108C
+	dw G5Q108H
+	dw G5Q109
+	db 0
+	db 3
+	dw G5Q109A, G5Q109B, G5Q109C, G5Q109C, G5Q109C, G5Q109C
+	dw G5Q109H
+	dw G5Q110
+	db 0
+	db 3
+	dw G5Q110A, G5Q110B, G5Q110C, G5Q110C, G5Q110C, G5Q110C
+	dw G5Q110H
+	dw G5Q111
+	db 0
+	db 3
+	dw G5Q111A, G5Q111B, G5Q111C, G5Q111C, G5Q111C, G5Q111C
+	dw G5Q111H
+	dw G5Q112
+	db 0
+	db 3
+	dw G5Q112A, G5Q112B, G5Q112C, G5Q112C, G5Q112C, G5Q112C
+	dw G5Q112H
+	dw G5Q113
+	db 0
+	db 3
+	dw G5Q113A, G5Q113B, G5Q113C, G5Q113C, G5Q113C, G5Q113C
+	dw G5Q113H
+	dw G5Q114
+	db 0
+	db 3
+	dw G5Q114A, G5Q114B, G5Q114C, G5Q114C, G5Q114C, G5Q114C
+	dw G5Q114H
+	dw G5Q115
+	db 0
+	db 3
+	dw G5Q115A, G5Q115B, G5Q115C, G5Q115C, G5Q115C, G5Q115C
+	dw G5Q115H
+	dw G5Q116
+	db 0
+	db 3
+	dw G5Q116A, G5Q116B, G5Q116C, G5Q116C, G5Q116C, G5Q116C
+	dw G5Q116H
+	dw G5Q117
+	db 0
+	db 3
+	dw G5Q117A, G5Q117B, G5Q117C, G5Q117C, G5Q117C, G5Q117C
+	dw G5Q117H
+	dw G5Q118
+	db 0
+	db 3
+	dw G5Q118A, G5Q118B, G5Q118C, G5Q118C, G5Q118C, G5Q118C
+	dw G5Q118H
+	dw G5Q119
+	db 0
+	db 3
+	dw G5Q119A, G5Q119B, G5Q119C, G5Q119C, G5Q119C, G5Q119C
+	dw G5Q119H
+	dw G5Q120
+	db 0
+	db 3
+	dw G5Q120A, G5Q120B, G5Q120C, G5Q120C, G5Q120C, G5Q120C
+	dw G5Q120H
+	dw G5Q121
+	db 0
+	db 3
+	dw G5Q121A, G5Q121B, G5Q121C, G5Q121C, G5Q121C, G5Q121C
+	dw G5Q121H
+	dw G5Q122
+	db 0
+	db 3
+	dw G5Q122A, G5Q122B, G5Q122C, G5Q122C, G5Q122C, G5Q122C
+	dw G5Q122H
+	dw G5Q123
+	db 0
+	db 3
+	dw G5Q123A, G5Q123B, G5Q123C, G5Q123C, G5Q123C, G5Q123C
+	dw G5Q123H
+	dw G5Q124
+	db 0
+	db 3
+	dw G5Q124A, G5Q124B, G5Q124C, G5Q124C, G5Q124C, G5Q124C
+	dw G5Q124H
+	dw G5Q125
+	db 0
+	db 3
+	dw G5Q125A, G5Q125B, G5Q125C, G5Q125C, G5Q125C, G5Q125C
+	dw G5Q125H
+	dw G5Q126
+	db 0
+	db 3
+	dw G5Q126A, G5Q126B, G5Q126C, G5Q126C, G5Q126C, G5Q126C
+	dw G5Q126H
+	dw G5Q127
+	db 0
+	db 3
+	dw G5Q127A, G5Q127B, G5Q127C, G5Q127C, G5Q127C, G5Q127C
+	dw G5Q127H
+	dw G5Q128
+	db 0
+	db 3
+	dw G5Q128A, G5Q128B, G5Q128C, G5Q128C, G5Q128C, G5Q128C
+	dw G5Q128H
+	dw G5Q129
+	db 0
+	db 3
+	dw G5Q129A, G5Q129B, G5Q129C, G5Q129C, G5Q129C, G5Q129C
+	dw G5Q129H
+	dw G5Q130
+	db 0
+	db 3
+	dw G5Q130A, G5Q130B, G5Q130C, G5Q130C, G5Q130C, G5Q130C
+	dw G5Q130H
+	dw G5Q131
+	db 0
+	db 3
+	dw G5Q131A, G5Q131B, G5Q131C, G5Q131C, G5Q131C, G5Q131C
+	dw G5Q131H
+	dw G5Q132
+	db 0
+	db 3
+	dw G5Q132A, G5Q132B, G5Q132C, G5Q132C, G5Q132C, G5Q132C
+	dw G5Q132H
+	dw G5Q133
+	db 0
+	db 3
+	dw G5Q133A, G5Q133B, G5Q133C, G5Q133C, G5Q133C, G5Q133C
+	dw G5Q133H
+	dw G5Q134
+	db 0
+	db 3
+	dw G5Q134A, G5Q134B, G5Q134C, G5Q134C, G5Q134C, G5Q134C
+	dw G5Q134H
+	dw G5Q135
+	db 0
+	db 3
+	dw G5Q135A, G5Q135B, G5Q135C, G5Q135C, G5Q135C, G5Q135C
+	dw G5Q135H
+	dw G5Q136
+	db 0
+	db 3
+	dw G5Q136A, G5Q136B, G5Q136C, G5Q136C, G5Q136C, G5Q136C
+	dw G5Q136H
+	dw G5Q137
+	db 0
+	db 3
+	dw G5Q137A, G5Q137B, G5Q137C, G5Q137C, G5Q137C, G5Q137C
+	dw G5Q137H
+	dw G5Q138
+	db 0
+	db 3
+	dw G5Q138A, G5Q138B, G5Q138C, G5Q138C, G5Q138C, G5Q138C
+	dw G5Q138H
+	dw G5Q139
+	db 0
+	db 3
+	dw G5Q139A, G5Q139B, G5Q139C, G5Q139C, G5Q139C, G5Q139C
+	dw G5Q139H
+	dw G5Q140
+	db 0
+	db 3
+	dw G5Q140A, G5Q140B, G5Q140C, G5Q140C, G5Q140C, G5Q140C
+	dw G5Q140H
+	dw G5Q141
+	db 0
+	db 3
+	dw G5Q141A, G5Q141B, G5Q141C, G5Q141C, G5Q141C, G5Q141C
+	dw G5Q141H
+	dw G5Q142
+	db 0
+	db 3
+	dw G5Q142A, G5Q142B, G5Q142C, G5Q142C, G5Q142C, G5Q142C
+	dw G5Q142H
+	dw G5Q143
+	db 0
+	db 3
+	dw G5Q143A, G5Q143B, G5Q143C, G5Q143C, G5Q143C, G5Q143C
+	dw G5Q143H
+	dw G5Q144
+	db 0
+	db 3
+	dw G5Q144A, G5Q144B, G5Q144C, G5Q144C, G5Q144C, G5Q144C
+	dw G5Q144H
+	dw G5Q145
+	db 0
+	db 3
+	dw G5Q145A, G5Q145B, G5Q145C, G5Q145C, G5Q145C, G5Q145C
+	dw G5Q145H
+	dw G5Q146
+	db 0
+	db 3
+	dw G5Q146A, G5Q146B, G5Q146C, G5Q146C, G5Q146C, G5Q146C
+	dw G5Q146H
+	dw G5Q147
+	db 0
+	db 3
+	dw G5Q147A, G5Q147B, G5Q147C, G5Q147C, G5Q147C, G5Q147C
+	dw G5Q147H
+	dw G5Q148
+	db 0
+	db 3
+	dw G5Q148A, G5Q148B, G5Q148C, G5Q148C, G5Q148C, G5Q148C
+	dw G5Q148H
+	dw G5Q149
+	db 0
+	db 3
+	dw G5Q149A, G5Q149B, G5Q149C, G5Q149C, G5Q149C, G5Q149C
+	dw G5Q149H
+	dw G5Q150
+	db 0
+	db 3
+	dw G5Q150A, G5Q150B, G5Q150C, G5Q150C, G5Q150C, G5Q150C
+	dw G5Q150H
+	dw G5Q151
+	db 0
+	db 3
+	dw G5Q151A, G5Q151B, G5Q151C, G5Q151C, G5Q151C, G5Q151C
+	dw G5Q151H
+	dw G5Q152
+	db 0
+	db 3
+	dw G5Q152A, G5Q152B, G5Q152C, G5Q152C, G5Q152C, G5Q152C
+	dw G5Q152H
 G5Q1: db "Opposite of true?@"
 G5Q1A: db "false@"
 G5Q1B: db "night@"
@@ -6178,3 +9255,263 @@ G5Q100A: db "12@"
 G5Q100B: db "24@"
 G5Q100C: db "10@"
 G5Q100H: db "Times before plus@"
+G5Q101: db "4 plus 2 x 5?@"
+G5Q101A: db "14@"
+G5Q101B: db "30@"
+G5Q101C: db "11@"
+G5Q101H: db "Times before plus@"
+G5Q102: db "4 plus 3 x 3?@"
+G5Q102A: db "13@"
+G5Q102B: db "21@"
+G5Q102C: db "10@"
+G5Q102H: db "Times before plus@"
+G5Q103: db "4 plus 3 x 4?@"
+G5Q103A: db "16@"
+G5Q103B: db "28@"
+G5Q103C: db "11@"
+G5Q103H: db "Times before plus@"
+G5Q104: db "4 plus 3 x 5?@"
+G5Q104A: db "19@"
+G5Q104B: db "35@"
+G5Q104C: db "12@"
+G5Q104H: db "Times before plus@"
+G5Q105: db "7 plus 2 x 3?@"
+G5Q105A: db "13@"
+G5Q105B: db "27@"
+G5Q105C: db "12@"
+G5Q105H: db "Times before plus@"
+G5Q106: db "7 plus 2 x 4?@"
+G5Q106A: db "15@"
+G5Q106B: db "36@"
+G5Q106C: db "13@"
+G5Q106H: db "Times before plus@"
+G5Q107: db "7 plus 2 x 5?@"
+G5Q107A: db "17@"
+G5Q107B: db "45@"
+G5Q107C: db "14@"
+G5Q107H: db "Times before plus@"
+G5Q108: db "7 plus 3 x 3?@"
+G5Q108A: db "16@"
+G5Q108B: db "30@"
+G5Q108C: db "13@"
+G5Q108H: db "Times before plus@"
+G5Q109: db "7 plus 3 x 4?@"
+G5Q109A: db "19@"
+G5Q109B: db "40@"
+G5Q109C: db "14@"
+G5Q109H: db "Times before plus@"
+G5Q110: db "7 plus 3 x 5?@"
+G5Q110A: db "22@"
+G5Q110B: db "50@"
+G5Q110C: db "15@"
+G5Q110H: db "Times before plus@"
+G5Q111: db "3 plus 2 x 3?@"
+G5Q111A: db "9@"
+G5Q111B: db "15@"
+G5Q111C: db "8@"
+G5Q111H: db "Times before plus@"
+G5Q112: db "3 plus 2 x 4?@"
+G5Q112A: db "11@"
+G5Q112B: db "20@"
+G5Q112C: db "9@"
+G5Q112H: db "Times before plus@"
+G5Q113: db "3 plus 2 x 5?@"
+G5Q113A: db "13@"
+G5Q113B: db "25@"
+G5Q113C: db "10@"
+G5Q113H: db "Times before plus@"
+G5Q114: db "3 plus 3 x 3?@"
+G5Q114A: db "12@"
+G5Q114B: db "18@"
+G5Q114C: db "9@"
+G5Q114H: db "Times before plus@"
+G5Q115: db "3 plus 3 x 4?@"
+G5Q115A: db "15@"
+G5Q115B: db "24@"
+G5Q115C: db "10@"
+G5Q115H: db "Times before plus@"
+G5Q116: db "3 plus 3 x 5?@"
+G5Q116A: db "18@"
+G5Q116B: db "30@"
+G5Q116C: db "11@"
+G5Q116H: db "Times before plus@"
+G5Q117: db "10 - 2 x 2?@"
+G5Q117A: db "6@"
+G5Q117B: db "16@"
+G5Q117C: db "7@"
+G5Q117H: db "Times first@"
+G5Q118: db "10 - 2 x 3?@"
+G5Q118A: db "4@"
+G5Q118B: db "24@"
+G5Q118C: db "5@"
+G5Q118H: db "Times first@"
+G5Q119: db "10 - 2 x 4?@"
+G5Q119A: db "2@"
+G5Q119B: db "32@"
+G5Q119C: db "4@"
+G5Q119H: db "Times first@"
+G5Q120: db "10 - 3 x 2?@"
+G5Q120A: db "4@"
+G5Q120B: db "14@"
+G5Q120C: db "5@"
+G5Q120H: db "Times first@"
+G5Q121: db "10 - 3 x 3?@"
+G5Q121A: db "1@"
+G5Q121B: db "21@"
+G5Q121C: db "4@"
+G5Q121H: db "Times first@"
+G5Q122: db "20 - 2 x 2?@"
+G5Q122A: db "16@"
+G5Q122B: db "36@"
+G5Q122C: db "17@"
+G5Q122H: db "Times first@"
+G5Q123: db "20 - 2 x 3?@"
+G5Q123A: db "14@"
+G5Q123B: db "54@"
+G5Q123C: db "15@"
+G5Q123H: db "Times first@"
+G5Q124: db "20 - 2 x 4?@"
+G5Q124A: db "12@"
+G5Q124B: db "72@"
+G5Q124C: db "14@"
+G5Q124H: db "Times first@"
+G5Q125: db "20 - 3 x 2?@"
+G5Q125A: db "14@"
+G5Q125B: db "34@"
+G5Q125C: db "15@"
+G5Q125H: db "Times first@"
+G5Q126: db "20 - 3 x 3?@"
+G5Q126A: db "11@"
+G5Q126B: db "51@"
+G5Q126C: db "14@"
+G5Q126H: db "Times first@"
+G5Q127: db "20 - 3 x 4?@"
+G5Q127A: db "8@"
+G5Q127B: db "68@"
+G5Q127C: db "13@"
+G5Q127H: db "Times first@"
+G5Q128: db "15 - 2 x 2?@"
+G5Q128A: db "11@"
+G5Q128B: db "26@"
+G5Q128C: db "12@"
+G5Q128H: db "Times first@"
+G5Q129: db "15 - 2 x 3?@"
+G5Q129A: db "9@"
+G5Q129B: db "39@"
+G5Q129C: db "10@"
+G5Q129H: db "Times first@"
+G5Q130: db "15 - 2 x 4?@"
+G5Q130A: db "7@"
+G5Q130B: db "52@"
+G5Q130C: db "9@"
+G5Q130H: db "Times first@"
+G5Q131: db "15 - 3 x 2?@"
+G5Q131A: db "9@"
+G5Q131B: db "24@"
+G5Q131C: db "10@"
+G5Q131H: db "Times first@"
+G5Q132: db "15 - 3 x 3?@"
+G5Q132A: db "6@"
+G5Q132B: db "36@"
+G5Q132C: db "9@"
+G5Q132H: db "Times first@"
+G5Q133: db "15 - 3 x 4?@"
+G5Q133A: db "3@"
+G5Q133B: db "48@"
+G5Q133C: db "8@"
+G5Q133H: db "Times first@"
+G5Q134: db "12 - 2 x 2?@"
+G5Q134A: db "8@"
+G5Q134B: db "20@"
+G5Q134C: db "9@"
+G5Q134H: db "Times first@"
+G5Q135: db "12 - 2 x 3?@"
+G5Q135A: db "6@"
+G5Q135B: db "30@"
+G5Q135C: db "7@"
+G5Q135H: db "Times first@"
+G5Q136: db "12 - 2 x 4?@"
+G5Q136A: db "4@"
+G5Q136B: db "40@"
+G5Q136C: db "6@"
+G5Q136H: db "Times first@"
+G5Q137: db "12 - 3 x 2?@"
+G5Q137A: db "6@"
+G5Q137B: db "18@"
+G5Q137C: db "7@"
+G5Q137H: db "Times first@"
+G5Q138: db "12 - 3 x 3?@"
+G5Q138A: db "3@"
+G5Q138B: db "27@"
+G5Q138C: db "6@"
+G5Q138H: db "Times first@"
+G5Q139: db "18 - 2 x 2?@"
+G5Q139A: db "14@"
+G5Q139B: db "32@"
+G5Q139C: db "15@"
+G5Q139H: db "Times first@"
+G5Q140: db "18 - 2 x 3?@"
+G5Q140A: db "12@"
+G5Q140B: db "48@"
+G5Q140C: db "13@"
+G5Q140H: db "Times first@"
+G5Q141: db "18 - 2 x 4?@"
+G5Q141A: db "10@"
+G5Q141B: db "64@"
+G5Q141C: db "12@"
+G5Q141H: db "Times first@"
+G5Q142: db "18 - 3 x 2?@"
+G5Q142A: db "12@"
+G5Q142B: db "30@"
+G5Q142C: db "13@"
+G5Q142H: db "Times first@"
+G5Q143: db "18 - 3 x 3?@"
+G5Q143A: db "9@"
+G5Q143B: db "45@"
+G5Q143C: db "12@"
+G5Q143H: db "Times first@"
+G5Q144: db "18 - 3 x 4?@"
+G5Q144A: db "6@"
+G5Q144B: db "60@"
+G5Q144C: db "11@"
+G5Q144H: db "Times first@"
+G5Q145: db "0.6 plus 0.7?@"
+G5Q145A: db "1.3@"
+G5Q145B: db "1.2@"
+G5Q145C: db "0.13@"
+G5Q145H: db "Add tenths@"
+G5Q146: db "0.4 plus 0.5?@"
+G5Q146A: db "0.9@"
+G5Q146B: db "0.8@"
+G5Q146C: db "1.0@"
+G5Q146H: db "Add tenths@"
+G5Q147: db "3/4 plus 1/4?@"
+G5Q147A: db "1@"
+G5Q147B: db "4/8@"
+G5Q147C: db "2@"
+G5Q147H: db "Add tops@"
+G5Q148: db "1/2 plus 1/4?@"
+G5Q148A: db "3/4@"
+G5Q148B: db "1/4@"
+G5Q148C: db "2/4@"
+G5Q148H: db "1/2 is 2/4@"
+G5Q149: db "Round 4.7?@"
+G5Q149A: db "5@"
+G5Q149B: db "4@"
+G5Q149C: db "6@"
+G5Q149H: db ".5 goes up@"
+G5Q150: db "Round 5.5?@"
+G5Q150A: db "6@"
+G5Q150B: db "5@"
+G5Q150C: db "7@"
+G5Q150H: db ".5 goes up@"
+G5Q151: db "Round 3.2?@"
+G5Q151A: db "3@"
+G5Q151B: db "4@"
+G5Q151C: db "2@"
+G5Q151H: db "Under .5@"
+G5Q152: db "Round 8.9?@"
+G5Q152A: db "9@"
+G5Q152B: db "8@"
+G5Q152C: db "10@"
+G5Q152H: db "Near 9@"
