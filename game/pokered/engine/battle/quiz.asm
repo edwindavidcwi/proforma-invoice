@@ -299,7 +299,7 @@ QuizEntryFromIdx:
 	and a
 	jr z, .done
 	ld b, a
-	ld de, 16
+	ld de, 18                      ; question entry size (must match QuizPickGrade / quizq)
 .loop
 	add hl, de
 	dec b
