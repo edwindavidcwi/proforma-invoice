@@ -2305,6 +2305,7 @@ wQuizFirstTry::     db  ; 1 if the last question was answered right on the FIRST
 ; New quiz vars go at the END of this section so they never shift the addresses
 ; the offline player reads (wQuizStreak 0xdef0, wQuizLastSubject 0xdef4, etc.).
 wQuizCol::          db  ; cursor column in the 2-column answer grid (0 = left, 1 = right)
+wQuizMissRun::      db  ; consecutive non-first-try answers (drives the easier-difficulty nudge)
 
 
 SECTION "Stack", WRAM0

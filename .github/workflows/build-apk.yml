@@ -49,6 +49,7 @@ jobs:
           node audit_render.js     ../pokered/pokered.gbc   # ~1200 live renders + shuffle bias
           node audit_outcome.js    ../pokered/pokered.gbc   # hit / miss / half-damage behaviour
           node test_review.js      ../pokered/pokered.gbc   # spaced-repetition review path (entry stride)
+          node test_adaptive.js    ../pokered/pokered.gbc   # adaptive difficulty: grade nudges up/down
           node test_music.js       ../pokered/pokered.gbc   # context-aware music track selection
           node test_music_engine.js ../pokered/pokered.gbc  # hidden audio GB plays the real song per context
           node test_readaloud.js                             # read-aloud text pipeline (decode/sanitize/prompt)

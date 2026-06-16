@@ -273,7 +273,31 @@ QuizSelectQuestion::
 	call CountSetBits              ; -> [wNumSetBits]
 	ld a, [wNumSetBits]
 	srl a                          ; badges / 2
-	inc a                          ; + 1
+	inc a                          ; base grade 1..5 (from badge progress)
+	; Adaptive difficulty: keep the player in the flow zone. A strong first-try
+	; streak reaches UP one grade (harder); repeated stumbles ease DOWN one grade.
+	; The grades are the difficulty axis, so this needs no per-question tagging.
+	ld b, a                        ; b = base grade
+	ld a, [wQuizStreak]
+	cp 4
+	jr c, .notHot
+	inc b                          ; on a roll -> a grade harder
+	jr .clampGrade
+.notHot
+	ld a, [wQuizMissRun]
+	cp 3
+	jr c, .clampGrade
+	dec b                          ; struggling -> a grade easier
+.clampGrade
+	ld a, b
+	and a
+	jr nz, .gradeNotZero
+	inc a                          ; clamp 0 -> 1
+.gradeNotZero
+	cp 6
+	jr c, .gradeReady
+	ld a, 5                        ; clamp 6 -> 5
+.gradeReady
 	jp QuizPickGrade
 
 ; Compute a question entry from wQuizGradeIdx + wQuizPickIdx (used by review).
@@ -679,9 +703,12 @@ QuizAsk::
 	ld [wQuizStreak], a            ; correct only after a miss -> streak resets
 	ld [wQuizFirstTry], a
 	call QuizReviewRemove          ; answered right (with help) -> stop reviewing it
+	call QuizMissRunBump           ; a stumble -> nudge difficulty toward easier
 	jr .streakReady
 .firstTry
 	call QuizReviewRemove          ; mastered first-try -> stop reviewing it
+	xor a
+	ld [wQuizMissRun], a           ; first-try mastery clears the struggle counter
 	ld a, 1
 	ld [wQuizFirstTry], a
 	ld a, [wQuizStreak]
@@ -713,6 +740,7 @@ QuizAsk::
 	ld [wQuizStreak], a            ; a miss breaks the streak
 	ld [wQuizFirstTry], a
 	call QuizReviewPush            ; missed -> queue for spaced-repetition review
+	call QuizMissRunBump           ; a miss -> nudge difficulty toward easier
 	; Reveal the correct answer so even a missed question teaches the fact.
 	ld a, [wQuizCorrectAnsPtr]
 	ld e, a
@@ -722,6 +750,16 @@ QuizAsk::
 	ld hl, QuizMissText
 	call PrintText
 	and a                          ; clear carry
+	ret
+
+; Count one stumble (a miss or a right-after-hint) toward the easier-difficulty
+; nudge, capped so it can't run away. Reset to 0 on a first-try-correct answer.
+QuizMissRunBump:
+	ld a, [wQuizMissRun]
+	cp 9
+	ret nc
+	inc a
+	ld [wQuizMissRun], a
 	ret
 
 ; Write the streak and the current attack-power multiplier into wStringBuffer,
