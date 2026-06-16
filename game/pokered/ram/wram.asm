@@ -2285,7 +2285,6 @@ wQuizAttemptsLeft:: db  ; tries remaining for this question
 wQuizResult::       db  ; item-use decision: 1 = allow, 0 = deny
 wQuizRotate::       db  ; random rotation applied to the answer order (anti-memorization)
 wQuizSlot::         db  ; scratch: answer slot being drawn
-wQuizCol::          db  ; cursor column in the 2-column answer grid (0 = left, 1 = right)
 wQuizCorrectAnsPtr:: dw ; pointer to the correct answer's text (revealed on a miss)
 wQuizHintPtr::      dw  ; pointer to the current question's method hint (shown on a retry)
 wQuizStreak::       db  ; how many questions answered right in a row (resets on a miss)
@@ -2303,6 +2302,9 @@ wQuizSubjBase::     dw  ; scratch: this grade's subject-array base address
 wQuizPickTries::    db  ; scratch: remaining re-roll attempts
 wQuizPickIdx::      db  ; scratch: chosen question index
 wQuizFirstTry::     db  ; 1 if the last question was answered right on the FIRST try (mastery)
+; New quiz vars go at the END of this section so they never shift the addresses
+; the offline player reads (wQuizStreak 0xdef0, wQuizLastSubject 0xdef4, etc.).
+wQuizCol::          db  ; cursor column in the 2-column answer grid (0 = left, 1 = right)
 
 
 SECTION "Stack", WRAM0

@@ -531,6 +531,14 @@ BODY_HTML = r"""
           </div>
         </section>
         <section class="card">
+          <h3>Read aloud <small>(speaks the question &amp; choices)</small></h3>
+          <div class="btnrow">
+            <button id="btnRead" title="Read the question and answer choices out loud">&#128483; Read aloud</button>
+            <button id="btnVoice" title="Switch the speaking voice">&#127908; Voice</button>
+            <button id="btnReadAgain" title="Hear the current question again">&#128260; Again</button>
+          </div>
+        </section>
+        <section class="card">
           <h3>System</h3>
           <div class="btnrow">
             <button id="btnFull" title="Make the game fill the screen">&#9974; Big screen</button>
@@ -963,6 +971,13 @@ MUSIC_JS = r"""
     }, true);
   }
 
+  // Lower the music while the read-aloud voice is speaking, then restore it, so
+  // the spoken question is clear over the soundtrack.
+  window.__musicDuck = function (down) {
+    if (!master) return;
+    master.gain.value = (window.__soundOn === false) ? 0 : (down ? 0.16 : 0.6);
+  };
+
   window.__musicStart = function () {
     ensure();
     if (ctx.state === 'suspended') { try { ctx.resume(); } catch (e) {} }
@@ -1365,6 +1380,170 @@ PROGRESS_JS = r"""
 """
 
 
+# High-quality read-aloud. Speaks the quiz QUESTION and ANSWER CHOICES decoded
+# straight from the game's RAM (the real on-screen text), using the best natural
+# voice the device offers (male/female selectable). It sanitizes first -- math
+# symbols become words ("3 x 4" -> "3 times 4"), exclamation marks and stray
+# symbols are dropped (never says "exclamation mark"), a few abbreviations are
+# expanded -- so it sounds like a friendly teacher, not a robot reading
+# punctuation or emojis. The music ducks while it speaks. Built for early readers
+# (grade 1-2) who can play by ear.
+READALOUD_JS = r"""
+(function () {
+  var synth = window.speechSynthesis || null;
+  // RAM addresses (pokered.sym): the quiz strings + state the engine writes.
+  var A_Q = 0xda92, A_ANS0 = 0xdaa6, A_STRIDE = 0x14;
+  var A_NUM = 0xdee7, A_ROT = 0xdeea, A_INBATTLE = 0xd057;
+
+  // Reverse Game Boy charmap (tile code -> character) for the chars quiz text uses.
+  var CMAP = {};
+  CMAP[0x7f] = ' '; CMAP[0x9c] = ':'; CMAP[0xe3] = '-';
+  CMAP[0xe6] = '?'; CMAP[0xe7] = '!'; CMAP[0xe8] = '.'; CMAP[0xf4] = ','; CMAP[0xf3] = '/';
+  for (var i = 0; i < 26; i++) { CMAP[0x80 + i] = String.fromCharCode(65 + i); CMAP[0xa0 + i] = String.fromCharCode(97 + i); }
+  for (var d = 0; d < 10; d++) CMAP[0xf6 + d] = String(d);
+
+  function rd(a) {
+    var em = window.__emulator;
+    if (!em || !em.module || em.e == null || typeof em.module._emulator_read_mem !== 'function') return -1;
+    return em.module._emulator_read_mem(em.e, a) & 0xff;
+  }
+  function decodeAt(addr) {            // read a '@'-terminated GB string -> JS text
+    var s = '';
+    for (var i = 0; i < 19; i++) {
+      var b = rd(addr + i);
+      if (b < 0 || b === 0x50) break;  // 0x50 = '@' terminator
+      var c = CMAP[b];
+      if (c === undefined) return '';  // non-text byte -> stale/box data, not a real string
+      s += c;
+    }
+    return s;
+  }
+
+  // Turn quiz text into something a voice says naturally.
+  var ABBR = { deg: 'degrees', hr: 'hours', hrs: 'hours', min: 'minutes', mins: 'minutes',
+               yr: 'year', sept: 'September', feb: 'February', sat: 'Saturday', sun: 'Sunday' };
+  function speakable(t) {
+    if (!t) return '';
+    t = t.replace(/(\d)\s*x\s*(\d)/gi, '$1 times $2');      // 3 x 4 -> 3 times 4
+    t = t.replace(/(\d)\s*-\s*(\d)/g, '$1 minus $2');       // 8 - 3 -> 8 minus 3
+    t = t.replace(/(\d)(\s*)\/(\s*)(\d)/g, function (m, a, s1, s2, b) {
+      return (s1 || s2) ? (a + ' divided by ' + b) : (a + ' over ' + b);  // spaced=divide, tight=fraction
+    });
+    t = t.replace(/\+/g, ' plus ');
+    t = t.replace(/=/g, ' equals ');
+    t = t.replace(/!/g, '');                                // never read exclamation marks
+    t = t.replace(/[^A-Za-z0-9 ?.,]/g, ' ');                // drop stray symbols
+    t = t.replace(/[A-Za-z]+/g, function (w) { var k = w.toLowerCase(); return ABBR[k] || w; });
+    return t.replace(/\s+/g, ' ').trim();
+  }
+
+  // Full spoken prompt: question, then the choices in on-screen (rotated) order.
+  function buildPrompt() {
+    var n = rd(A_NUM);
+    if (n < 2 || n > 6) return '';
+    if (rd(A_INBATTLE) === 0) return '';                   // the quiz only shows in battle
+    var q = decodeAt(A_Q);
+    if (q.replace(/[^A-Za-z]/g, '').length < 2) return '';  // not a real question
+    var rot = rd(A_ROT); if (rot < 0) rot = 0;
+    var opts = [];
+    for (var s = 0; s < n; s++) {
+      var o = speakable(decodeAt(A_ANS0 + ((s + rot) % n) * A_STRIDE));
+      if (o) opts.push(o);
+    }
+    var qs = speakable(q);
+    if (!opts.length) return qs;
+    var list = opts.length > 1 ? opts.slice(0, -1).join(', ') + ', or ' + opts[opts.length - 1] : opts[0];
+    return qs + ' Is it: ' + list + '?';
+  }
+
+  // ---- voice selection (quality + gender) ----
+  var gender = 'female';
+  try { var gv = localStorage.getItem('pq_voice'); if (gv === 'male' || gv === 'female') gender = gv; } catch (e) {}
+  var FEMALE = /\b(aria|jenny|libby|sonia|emma|ava|natasha|samantha|zira|susan|hazel|heera|neerja|salli|joanna|kendra|female|woman|girl)\b/i;
+  var MALE = /\b(guy|ryan|david|mark|george|james|brian|matthew|ravi|prabhat|fred|daniel|male|man|boy)\b/i;
+  var btnRead = document.getElementById('btnRead');
+  var btnVoice = document.getElementById('btnVoice');
+  var btnAgain = document.getElementById('btnReadAgain');
+  function enVoices() { return (synth ? synth.getVoices() : []).filter(function (v) { return /^en(-|_|$)/i.test(v.lang); }); }
+  function score(v) {
+    var n = v.name.toLowerCase(), s = 0;
+    if (/natural|neural|premium|enhanced|wavenet|online|siri/.test(n)) s += 100;
+    if (/google/.test(n)) s += 60;
+    if (/microsoft/.test(n)) s += 25;
+    if (v.localService === false) s += 12;
+    var l = v.lang.toLowerCase();
+    if (/en[-_]us/.test(l)) s += 15; else if (/en[-_](gb|in|au)/.test(l)) s += 10;
+    return s;
+  }
+  var voice = null;
+  function pickVoice() {
+    var vs = enVoices();
+    if (!vs.length) { voice = null; return; }
+    var want = (gender === 'male') ? MALE : FEMALE;
+    var pool = vs.filter(function (v) { return want.test(v.name); });
+    if (!pool.length) pool = vs;
+    pool.sort(function (a, b) { return score(b) - score(a); });
+    voice = pool[0];
+    if (btnVoice && voice) btnVoice.textContent = '🎤 ' + voice.name.replace(/Microsoft |Google /, '').slice(0, 14);
+  }
+  if (synth && 'onvoiceschanged' in synth) synth.onvoiceschanged = pickVoice;
+
+  function say(text, mood) {
+    if (!synth || !text) return;
+    try { synth.cancel(); } catch (e) {}
+    var u = new SpeechSynthesisUtterance(text);
+    if (voice) u.voice = voice;
+    u.lang = (voice && voice.lang) || 'en-US';
+    u.rate = 0.96; u.pitch = 1.06; u.volume = 1.0;         // warm, slightly slow for a child
+    if (mood === 'happy') { u.rate = 1.0; u.pitch = 1.22; }
+    else if (mood === 'soft') { u.rate = 0.92; u.pitch = 1.0; }
+    u.onstart = function () { if (window.__musicDuck) window.__musicDuck(true); };
+    u.onend = u.onerror = function () { if (window.__musicDuck) window.__musicDuck(false); };
+    synth.speak(u);
+  }
+
+  // ---- controls ----
+  var on = true;
+  try { if (localStorage.getItem('pq_read') === '0') on = false; } catch (e) {}
+  function syncBtn() { if (btnRead) { btnRead.textContent = on ? '🗣 Read: On' : '🔇 Read: Off'; btnRead.classList.toggle('on', on); } }
+  if (btnRead) btnRead.addEventListener('click', function () {
+    on = !on; try { localStorage.setItem('pq_read', on ? '1' : '0'); } catch (e) {}
+    if (!on) { try { synth.cancel(); } catch (e) {} if (window.__musicDuck) window.__musicDuck(false); }
+    syncBtn();
+  });
+  if (btnVoice) btnVoice.addEventListener('click', function () {
+    gender = (gender === 'female') ? 'male' : 'female';
+    try { localStorage.setItem('pq_voice', gender); } catch (e) {}
+    pickVoice();
+    say(gender === 'male' ? 'Hi! I will read for you.' : 'Hello! I will read for you.');
+  });
+  if (btnAgain) btnAgain.addEventListener('click', function () { var p = buildPrompt(); if (p) say(p); });
+
+  // ---- poll for a new question and read it once ----
+  var lastQ = '';
+  function poll() {
+    if (!on || !synth) return;
+    if (rd(A_INBATTLE) === 0) { lastQ = ''; return; }      // left battle -> allow re-reading later
+    var n = rd(A_NUM); if (n < 2 || n > 6) return;
+    var q = decodeAt(A_Q);
+    if (q.replace(/[^A-Za-z]/g, '').length < 2) return;
+    if (q === lastQ) return;                               // already read this question
+    lastQ = q;
+    var p = buildPrompt();
+    if (p) say(p);
+  }
+
+  // Voices load asynchronously; retry a few times, then poll for questions.
+  var tries = 0, warm = setInterval(function () { pickVoice(); if (voice || tries++ > 20) clearInterval(warm); }, 200);
+  pickVoice(); syncBtn();
+  if (synth) setInterval(poll, 300);
+
+  // Inspection hook for the headless text-pipeline test.
+  window.__readaloud = { decodeAt: decodeAt, speakable: speakable, buildPrompt: buildPrompt, pickVoice: pickVoice };
+})();
+"""
+
+
 def read_text(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -1435,6 +1614,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -1456,6 +1636,7 @@ def main():
         FS_JS,
         VISUAL_JS,
         PROGRESS_JS,
+        READALOUD_JS,
     )
 
     with open(args.out, "w", encoding="utf-8") as f:

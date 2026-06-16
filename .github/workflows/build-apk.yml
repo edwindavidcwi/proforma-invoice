@@ -50,6 +50,7 @@ jobs:
           node audit_outcome.js    ../pokered/pokered.gbc   # hit / miss / half-damage behaviour
           node test_music.js       ../pokered/pokered.gbc   # context-aware music track selection
           node test_music_engine.js ../pokered/pokered.gbc  # hidden audio GB plays the real song per context
+          node test_readaloud.js                             # read-aloud text pipeline (decode/sanitize/prompt)
           python3 audit_facts.py   ../pokered/pokered.gbc   # independent answer-key check
           python3 ../pokered/audit_content.py               # data lint + content report + generator sync
 
