@@ -79,6 +79,16 @@ h2 .e{font-size:27px;vertical-align:-2px;margin-right:6px}
 .opt{display:inline-block;background:#eef2f7;color:#374151;border-radius:999px;padding:3px 11px;margin:0 5px 2px 0;font-size:14px}
 .opt.ok{background:#16a34a;color:#fff;font-weight:700}
 .hint{color:var(--soft);font-style:italic;font-size:13.5px}
+/* adventure walkthrough */
+.gymtable{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:8px}
+.gymtable th,.gymtable td{text-align:left;padding:6px 9px;border-bottom:1px solid var(--line);vertical-align:top}
+.gymtable th{background:#eef2f7;font-size:13px;text-transform:uppercase;letter-spacing:.03em;color:#475569}
+.gymtable td:first-child,.gymtable td:nth-child(2){font-weight:700;white-space:nowrap}
+.gymtable tr:last-child td{border-bottom:0}
+.win{color:#15803d;font-weight:700}
+.badgecol{white-space:nowrap;color:#b45309;font-weight:700}
+.typetip{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.typetip span{background:#f1f5f9;border-radius:999px;padding:5px 12px;font-size:15px}
 .gradehd{font-size:27px;margin:22px 0 2px;text-align:center}
 .count{color:var(--soft);text-align:center;margin-bottom:6px;font-size:14px}
 .foot{text-align:center;color:#6b7280;font-size:14px;margin:26px 0}
@@ -136,6 +146,78 @@ def subject_block(grade, subject):
     cls = "qlist compact" if subject == "Math" else "qlist"
     return h + f'<div class="{cls}">' + "".join(question_html(q) for q in qs) + '</div>'
 
+def adventure_html():
+    # Factual Pokémon Red progression, written kid-simple (no copyrighted art/text).
+    leaders = [
+        ("Pewter City",   "Brock",     "Rock \U0001FAA8",   "Grass \U0001F33F or Water \U0001F4A7 moves", "1 · Boulder"),
+        ("Cerulean City", "Misty",     "Water \U0001F4A7",  "Grass \U0001F33F or Electric ⚡",        "2 · Cascade"),
+        ("Vermilion City","Lt. Surge", "Electric ⚡",   "Ground moves (Electric can't hit Ground)",   "3 · Thunder"),
+        ("Celadon City",  "Erika",     "Grass \U0001F33F",  "Fire \U0001F525 or Flying \U0001F985",       "4 · Rainbow"),
+        ("Fuchsia City",  "Koga",      "Poison ☠️","Psychic \U0001F52E or Ground",              "5 · Soul"),
+        ("Saffron City",  "Sabrina",   "Psychic \U0001F52E","Bug \U0001F41B moves",                       "6 · Marsh"),
+        ("Cinnabar Is.",  "Blaine",    "Fire \U0001F525",   "Water \U0001F4A7 moves",                     "7 · Volcano"),
+        ("Viridian City", "Giovanni",  "Ground \U0001F30B", "Water \U0001F4A7 or Grass \U0001F33F",       "8 · Earth"),
+    ]
+    rows = "".join(
+        f'<tr><td>{esc(c)}</td><td>{esc(l)}</td><td>{t}</td>'
+        f'<td class="win">{w}</td><td class="badgecol">{b}</td></tr>'
+        for c, l, t, w, b in leaders)
+    return f"""
+  <div class="card">
+    <h2><span class="e">\U0001F5FA️</span>Your Pokémon adventure (how to play)</h2>
+    <p class="lead">You are a young trainer starting out in your home town. Your big quest: travel across the land,
+    earn <b>8 gym badges</b>, and become the <b>Champion</b>! Along the way you catch and train Pokémon &mdash; and
+    every move you make is powered by answering a <b>school question</b>.</p>
+    <div class="tip">\U0001F49A You can't lose for good. Faint a battle? You wake up safe at the last town with full health and <b>no money lost</b>. So it's always safe to explore.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="e">\U0001F45F</span>Where to go &mdash; step by step</h2>
+    <ol class="steps">
+      <li><b>Pallet Town (home).</b> Visit <b>Professor Oak</b> and pick your first Pokémon &mdash; \U0001F33F <b>Bulbasaur</b> (easiest start), \U0001F525 <b>Charmander</b>, or \U0001F4A7 <b>Squirtle</b>.</li>
+      <li>Walk up <b>Route 1</b> to <b>Viridian City</b> to buy <b>Poké Balls</b> (to catch Pokémon) and <b>Potions</b>.</li>
+      <li>Go through <b>Viridian Forest</b> to <b>Pewter City</b> &mdash; beat <b>Brock</b> for <b>Badge&nbsp;1</b>.</li>
+      <li>Cross <b>Mt. Moon</b> to <b>Cerulean City</b> &mdash; beat <b>Misty</b> for <b>Badge&nbsp;2</b>.</li>
+      <li>Find the move <b>Cut</b> ✂️ on the big ship (<b>S.S. Anne</b>), then beat <b>Lt. Surge</b> in <b>Vermilion City</b> for <b>Badge&nbsp;3</b>.</li>
+      <li>Pass through <b>Rock Tunnel</b> and <b>Lavender Town</b> to <b>Celadon City</b> &mdash; beat <b>Erika</b> for <b>Badge&nbsp;4</b>.</li>
+      <li>Get the <b>Poké Flute</b> in Lavender Town to wake the giant sleeping <b>Snorlax</b> blocking the road.</li>
+      <li>Reach <b>Fuchsia City</b> &mdash; beat <b>Koga</b> for <b>Badge&nbsp;5</b>. (Explore the <b>Safari Zone</b> here!)</li>
+      <li>In <b>Saffron City</b>, beat <b>Sabrina</b> for <b>Badge&nbsp;6</b>.</li>
+      <li>Use <b>Surf</b> \U0001F30A to reach <b>Cinnabar Island</b> &mdash; beat <b>Blaine</b> for <b>Badge&nbsp;7</b>.</li>
+      <li>Return to <b>Viridian City</b> &mdash; its gym is now open. Beat <b>Giovanni</b> for <b>Badge&nbsp;8</b>.</li>
+      <li>Climb <b>Victory Road</b>, beat the <b>Elite Four</b> and your <b>Rival</b> &mdash; you're the <b>Champion</b>! \U0001F3C6</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2><span class="e">\U0001F3C5</span>The 8 Gym Leaders &mdash; and how to beat each one</h2>
+    <table class="gymtable">
+      <tr><th>City</th><th>Leader</th><th>Uses</th><th>To win, use…</th><th>Badge</th></tr>
+      {rows}
+    </table>
+  </div>
+
+  <div class="card">
+    <h2><span class="e">⚔️</span>Type tips (what beats what)</h2>
+    <p class="lead">Pick a move that is <b>strong</b> against the other Pokémon and it does extra damage. The easy three:</p>
+    <div class="typetip">
+      <span>\U0001F4A7 Water beats Fire \U0001F525</span>
+      <span>\U0001F525 Fire beats Grass \U0001F33F</span>
+      <span>\U0001F33F Grass beats Water \U0001F4A7</span>
+      <span>⚡ Electric beats Water \U0001F4A7</span>
+      <span>\U0001F30B Ground beats Electric ⚡</span>
+    </div>
+    <div class="tip">\U0001F4A1 Tip: keep <b>two or three different types</b> of Pokémon on your team so you always have something strong to send out.</div>
+  </div>
+
+  <div class="card">
+    <h2><span class="e">\U0001F4C8</span>The clever part (a note for Mom &amp; Dad)</h2>
+    <div class="note">The further Ethan travels, the more <b>badges</b> he earns &mdash; and the game quietly raises the school <b>grade level</b> of the questions to match. So <b>just by adventuring he is moving up grades</b>, and it never feels like a test.</div>
+    <div class="note">Special moves to find unlock new paths: <b>Cut</b> ✂️ (clears small trees), <b>Surf</b> \U0001F30A (cross water), <b>Strength</b> \U0001F4AA (push boulders), <b>Flash</b> \U0001F526 (light up dark caves).</div>
+    <div class="note">Stuck? Talk to <b>Nurse Joy</b> in any Pokémon Center and <b>Professor Oak</b> &mdash; they give <b>free quiz practice</b> with no battle, and explain the answer when you miss.</div>
+  </div>
+"""
+
 def guide_html():
     rows = "".join(
         f'<tr><td style="padding:4px 10px"><span style="font-size:20px">{SUBJ[s][0]}</span> <b>{esc(s)}</b></td>'
@@ -188,6 +270,8 @@ def guide_html():
       <p>On a phone: use the on-screen buttons. Hold <b>Space</b> to fast-forward walking.</p>
     </div>
   </div>
+
+  {adventure_html()}
 
   <div class="card">
     <h2><span class="e">\U0001F31F</span>Helpful features (tap ☰ Menu)</h2>
