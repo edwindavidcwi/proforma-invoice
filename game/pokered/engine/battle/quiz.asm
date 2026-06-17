@@ -190,6 +190,9 @@ QuizCapture::
 	ld [wQuizResult], a
 .done
 	call LoadScreenTilesFromBuffer2
+	; the capture quiz used the box-region scratch; if this catch sends the mon
+	; to the PC box (party full), the box must be valid first -- restore it now.
+	farcall RefreshCurBoxFromSRAM
 	call Delay3
 	ret
 

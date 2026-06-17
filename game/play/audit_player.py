@@ -72,6 +72,20 @@ check("RefreshCurBoxFromSRAM is built into the ROM (reloads the box after battle
       "RefreshCurBoxFromSRAM" in sym,
       "missing -- the quiz/box overlay would be unsafe without it")
 
+# The quiz strings must NEVER live on the battle's screen-backup buffers
+# (wTileMapBackup / wSurroundingTiles, the "Buffer1" the battle engine reuses
+# constantly). Putting them there shredded the on-screen question/answers.
+print("\n-- quiz strings do NOT overlap the battle screen buffer (Buffer1) --")
+SCREEN_AREA = 20 * 18
+buf = sym.get("wTileMapBackup")
+qlo, qhi = sym.get("wQuizEntry"), sym.get("wQuizFocusCache")
+if buf is None or qlo is None or qhi is None:
+    check("quiz + screen-buffer symbols present", False, "missing from sym")
+else:
+    overlap = not (qhi < buf or qlo >= buf + SCREEN_AREA)
+    check(f"quiz scratch [{qlo:#06x},{qhi:#06x}] clear of Buffer1 [{buf:#06x},{buf + SCREEN_AREA:#06x})",
+          not overlap, "OVERLAP -> battle text will garble")
+
 print("\n-- no broken emoji escapes --")
 # Emoji written as Python \U........ escapes inside the JS RAW strings leak into
 # the page as literal text ("U0001F4DA") instead of the emoji (this broke the
