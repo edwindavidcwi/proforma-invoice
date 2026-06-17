@@ -55,6 +55,7 @@ jobs:
           node test_music.js       ../pokered/pokered.gbc   # context-aware music track selection
           node test_music_engine.js ../pokered/pokered.gbc  # hidden audio GB plays the real song per context
           node test_readaloud.js                             # read-aloud text pipeline (decode/sanitize/prompt)
+          node test_learnhub.js                              # in-game Learn Hub: walkthrough + learning sheets (math tables, etc.)
           python3 audit_facts.py   ../pokered/pokered.gbc   # independent answer-key check
           python3 audit_player.py                            # player RAM-address drift + MBC-safety lint
           python3 ../pokered/audit_content.py               # data lint + content report + generator sync

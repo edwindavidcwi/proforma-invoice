@@ -378,6 +378,79 @@ body { display: flex; flex-direction: column; }
    hint would just overlap the Select/Start buttons -- hide it there. */
 @media (pointer: coarse) { #hint { display: none; } }
 
+/* ---- Learn Hub (walkthrough + learning reference sheets) ---- */
+.lhOpenBtn { width: 100%; padding: 13px; border: 0; border-radius: 13px; cursor: pointer;
+  font: 700 14px/1 system-ui, sans-serif; color: #06281a; letter-spacing: .01em;
+  background: linear-gradient(180deg, #5be39a, #16a34a); box-shadow: 0 3px 0 #0c7a39;
+  display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform .08s; }
+.lhOpenBtn:active { transform: translateY(2px); box-shadow: 0 1px 0 #0c7a39; }
+#pqLearn { display: none; position: fixed; inset: 0; z-index: 62; padding: 12px;
+  background: rgba(2,10,15,.78); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
+  align-items: center; justify-content: center; }
+#pqLearn.show { display: flex; animation: pqFade .18s ease; }
+#pqLearnCard { width: min(96vw, 760px); max-height: 92vh; display: flex; flex-direction: column;
+  background: linear-gradient(180deg, #15293a, #0f1d28); color: #e4eef5; border-radius: 18px;
+  overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.05);
+  font-family: system-ui, "Segoe UI", sans-serif; }
+#pqLearnHead { display: flex; align-items: center; gap: 8px; padding: 14px 18px; font-weight: 800;
+  font-size: 17px; color: #04261a; background: linear-gradient(180deg, #6fe7a6, #1faa57); }
+#pqLearnHead span { margin-right: auto; }
+#pqLearnHead button { background: rgba(0,0,0,.16); border: 0; color: #04261a; width: 28px; height: 28px;
+  border-radius: 8px; font-size: 16px; cursor: pointer; line-height: 1; }
+.lhTabs { display: flex; gap: 6px; padding: 10px 12px; overflow-x: auto; background: #0c1923;
+  border-bottom: 1px solid #1b2c38; -webkit-overflow-scrolling: touch; }
+.lhTab { flex: 0 0 auto; padding: 9px 13px; border: 1px solid #213340; border-radius: 999px; cursor: pointer;
+  background: #112230; color: #aecadb; font: 600 13px/1 system-ui, sans-serif; white-space: nowrap; }
+.lhTab.on { background: linear-gradient(180deg, #5be39a, #16a34a); color: #06281a; border-color: transparent; }
+#pqLearnBody { padding: 16px 18px 22px; overflow-y: auto; }
+.lhSec { display: none; }
+.lhSec.on { display: block; animation: pqFade .15s ease; }
+.lhH { font-size: 19px; font-weight: 800; margin: 4px 0 8px; color: #eaf4fb; }
+.lhP { font-size: 14.5px; line-height: 1.6; color: #cfe0ec; margin: 6px 0; }
+.lhP b { color: #fff; }
+.lhCard { background: #0c1923; border: 1px solid #1b2c38; border-radius: 13px; padding: 12px 14px; margin: 10px 0; }
+.lhCard h4 { margin: 0 0 6px; font-size: 15px; color: #8fe0b0; }
+.lhStep { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px dashed #1b2c38; font-size: 14px; line-height: 1.5; color: #d3e3ef; }
+.lhStep:last-child { border-bottom: 0; }
+.lhStep b { color: #ffd23f; }
+.lhNum { flex: 0 0 24px; height: 24px; border-radius: 50%; background: #16a34a; color: #04261a;
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; }
+/* multiplication / addition grid */
+.lhGridWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 8px 0; }
+table.lhGrid { border-collapse: collapse; margin: 0 auto; font-variant-numeric: tabular-nums; }
+table.lhGrid th, table.lhGrid td { width: 38px; height: 34px; text-align: center; font-size: 14px;
+  border: 1px solid #1b2c38; color: #d3e3ef; }
+table.lhGrid th { background: #143042; color: #8fe0b0; font-weight: 800; }
+table.lhGrid td { cursor: pointer; background: #0c1923; transition: background .08s; }
+table.lhGrid td.hot { background: #16a34a; color: #04261a; font-weight: 800; }
+table.lhGrid td.lit { background: #1d3a2c; color: #bff0d0; }
+table.lhGrid th.lit { background: #1faa57; color: #04261a; }
+.lhEq { text-align: center; font-size: 20px; font-weight: 800; color: #ffd23f; min-height: 28px; margin: 4px 0 2px; }
+.lhTimesRow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.lhPick { padding: 7px 12px; border-radius: 9px; border: 1px solid #213340; background: #112230; color: #cfe0ec; cursor: pointer; font: 700 13px/1 system-ui; }
+.lhPick.on { background: #16a34a; color: #04261a; border-color: transparent; }
+.lhFacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(86px, 1fr)); gap: 6px; margin-top: 8px; }
+.lhFact { background: #0e1f2b; border: 1px solid #1b2c38; border-radius: 9px; padding: 7px 4px; text-align: center; font-size: 14px; color: #d3e3ef; }
+.lhFact b { color: #8fe0b0; }
+/* coloured reference chips / rows */
+.lhRows { margin: 8px 0; }
+.lhRow { display: flex; align-items: center; gap: 10px; padding: 8px 11px; border-radius: 10px; margin: 5px 0;
+  background: #0e1f2b; border: 1px solid #1b2c38; font-size: 14px; color: #d3e3ef; }
+.lhRow .k { flex: 0 0 auto; font-weight: 800; color: #ffd23f; min-width: 64px; }
+.lhRow .v { flex: 1 1 auto; }
+.lhPill { display: inline-block; background: #16351f; color: #8fe0b0; border-radius: 999px; padding: 2px 9px; font-size: 13px; margin: 2px 3px 2px 0; }
+.lhWin { color: #6fe08a; font-weight: 700; }
+.lhClock { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 8px 0; }
+.lhClockFace { text-align: center; font-size: 13px; color: #aecadb; }
+.lhClockFace svg { display: block; margin: 0 auto 3px; }
+.lhTip { background: linear-gradient(180deg, #143427, #0f2920); border: 1px solid #245a3e; border-left: 4px solid #43c06a;
+  border-radius: 11px; padding: 11px 14px; margin: 10px 0; font-size: 13.5px; line-height: 1.55; color: #d6eade; }
+.lhTip b { color: #fff; }
+.lhTable { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 6px 0; }
+.lhTable th, .lhTable td { text-align: left; padding: 7px 9px; border-bottom: 1px solid #1b2c38; vertical-align: top; }
+.lhTable th { color: #8fb3c6; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+.lhTable td:first-child, .lhTable td:nth-child(2) { font-weight: 700; white-space: nowrap; }
+
 /* ---- slide-up menu sheet ---- */
 #menu {
   display: none; position: fixed; inset: 0; z-index: 50;
@@ -1414,6 +1487,264 @@ PROGRESS_JS = r"""
 """
 
 
+# Learn Hub: an in-game reference any time from the menu, for the child AND the
+# parent/teacher. It carries the whole Pokemon Red walkthrough (where to go, the
+# 8 gyms + how to beat each, type tips, the HMs and where to find them) PLUS the
+# core learning sheets -- an interactive multiplication table (tap a square to
+# light up the answer), an addition table, doubles, even/odd, place value,
+# fractions, telling time (drawn clock faces), money, calendar, measurement,
+# opposites/plurals/past-tense/vowels, and shapes & colour mixing. Tabbed so it
+# stays compact; opens over the game and pauses nothing it doesn't need to.
+LEARNHUB_JS = r"""
+(function () {
+  // ---------------- content data ----------------
+  var GYMS = [
+    ['1 · Boulder', 'Brock',     'Rock',     'Grass \U0001F33F / Water \U0001F4A7'],
+    ['2 · Cascade', 'Misty',     'Water',    'Grass \U0001F33F / Electric ⚡'],
+    ['3 · Thunder', 'Lt. Surge', 'Electric', 'Ground \U0001F30B'],
+    ['4 · Rainbow', 'Erika',     'Grass',    'Fire \U0001F525 / Flying \U0001F985 / Bug \U0001F41B'],
+    ['5 · Soul',    'Koga',      'Poison',   'Psychic \U0001F52E / Ground \U0001F30B'],
+    ['6 · Marsh',   'Sabrina',   'Psychic',  'Bug \U0001F41B'],
+    ['7 · Volcano', 'Blaine',    'Fire',     'Water \U0001F4A7 / Rock \U0001FAA8'],
+    ['8 · Earth',   'Giovanni',  'Ground',   'Water \U0001F4A7 / Grass \U0001F33F / Ice \U0001F9CA']
+  ];
+  var TYPES = [
+    ['\U0001F4A7 Water',    'beats Fire \U0001F525, Rock \U0001FAA8, Ground \U0001F30B'],
+    ['\U0001F525 Fire',     'beats Grass \U0001F33F, Bug \U0001F41B, Ice \U0001F9CA'],
+    ['\U0001F33F Grass',    'beats Water \U0001F4A7, Rock \U0001FAA8, Ground \U0001F30B'],
+    ['⚡ Electric', 'beats Water \U0001F4A7, Flying \U0001F985 (can\'t hit Ground)'],
+    ['\U0001F30B Ground',   'beats Fire \U0001F525, Electric ⚡, Rock \U0001FAA8, Poison ☠️'],
+    ['\U0001F52E Psychic',  'beats Fighting \U0001F94A, Poison ☠️'],
+    ['\U0001F41B Bug',      'beats Grass \U0001F33F, Psychic \U0001F52E'],
+    ['\U0001F9CA Ice',      'beats Grass \U0001F33F, Ground \U0001F30B, Flying \U0001F985, Dragon \U0001F409']
+  ];
+  var HMS = [
+    ['Cut ✂️',      'chops small trees',  'the SS Anne captain (Vermilion City)'],
+    ['Fly \U0001F985',        'jump to any town',   'a house on Route 16 (west of Celadon)'],
+    ['Surf \U0001F30A',       'ride across water',  'a secret house in the Safari Zone'],
+    ['Strength \U0001F4AA',   'push big boulders',  'the Fuchsia Warden (bring the Gold Teeth)'],
+    ['Flash \U0001F526',      'light up dark caves','Oak\'s Aide on Route 2 (catch ~10 first)']
+  ];
+  var JOURNEY = [
+    'Start in <b>Pallet Town</b>. Pick your first Pokémon from Professor Oak — \U0001F33F Bulbasaur is the easiest start.',
+    'Go up <b>Route 1</b> to <b>Viridian City</b>. Deliver Oak\'s Parcel for the Pokédex; buy Poké Balls &amp; Potions.',
+    'Through <b>Viridian Forest</b> to <b>Pewter City</b> &rarr; beat <b>Brock</b> (Gym 1). Use Grass or Water.',
+    'Cross <b>Mt. Moon</b> to <b>Cerulean City</b> &rarr; beat <b>Misty</b> (Gym 2). Use Grass or Electric.',
+    'Find <b>Cut</b> on the <b>SS Anne</b>, then beat <b>Lt. Surge</b> in <b>Vermilion City</b> (Gym 3). Use Ground.',
+    'Get <b>Flash</b>, cross <b>Rock Tunnel</b> to <b>Lavender Town</b>, then west to <b>Celadon City</b> &rarr; beat <b>Erika</b> (Gym 4). Use Fire/Flying/Bug.',
+    'Beat Team Rocket under the Game Corner for the <b>Silph Scope</b>. Clear <b>Pokémon Tower</b> in Lavender &rarr; get the <b>Poké Flute</b> to wake the sleeping <b>Snorlax</b>.',
+    'Head south to <b>Fuchsia City</b> &rarr; beat <b>Koga</b> (Gym 5). Use Psychic/Ground. Find <b>Surf</b> &amp; <b>Strength</b> in the Safari Zone.',
+    'Give the Saffron guard a drink, clear <b>Silph Co.</b>, then beat <b>Sabrina</b> (Gym 6). Use Bug.',
+    'Surf to <b>Cinnabar Island</b>, find the <b>Secret Key</b> in the Mansion &rarr; beat <b>Blaine</b> (Gym 7). Use Water.',
+    'Return to <b>Viridian City</b> &rarr; beat <b>Giovanni</b> (Gym 8). Use Water/Grass/Ice.',
+    'Climb <b>Victory Road</b> (push boulders with Strength) &rarr; beat the <b>Elite Four</b> and your <b>Rival</b> &rarr; become <b>Champion</b>! \U0001F3C6'
+  ];
+
+  // ---------------- tab builders ----------------
+  function adventureHTML() {
+    var h = '<div class="lhH">\U0001F5FA️ Your Quest</div>'
+          + '<div class="lhP">Travel the land, earn <b>8 gym badges</b>, and become the <b>Champion</b>! Here is exactly where to go:</div>';
+    JOURNEY.forEach(function (s, i) { h += '<div class="lhStep"><span class="lhNum">' + (i + 1) + '</span><span>' + s + '</span></div>'; });
+    h += '<div class="lhCard"><h4>\U0001F3C5 The 8 Gyms — how to beat each</h4><table class="lhTable">'
+       + '<tr><th>Badge</th><th>Leader</th><th>Uses</th><th>Beat with</th></tr>';
+    GYMS.forEach(function (g) { h += '<tr><td>' + g[0] + '</td><td>' + g[1] + '</td><td>' + g[2] + '</td><td class="lhWin">' + g[3] + '</td></tr>'; });
+    h += '</table></div>';
+    h += '<div class="lhCard"><h4>⚔️ Type tips (what beats what)</h4>';
+    TYPES.forEach(function (t) { h += '<div class="lhRow"><span class="k">' + t[0] + '</span><span class="v">' + t[1] + '</span></div>'; });
+    h += '<div class="lhTip">\U0001F4A1 Easy rule: <b>Water</b> beats Fire, <b>Fire</b> beats Grass, <b>Grass</b> beats Water. Keep one of each on your team!</div></div>';
+    h += '<div class="lhCard"><h4>\U0001F31F Special moves (HMs) &amp; where to find them</h4>';
+    HMS.forEach(function (x) { h += '<div class="lhRow"><span class="k">' + x[0] + '</span><span class="v">' + x[1] + ' — <i>' + x[2] + '</i></span></div>'; });
+    h += '</div>';
+    h += '<div class="lhTip">\U0001F4BE <b>Save often:</b> press Start &rarr; SAVE. You never truly lose — if your team faints you wake up safe at the last town with full health.</div>';
+    return h;
+  }
+
+  function timesHTML() {
+    var h = '<div class="lhH">✖️ Times Tables (1–12)</div>'
+          + '<div class="lhP">Tap any square to see the answer. The gold row and column show the two numbers you multiply.</div>'
+          + '<div class="lhEq" id="lhEq">Tap a square below \U0001F447</div>'
+          + '<div class="lhGridWrap"><table class="lhGrid"><tr><th>×</th>';
+    for (var c = 1; c <= 12; c++) h += '<th data-c="' + c + '">' + c + '</th>';
+    h += '</tr>';
+    for (var r = 1; r <= 12; r++) {
+      h += '<tr><th data-r="' + r + '">' + r + '</th>';
+      for (var c2 = 1; c2 <= 12; c2++) h += '<td data-r="' + r + '" data-c="' + c2 + '">' + (r * c2) + '</td>';
+      h += '</tr>';
+    }
+    h += '</table></div>';
+    h += '<div class="lhP" style="margin-top:14px"><b>Or learn one table at a time:</b></div><div class="lhTimesRow" id="lhTimesPick">';
+    for (var n = 1; n <= 12; n++) h += '<button class="lhPick" data-n="' + n + '">' + n + '×</button>';
+    h += '</div><div class="lhFacts" id="lhTimesOut"></div>';
+    return h;
+  }
+
+  function mathHTML() {
+    var h = '<div class="lhH">➕ Math Helper</div>';
+    h += '<div class="lhCard"><h4>➕ Addition table (0–10)</h4><div class="lhGridWrap"><table class="lhGrid"><tr><th>+</th>';
+    for (var c = 0; c <= 10; c++) h += '<th>' + c + '</th>';
+    h += '</tr>';
+    for (var r = 0; r <= 10; r++) { h += '<tr><th>' + r + '</th>'; for (var c2 = 0; c2 <= 10; c2++) h += '<td>' + (r + c2) + '</td>'; h += '</tr>'; }
+    h += '</table></div></div>';
+    h += '<div class="lhCard"><h4>✌️ Doubles (great to memorise)</h4><div class="lhFacts">';
+    for (var d = 1; d <= 10; d++) h += '<div class="lhFact">' + d + '+' + d + ' = <b>' + (d + d) + '</b></div>';
+    h += '</div></div>';
+    h += '<div class="lhCard"><h4>\U0001F522 Even &amp; Odd</h4>'
+       + '<div class="lhRow"><span class="k">Even</span><span class="v">ends in 0, 2, 4, 6, 8 — splits into two equal groups</span></div>'
+       + '<div class="lhRow"><span class="k">Odd</span><span class="v">ends in 1, 3, 5, 7, 9 — one is always left over</span></div></div>';
+    h += '<div class="lhCard"><h4>\U0001F3F7️ Place value</h4><div class="lhP">In <b>3 1 6</b>: the <b>6</b> is ones, the <b>1</b> is tens, the <b>3</b> is hundreds. So it means 300 + 10 + 6.</div></div>';
+    h += '<div class="lhCard"><h4>\U0001F355 Fractions</h4>'
+       + '<div class="lhRow"><span class="k">1/2</span><span class="v">one half — 2 equal pieces, take 1</span></div>'
+       + '<div class="lhRow"><span class="k">1/3</span><span class="v">one third — 3 equal pieces, take 1</span></div>'
+       + '<div class="lhRow"><span class="k">1/4</span><span class="v">one quarter — 4 equal pieces, take 1</span></div></div>';
+    h += '<div class="lhTip">\U0001F4A1 <b>Rounding:</b> if the next digit is 5 or more, round up; 4 or less, round down. 47 → 50, 43 → 40.</div>';
+    return h;
+  }
+
+  function clockSVG(hour) {
+    var cx = 32, cy = 32, ticks = '';
+    for (var i = 0; i < 12; i++) {
+      var a = (i * 30 - 90) * Math.PI / 180;
+      var x1 = cx + Math.cos(a) * 25, y1 = cy + Math.sin(a) * 25;
+      var x2 = cx + Math.cos(a) * 29, y2 = cy + Math.sin(a) * 29;
+      ticks += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="#8fb3c6" stroke-width="1.5"/>';
+    }
+    var ha = ((hour % 12) * 30 - 90) * Math.PI / 180;
+    var hx = cx + Math.cos(ha) * 15, hy = cy + Math.sin(ha) * 15;
+    return '<svg width="68" height="68" viewBox="0 0 64 64">'
+      + '<circle cx="32" cy="32" r="29" fill="#0c1923" stroke="#8fe0b0" stroke-width="2"/>' + ticks
+      + '<line x1="32" y1="32" x2="32" y2="9" stroke="#cfe0ec" stroke-width="2"/>'
+      + '<line x1="32" y1="32" x2="' + hx.toFixed(1) + '" y2="' + hy.toFixed(1) + '" stroke="#ffd23f" stroke-width="3.5"/>'
+      + '<circle cx="32" cy="32" r="3" fill="#ffd23f"/></svg>';
+  }
+
+  function realLifeHTML() {
+    var h = '<div class="lhH">\U0001F550 Real-Life Skills</div>';
+    h += '<div class="lhCard"><h4>\U0001F550 Telling time (o\'clock)</h4>'
+       + '<div class="lhP">The short <b style="color:#ffd23f">gold hand</b> points to the hour. The long hand pointing straight up at 12 means <b>o\'clock</b>.</div><div class="lhClock">';
+    [3, 6, 9, 12].forEach(function (hh) { h += '<div class="lhClockFace">' + clockSVG(hh) + hh + ":00</div>"; });
+    h += '</div></div>';
+    h += '<div class="lhCard"><h4>\U0001F4B0 Money (coins)</h4>'
+       + '<div class="lhRow"><span class="k">Penny</span><span class="v">1¢</span></div>'
+       + '<div class="lhRow"><span class="k">Nickel</span><span class="v">5¢</span></div>'
+       + '<div class="lhRow"><span class="k">Dime</span><span class="v">10¢</span></div>'
+       + '<div class="lhRow"><span class="k">Quarter</span><span class="v">25¢</span></div>'
+       + '<div class="lhTip">\U0001F4A1 4 quarters = 100¢ = $1.00.</div></div>';
+    h += '<div class="lhCard"><h4>\U0001F4C5 Days &amp; Months</h4>'
+       + '<div class="lhP"><b>7 days:</b> Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday.</div>'
+       + '<div class="lhP"><b>12 months:</b> Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec.</div>'
+       + '<div class="lhP">A year has <b>365 days</b>, <b>52 weeks</b>, and <b>4 seasons</b>.</div></div>';
+    h += '<div class="lhCard"><h4>\U0001F4CF Measuring</h4>'
+       + '<div class="lhRow"><span class="k">Length</span><span class="v">12 inches = 1 foot · 100 cm = 1 metre</span></div>'
+       + '<div class="lhRow"><span class="k">Weight</span><span class="v">1000 g = 1 kilogram</span></div>'
+       + '<div class="lhRow"><span class="k">Volume</span><span class="v">1000 ml = 1 litre</span></div></div>';
+    return h;
+  }
+
+  function wordsHTML() {
+    var h = '<div class="lhH">\U0001F524 Word Helper</div>';
+    h += '<div class="lhCard"><h4>\U0001F170️ Vowels</h4><div class="lhP">The vowels are <b>a, e, i, o, u</b> (and sometimes y). Every word needs at least one!</div></div>';
+    var opp = [['big', 'small'], ['hot', 'cold'], ['up', 'down'], ['fast', 'slow'], ['happy', 'sad'], ['day', 'night'], ['open', 'shut'], ['hard', 'soft']];
+    h += '<div class="lhCard"><h4>↔️ Opposites</h4><div class="lhFacts">';
+    opp.forEach(function (o) { h += '<div class="lhFact">' + o[0] + ' ↔ <b>' + o[1] + '</b></div>'; });
+    h += '</div></div>';
+    h += '<div class="lhCard"><h4>➕ Plurals (more than one)</h4>'
+       + '<div class="lhRow"><span class="k">Add -s</span><span class="v">cat → cats, dog → dogs</span></div>'
+       + '<div class="lhRow"><span class="k">Add -es</span><span class="v">box → boxes, bus → buses</span></div>'
+       + '<div class="lhRow"><span class="k">Tricky</span><span class="v">child → children, foot → feet, mouse → mice</span></div></div>';
+    h += '<div class="lhCard"><h4>⏪ Past tense (already happened)</h4>'
+       + '<div class="lhRow"><span class="k">Add -ed</span><span class="v">walk → walked, jump → jumped</span></div>'
+       + '<div class="lhRow"><span class="k">Tricky</span><span class="v">go → went, run → ran, eat → ate</span></div></div>';
+    h += '<div class="lhTip">\U0001F4A1 <b>Rhyming words</b> end with the same sound: cat, hat, bat, mat, sat.</div>';
+    return h;
+  }
+
+  function shapesHTML() {
+    var h = '<div class="lhH">\U0001F537 Shapes &amp; Colours</div>';
+    var shapes = [['Triangle', '3 sides \U0001F53A'], ['Square', '4 equal sides \U0001F7E6'], ['Rectangle', '4 sides (2 long, 2 short)'],
+                  ['Pentagon', '5 sides'], ['Hexagon', '6 sides'], ['Circle', 'round — 0 corners ⭕']];
+    h += '<div class="lhCard"><h4>\U0001F4D0 Shapes &amp; sides</h4>';
+    shapes.forEach(function (s) { h += '<div class="lhRow"><span class="k">' + s[0] + '</span><span class="v">' + s[1] + '</span></div>'; });
+    h += '</div>';
+    h += '<div class="lhCard"><h4>\U0001F3A8 Mixing colours</h4>'
+       + '<div class="lhRow"><span class="k">Red + Blue</span><span class="v">= Purple \U0001F49C</span></div>'
+       + '<div class="lhRow"><span class="k">Blue + Yellow</span><span class="v">= Green \U0001F49A</span></div>'
+       + '<div class="lhRow"><span class="k">Red + Yellow</span><span class="v">= Orange \U0001F9E1</span></div>'
+       + '<div class="lhTip">\U0001F4A1 Red, blue and yellow are the <b>primary colours</b> — mix them to make all the others.</div></div>';
+    return h;
+  }
+
+  var TABS = [
+    ['adv',   '\U0001F5FA️ Adventure', adventureHTML],
+    ['mul',   '✖️ Times Tables',  timesHTML],
+    ['math',  '➕ Math',                mathHTML],
+    ['real',  '\U0001F550 Real Life',       realLifeHTML],
+    ['word',  '\U0001F524 Words',           wordsHTML],
+    ['shape', '\U0001F537 Shapes',          shapesHTML]
+  ];
+
+  function wireTimes(root) {
+    var grid = root.querySelector('table.lhGrid'), eq = root.querySelector('#lhEq');
+    if (grid && eq) {
+      grid.addEventListener('click', function (e) {
+        var td = e.target.closest('td'); if (!td) return;
+        var r = +td.getAttribute('data-r'), c = +td.getAttribute('data-c');
+        grid.querySelectorAll('.hot, .lit').forEach(function (x) { x.classList.remove('hot', 'lit'); });
+        grid.querySelectorAll('[data-r="' + r + '"]').forEach(function (x) { x.classList.add('lit'); });
+        grid.querySelectorAll('[data-c="' + c + '"]').forEach(function (x) { x.classList.add('lit'); });
+        td.classList.remove('lit'); td.classList.add('hot');
+        eq.textContent = r + ' × ' + c + ' = ' + (r * c);
+      });
+    }
+    var pick = root.querySelector('#lhTimesPick'), out = root.querySelector('#lhTimesOut');
+    if (pick && out) {
+      pick.addEventListener('click', function (e) {
+        var b = e.target.closest('.lhPick'); if (!b) return;
+        var n = +b.getAttribute('data-n');
+        pick.querySelectorAll('.lhPick').forEach(function (x) { x.classList.toggle('on', x === b); });
+        var s = '';
+        for (var i = 1; i <= 12; i++) s += '<div class="lhFact">' + n + ' × ' + i + ' = <b>' + (n * i) + '</b></div>';
+        out.innerHTML = s;
+      });
+    }
+  }
+
+  function build() {
+    if (document.getElementById('pqLearn')) return;
+    var m = document.createElement('div'); m.id = 'pqLearn';
+    var tabsHTML = TABS.map(function (t, i) { return '<button class="lhTab' + (i === 0 ? ' on' : '') + '" data-tab="' + t[0] + '">' + t[1] + '</button>'; }).join('');
+    var secsHTML = TABS.map(function (t, i) { return '<div class="lhSec' + (i === 0 ? ' on' : '') + '" data-sec="' + t[0] + '">' + t[2]() + '</div>'; }).join('');
+    m.innerHTML = '<div id="pqLearnCard"><div id="pqLearnHead"><span>\U0001F4DA Learn Hub</span>'
+      + '<button id="pqLearnClose" title="Close">✕</button></div>'
+      + '<div class="lhTabs">' + tabsHTML + '</div>'
+      + '<div id="pqLearnBody">' + secsHTML + '</div></div>';
+    document.body.appendChild(m);
+    m.addEventListener('click', function (e) { if (e.target === m) hide(); });
+    document.getElementById('pqLearnClose').addEventListener('click', hide);
+    m.querySelector('.lhTabs').addEventListener('click', function (e) {
+      var b = e.target.closest('.lhTab'); if (!b) return;
+      var id = b.getAttribute('data-tab');
+      m.querySelectorAll('.lhTab').forEach(function (x) { x.classList.toggle('on', x === b); });
+      m.querySelectorAll('.lhSec').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-sec') === id); });
+      var body = document.getElementById('pqLearnBody'); if (body) body.scrollTop = 0;
+    });
+    wireTimes(m);
+    var host = document.getElementById('menu_body');
+    if (host) {
+      var card = document.createElement('section'); card.className = 'card';
+      card.innerHTML = '<h3>Learn Hub <small>(walkthrough &amp; learning sheets)</small></h3>'
+        + '<button id="pqLearnOpen" class="lhOpenBtn">\U0001F4DA Open Learn Hub</button>';
+      host.insertBefore(card, host.firstChild);
+      document.getElementById('pqLearnOpen').addEventListener('click', show);
+    }
+  }
+  function show() { var mm = document.getElementById('menu'); if (mm) mm.classList.remove('show'); document.getElementById('pqLearn').classList.add('show'); }
+  function hide() { var r = document.getElementById('pqLearn'); if (r) r.classList.remove('show'); }
+  if (document.readyState !== 'loading') build(); else document.addEventListener('DOMContentLoaded', build);
+  window.__learnhub = { show: show, hide: hide };
+})();
+"""
+
+
 # High-quality read-aloud. Speaks the quiz QUESTION and ANSWER CHOICES decoded
 # straight from the game's RAM (the real on-screen text), using the best natural
 # voice the device offers (male/female selectable). It sanitizes first -- math
@@ -1703,6 +2034,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -1724,6 +2056,7 @@ def main():
         FS_JS,
         VISUAL_JS,
         PROGRESS_JS,
+        LEARNHUB_JS,
         READALOUD_JS,
         PICKER_JS,
     )
