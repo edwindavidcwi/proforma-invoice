@@ -181,6 +181,32 @@ wSerialPartyMonsPatchList:: ds 200
 
 ; list of indexes to patch with SERIAL_NO_DATA_BYTE after transfer
 wSerialEnemyMonsPatchList:: ds 200
+
+NEXTU
+; Quiz Battle scratch: the chosen question (entry + its strings) is copied here
+; from its ROM bank before display. It shares the transient screen / link-only
+; buffers above, which are all idle while a quiz is on screen: the quiz saves the
+; real screen to Buffer2 (not this Buffer1), draws from wTileMap, and copies its
+; data fresh for every question. This must NOT live on wBoxData -- that is the
+; LIVE current PC box, and clobbering it crashed "SOMEONE's PC" and could corrupt
+; a save. 190 bytes, well under this union's size, so no extra WRAM is used.
+wQuizEntry:: ds 18
+wQuizQStr:: ds 20
+wQuizA0:: ds 20
+wQuizA1:: ds 20
+wQuizA2:: ds 20
+wQuizA3:: ds 20
+wQuizA4:: ds 20
+wQuizA5:: ds 20
+wQuizHStr:: ds 20
+; Spaced-repetition ring of recently-missed questions (gradeIdx, index).
+; Selection validates each entry (grade < 5, index < count) so stale data here is
+; harmless.
+wQuizReviewRing:: ds 8  ; 4 entries x (gradeIdx, index)
+wQuizReviewHead:: db    ; next write slot (masked to 0-3 on use)
+wQuizReviewFilled:: db  ; valid slot count (validated on use)
+wQuizClock:: db         ; 0 = normal question; 1-12 = draw an analog clock at that o'clock hour
+wQuizFocusCache:: db    ; cached copy of sQuizFocus (parent grade/subject focus), read once per question
 ENDU
 
 
@@ -2227,7 +2253,6 @@ SECTION "Current Box Data", WRAM0
 
 wBoxDataStart::
 
-UNION
 wBoxCount:: db
 wBoxSpecies:: ds MONS_PER_BOX + 1
 
@@ -2251,29 +2276,6 @@ ENDR
 wBoxMonNicksEnd::
 
 wBoxDataEnd::
-
-NEXTU
-; Quiz Battle scratch: the chosen question (entry + its strings) is copied here
-; from its ROM bank before display. This overlays the PC box, which is never
-; touched during a battle, so no extra WRAM is needed.
-wQuizEntry:: ds 18
-wQuizQStr:: ds 20
-wQuizA0:: ds 20
-wQuizA1:: ds 20
-wQuizA2:: ds 20
-wQuizA3:: ds 20
-wQuizA4:: ds 20
-wQuizA5:: ds 20
-wQuizHStr:: ds 20
-; Spaced-repetition ring of recently-missed questions (gradeIdx, index). Overlays
-; the idle PC box; selection validates each entry (grade < 5, index < count) so
-; stale/box data here is harmless.
-wQuizReviewRing:: ds 8  ; 4 entries x (gradeIdx, index)
-wQuizReviewHead:: db    ; next write slot (masked to 0-3 on use)
-wQuizReviewFilled:: db  ; valid slot count (validated on use)
-wQuizClock:: db         ; 0 = normal question; 1-12 = draw an analog clock at that o'clock hour
-wQuizFocusCache:: db    ; cached copy of sQuizFocus (parent grade/subject focus), read once per question
-ENDU
 
 
 SECTION "Quiz Battle RAM", WRAMX

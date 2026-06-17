@@ -1346,8 +1346,8 @@ PROGRESS_JS = r"""
     return ({ 0xe6: '?', 0xe7: '!', 0xe8: '.' })[b] || '';
   }
   function popcount(x) { var n = 0; while (x) { n += x & 1; x >>= 1; } return n; }
-  function readQ(rd) { var s = ''; for (var i = 0; i < 18; i++) { var b = rd(0xda92 + i); if (b === 0x50) break; s += dec(b); } return s.trim(); } // wQuizQStr
-  function readAns(rd) { var s = ''; for (var i = 0; i < 16; i++) { var b = rd(0xdaa6 + i); if (b === 0x50) break; s += dec(b); } return s.trim(); } // wQuizA0 = correct answer
+  function readQ(rd) { var s = ''; for (var i = 0; i < 18; i++) { var b = rd(0xc51a + i); if (b === 0x50) break; s += dec(b); } return s.trim(); } // wQuizQStr
+  function readAns(rd) { var s = ''; for (var i = 0; i < 16; i++) { var b = rd(0xc52e + i); if (b === 0x50) break; s += dec(b); } return s.trim(); } // wQuizA0 = correct answer
   function record(subj, grade, q, ok, ans) {
     st.subj[subj] = st.subj[subj] || { c: 0, w: 0 };
     st.grade[grade] = st.grade[grade] || { c: 0, w: 0 };
@@ -1757,7 +1757,7 @@ READALOUD_JS = r"""
 (function () {
   var synth = window.speechSynthesis || null;
   // RAM addresses (pokered.sym): the quiz strings + state the engine writes.
-  var A_Q = 0xda92, A_ANS0 = 0xdaa6, A_STRIDE = 0x14;
+  var A_Q = 0xc51a, A_ANS0 = 0xc52e, A_STRIDE = 0x14;
   var A_NUM = 0xdee7, A_ROT = 0xdeea, A_INBATTLE = 0xd057;
 
   // Reverse Game Boy charmap (tile code -> character) for the chars quiz text uses.

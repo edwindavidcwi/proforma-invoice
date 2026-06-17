@@ -39,7 +39,7 @@ function enc(s) {
 const RAM = {};
 function writeStr(addr, s) { enc(s).forEach((b, i) => { RAM[addr + i] = b; }); }
 function writeByte(addr, v) { RAM[addr] = v & 0xff; }
-const A_Q = 0xda92, A_ANS0 = 0xdaa6, A_STRIDE = 0x14, A_NUM = 0xdee7, A_ROT = 0xdeea, A_INBATTLE = 0xd057;
+const A_Q = 0xc51a, A_ANS0 = 0xc52e, A_STRIDE = 0x14, A_NUM = 0xdee7, A_ROT = 0xdeea, A_INBATTLE = 0xd057;
 
 // Extract READALOUD_JS from build_player.py and run it in a stubbed browser.
 const py = fs.readFileSync(path.join(__dirname, "build_player.py"), "utf8");
