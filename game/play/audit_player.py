@@ -79,6 +79,14 @@ else:
               a is not None and not inside,
               f"at {a:#06x}" if a is not None else "missing from sym")
 
+print("\n-- no broken emoji escapes --")
+# Emoji written as Python \U........ escapes inside the JS RAW strings leak into
+# the page as literal text ("U0001F4DA") instead of the emoji (this broke the
+# Learn Hub). Real emoji characters must be used in the JS instead.
+leaked = re.findall(r"\\U[0-9A-Fa-f]{8}", src)
+check("no \\U-style emoji escapes in the player (use real emoji characters)",
+      not leaked, f"{len(leaked)} found, e.g. {leaked[0]}" if leaked else "")
+
 print("\n-- MBC safety: no live writes to cartridge control registers ($0000-$7FFF) --")
 bad = []
 for m in re.finditer(r"_emulator_write_mem\(\s*\w+\s*,\s*(0x[0-9a-fA-F]+)", src):

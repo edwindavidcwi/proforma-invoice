@@ -381,8 +381,8 @@ body { display: flex; flex-direction: column; }
 #pqLearnHead span { margin-right: auto; text-shadow: 0 1px 2px rgba(0,0,0,.18); }
 #pqLearnHead button { background: rgba(255,255,255,.25); border: 0; color: #fff; width: 32px; height: 32px;
   border-radius: 10px; font-size: 17px; cursor: pointer; line-height: 1; }
-.lhTabs { display: flex; gap: 7px; padding: 11px 12px; overflow-x: auto; background: #f3eee2;
-  border-bottom: 1px solid #e7e0cf; -webkit-overflow-scrolling: touch; }
+.lhTabs { display: flex; flex-wrap: wrap; gap: 7px; padding: 11px 12px; background: #f3eee2;
+  border-bottom: 1px solid #e7e0cf; }
 .lhTab { flex: 0 0 auto; padding: 10px 15px; border: 0; border-radius: 999px; cursor: pointer;
   background: #fff; color: #6b5e44; font: 800 13.5px/1 inherit; white-space: nowrap;
   box-shadow: 0 2px 4px rgba(0,0,0,.08); transition: transform .08s; }
@@ -2479,34 +2479,34 @@ class Rewind {
 (function () {
   // ---------------- content data ----------------
   var GYMS = [
-    ['1 · Boulder', 'Brock',     'Rock',     'Grass \U0001F33F / Water \U0001F4A7'],
-    ['2 · Cascade', 'Misty',     'Water',    'Grass \U0001F33F / Electric ⚡'],
-    ['3 · Thunder', 'Lt. Surge', 'Electric', 'Ground \U0001F30B'],
-    ['4 · Rainbow', 'Erika',     'Grass',    'Fire \U0001F525 / Flying \U0001F985 / Bug \U0001F41B'],
-    ['5 · Soul',    'Koga',      'Poison',   'Psychic \U0001F52E / Ground \U0001F30B'],
-    ['6 · Marsh',   'Sabrina',   'Psychic',  'Bug \U0001F41B'],
-    ['7 · Volcano', 'Blaine',    'Fire',     'Water \U0001F4A7 / Rock \U0001FAA8'],
-    ['8 · Earth',   'Giovanni',  'Ground',   'Water \U0001F4A7 / Grass \U0001F33F / Ice \U0001F9CA']
+    ['1 · Boulder', 'Brock',     'Rock',     'Grass 🌿 / Water 💧'],
+    ['2 · Cascade', 'Misty',     'Water',    'Grass 🌿 / Electric ⚡'],
+    ['3 · Thunder', 'Lt. Surge', 'Electric', 'Ground 🌋'],
+    ['4 · Rainbow', 'Erika',     'Grass',    'Fire 🔥 / Flying 🦅 / Bug 🐛'],
+    ['5 · Soul',    'Koga',      'Poison',   'Psychic 🔮 / Ground 🌋'],
+    ['6 · Marsh',   'Sabrina',   'Psychic',  'Bug 🐛'],
+    ['7 · Volcano', 'Blaine',    'Fire',     'Water 💧 / Rock 🪨'],
+    ['8 · Earth',   'Giovanni',  'Ground',   'Water 💧 / Grass 🌿 / Ice 🧊']
   ];
   var TYPES = [
-    ['\U0001F4A7 Water',    'beats Fire \U0001F525, Rock \U0001FAA8, Ground \U0001F30B'],
-    ['\U0001F525 Fire',     'beats Grass \U0001F33F, Bug \U0001F41B, Ice \U0001F9CA'],
-    ['\U0001F33F Grass',    'beats Water \U0001F4A7, Rock \U0001FAA8, Ground \U0001F30B'],
-    ['⚡ Electric', 'beats Water \U0001F4A7, Flying \U0001F985 (can\'t hit Ground)'],
-    ['\U0001F30B Ground',   'beats Fire \U0001F525, Electric ⚡, Rock \U0001FAA8, Poison ☠️'],
-    ['\U0001F52E Psychic',  'beats Fighting \U0001F94A, Poison ☠️'],
-    ['\U0001F41B Bug',      'beats Grass \U0001F33F, Psychic \U0001F52E'],
-    ['\U0001F9CA Ice',      'beats Grass \U0001F33F, Ground \U0001F30B, Flying \U0001F985, Dragon \U0001F409']
+    ['💧 Water',    'beats Fire 🔥, Rock 🪨, Ground 🌋'],
+    ['🔥 Fire',     'beats Grass 🌿, Bug 🐛, Ice 🧊'],
+    ['🌿 Grass',    'beats Water 💧, Rock 🪨, Ground 🌋'],
+    ['⚡ Electric', 'beats Water 💧, Flying 🦅 (can\'t hit Ground)'],
+    ['🌋 Ground',   'beats Fire 🔥, Electric ⚡, Rock 🪨, Poison ☠️'],
+    ['🔮 Psychic',  'beats Fighting 🥊, Poison ☠️'],
+    ['🐛 Bug',      'beats Grass 🌿, Psychic 🔮'],
+    ['🧊 Ice',      'beats Grass 🌿, Ground 🌋, Flying 🦅, Dragon 🐉']
   ];
   var HMS = [
     ['Cut ✂️',      'chops small trees',  'the SS Anne captain (Vermilion City)'],
-    ['Fly \U0001F985',        'jump to any town',   'a house on Route 16 (west of Celadon)'],
-    ['Surf \U0001F30A',       'ride across water',  'a secret house in the Safari Zone'],
-    ['Strength \U0001F4AA',   'push big boulders',  'the Fuchsia Warden (bring the Gold Teeth)'],
-    ['Flash \U0001F526',      'light up dark caves','Oak\'s Aide on Route 2 (catch ~10 first)']
+    ['Fly 🦅',        'jump to any town',   'a house on Route 16 (west of Celadon)'],
+    ['Surf 🌊',       'ride across water',  'a secret house in the Safari Zone'],
+    ['Strength 💪',   'push big boulders',  'the Fuchsia Warden (bring the Gold Teeth)'],
+    ['Flash 🔦',      'light up dark caves','Oak\'s Aide on Route 2 (catch ~10 first)']
   ];
   var JOURNEY = [
-    'Start in <b>Pallet Town</b>. Pick your first Pokémon from Professor Oak — \U0001F33F Bulbasaur is the easiest start.',
+    'Start in <b>Pallet Town</b>. Pick your first Pokémon from Professor Oak — 🌿 Bulbasaur is the easiest start.',
     'Go up <b>Route 1</b> to <b>Viridian City</b>. Deliver Oak\'s Parcel for the Pokédex; buy Poké Balls &amp; Potions.',
     'Through <b>Viridian Forest</b> to <b>Pewter City</b> &rarr; beat <b>Brock</b> (Gym 1). Use Grass or Water.',
     'Cross <b>Mt. Moon</b> to <b>Cerulean City</b> &rarr; beat <b>Misty</b> (Gym 2). Use Grass or Electric.',
@@ -2517,32 +2517,32 @@ class Rewind {
     'Give the Saffron guard a drink, clear <b>Silph Co.</b>, then beat <b>Sabrina</b> (Gym 6). Use Bug.',
     'Surf to <b>Cinnabar Island</b>, find the <b>Secret Key</b> in the Mansion &rarr; beat <b>Blaine</b> (Gym 7). Use Water.',
     'Return to <b>Viridian City</b> &rarr; beat <b>Giovanni</b> (Gym 8). Use Water/Grass/Ice.',
-    'Climb <b>Victory Road</b> (push boulders with Strength) &rarr; beat the <b>Elite Four</b> and your <b>Rival</b> &rarr; become <b>Champion</b>! \U0001F3C6'
+    'Climb <b>Victory Road</b> (push boulders with Strength) &rarr; beat the <b>Elite Four</b> and your <b>Rival</b> &rarr; become <b>Champion</b>! 🏆'
   ];
 
   // ---------------- tab builders ----------------
   function adventureHTML() {
-    var h = '<div class="lhH">\U0001F5FA️ Your Quest</div>'
+    var h = '<div class="lhH">🗺️ Your Quest</div>'
           + '<div class="lhP">Travel the land, earn <b>8 gym badges</b>, and become the <b>Champion</b>! Here is exactly where to go:</div>';
     JOURNEY.forEach(function (s, i) { h += '<div class="lhStep"><span class="lhNum">' + (i + 1) + '</span><span>' + s + '</span></div>'; });
-    h += '<div class="lhCard"><h4>\U0001F3C5 The 8 Gyms — how to beat each</h4><table class="lhTable">'
+    h += '<div class="lhCard"><h4>🏅 The 8 Gyms — how to beat each</h4><table class="lhTable">'
        + '<tr><th>Badge</th><th>Leader</th><th>Uses</th><th>Beat with</th></tr>';
     GYMS.forEach(function (g) { h += '<tr><td>' + g[0] + '</td><td>' + g[1] + '</td><td>' + g[2] + '</td><td class="lhWin">' + g[3] + '</td></tr>'; });
     h += '</table></div>';
     h += '<div class="lhCard"><h4>⚔️ Type tips (what beats what)</h4>';
     TYPES.forEach(function (t) { h += '<div class="lhRow"><span class="k">' + t[0] + '</span><span class="v">' + t[1] + '</span></div>'; });
-    h += '<div class="lhTip">\U0001F4A1 Easy rule: <b>Water</b> beats Fire, <b>Fire</b> beats Grass, <b>Grass</b> beats Water. Keep one of each on your team!</div></div>';
-    h += '<div class="lhCard"><h4>\U0001F31F Special moves (HMs) &amp; where to find them</h4>';
+    h += '<div class="lhTip">💡 Easy rule: <b>Water</b> beats Fire, <b>Fire</b> beats Grass, <b>Grass</b> beats Water. Keep one of each on your team!</div></div>';
+    h += '<div class="lhCard"><h4>🌟 Special moves (HMs) &amp; where to find them</h4>';
     HMS.forEach(function (x) { h += '<div class="lhRow"><span class="k">' + x[0] + '</span><span class="v">' + x[1] + ' — <i>' + x[2] + '</i></span></div>'; });
     h += '</div>';
-    h += '<div class="lhTip">\U0001F4BE <b>Save often:</b> press Start &rarr; SAVE. You never truly lose — if your team faints you wake up safe at the last town with full health.</div>';
+    h += '<div class="lhTip">💾 <b>Save often:</b> press Start &rarr; SAVE. You never truly lose — if your team faints you wake up safe at the last town with full health.</div>';
     return h;
   }
 
   function timesHTML() {
     var h = '<div class="lhH">✖️ Times Tables (1–12)</div>'
           + '<div class="lhP">Tap any square to see the answer. The gold row and column show the two numbers you multiply.</div>'
-          + '<div class="lhEq" id="lhEq">Tap a square below \U0001F447</div>'
+          + '<div class="lhEq" id="lhEq">Tap a square below 👇</div>'
           + '<div class="lhGridWrap"><table class="lhGrid"><tr><th>×</th>';
     for (var c = 1; c <= 12; c++) h += '<th data-c="' + c + '">' + c + '</th>';
     h += '</tr>';
@@ -2568,15 +2568,15 @@ class Rewind {
     h += '<div class="lhCard"><h4>✌️ Doubles (great to memorise)</h4><div class="lhFacts">';
     for (var d = 1; d <= 10; d++) h += '<div class="lhFact">' + d + '+' + d + ' = <b>' + (d + d) + '</b></div>';
     h += '</div></div>';
-    h += '<div class="lhCard"><h4>\U0001F522 Even &amp; Odd</h4>'
+    h += '<div class="lhCard"><h4>🔢 Even &amp; Odd</h4>'
        + '<div class="lhRow"><span class="k">Even</span><span class="v">ends in 0, 2, 4, 6, 8 — splits into two equal groups</span></div>'
        + '<div class="lhRow"><span class="k">Odd</span><span class="v">ends in 1, 3, 5, 7, 9 — one is always left over</span></div></div>';
-    h += '<div class="lhCard"><h4>\U0001F3F7️ Place value</h4><div class="lhP">In <b>3 1 6</b>: the <b>6</b> is ones, the <b>1</b> is tens, the <b>3</b> is hundreds. So it means 300 + 10 + 6.</div></div>';
-    h += '<div class="lhCard"><h4>\U0001F355 Fractions</h4>'
+    h += '<div class="lhCard"><h4>🏷️ Place value</h4><div class="lhP">In <b>3 1 6</b>: the <b>6</b> is ones, the <b>1</b> is tens, the <b>3</b> is hundreds. So it means 300 + 10 + 6.</div></div>';
+    h += '<div class="lhCard"><h4>🍕 Fractions</h4>'
        + '<div class="lhRow"><span class="k">1/2</span><span class="v">one half — 2 equal pieces, take 1</span></div>'
        + '<div class="lhRow"><span class="k">1/3</span><span class="v">one third — 3 equal pieces, take 1</span></div>'
        + '<div class="lhRow"><span class="k">1/4</span><span class="v">one quarter — 4 equal pieces, take 1</span></div></div>';
-    h += '<div class="lhTip">\U0001F4A1 <b>Rounding:</b> if the next digit is 5 or more, round up; 4 or less, round down. 47 → 50, 43 → 40.</div>';
+    h += '<div class="lhTip">💡 <b>Rounding:</b> if the next digit is 5 or more, round up; 4 or less, round down. 47 → 50, 43 → 40.</div>';
     return h;
   }
 
@@ -2600,22 +2600,22 @@ class Rewind {
   }
 
   function realLifeHTML() {
-    var h = '<div class="lhH">\U0001F550 Real-Life Skills</div>';
-    h += '<div class="lhCard"><h4>\U0001F550 Telling time (o\'clock)</h4>'
+    var h = '<div class="lhH">🕐 Real-Life Skills</div>';
+    h += '<div class="lhCard"><h4>🕐 Telling time (o\'clock)</h4>'
        + '<div class="lhP">The short <b style="color:#ffd23f">gold hand</b> points to the hour. The long hand pointing straight up at 12 means <b>o\'clock</b>.</div><div class="lhClock">';
     [3, 6, 9, 12].forEach(function (hh) { h += '<div class="lhClockFace">' + clockSVG(hh) + hh + ":00</div>"; });
     h += '</div></div>';
-    h += '<div class="lhCard"><h4>\U0001F4B0 Money (coins)</h4>'
+    h += '<div class="lhCard"><h4>💰 Money (coins)</h4>'
        + '<div class="lhRow"><span class="k">Penny</span><span class="v">1¢</span></div>'
        + '<div class="lhRow"><span class="k">Nickel</span><span class="v">5¢</span></div>'
        + '<div class="lhRow"><span class="k">Dime</span><span class="v">10¢</span></div>'
        + '<div class="lhRow"><span class="k">Quarter</span><span class="v">25¢</span></div>'
-       + '<div class="lhTip">\U0001F4A1 4 quarters = 100¢ = $1.00.</div></div>';
-    h += '<div class="lhCard"><h4>\U0001F4C5 Days &amp; Months</h4>'
+       + '<div class="lhTip">💡 4 quarters = 100¢ = $1.00.</div></div>';
+    h += '<div class="lhCard"><h4>📅 Days &amp; Months</h4>'
        + '<div class="lhP"><b>7 days:</b> Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday.</div>'
        + '<div class="lhP"><b>12 months:</b> Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec.</div>'
        + '<div class="lhP">A year has <b>365 days</b>, <b>52 weeks</b>, and <b>4 seasons</b>.</div></div>';
-    h += '<div class="lhCard"><h4>\U0001F4CF Measuring</h4>'
+    h += '<div class="lhCard"><h4>📏 Measuring</h4>'
        + '<div class="lhRow"><span class="k">Length</span><span class="v">12 inches = 1 foot · 100 cm = 1 metre</span></div>'
        + '<div class="lhRow"><span class="k">Weight</span><span class="v">1000 g = 1 kilogram</span></div>'
        + '<div class="lhRow"><span class="k">Volume</span><span class="v">1000 ml = 1 litre</span></div></div>';
@@ -2623,8 +2623,8 @@ class Rewind {
   }
 
   function wordsHTML() {
-    var h = '<div class="lhH">\U0001F524 Word Helper</div>';
-    h += '<div class="lhCard"><h4>\U0001F170️ Vowels</h4><div class="lhP">The vowels are <b>a, e, i, o, u</b> (and sometimes y). Every word needs at least one!</div></div>';
+    var h = '<div class="lhH">🔤 Word Helper</div>';
+    h += '<div class="lhCard"><h4>🅰️ Vowels</h4><div class="lhP">The vowels are <b>a, e, i, o, u</b> (and sometimes y). Every word needs at least one!</div></div>';
     var opp = [['big', 'small'], ['hot', 'cold'], ['up', 'down'], ['fast', 'slow'], ['happy', 'sad'], ['day', 'night'], ['open', 'shut'], ['hard', 'soft']];
     h += '<div class="lhCard"><h4>↔️ Opposites</h4><div class="lhFacts">';
     opp.forEach(function (o) { h += '<div class="lhFact">' + o[0] + ' ↔ <b>' + o[1] + '</b></div>'; });
@@ -2636,32 +2636,32 @@ class Rewind {
     h += '<div class="lhCard"><h4>⏪ Past tense (already happened)</h4>'
        + '<div class="lhRow"><span class="k">Add -ed</span><span class="v">walk → walked, jump → jumped</span></div>'
        + '<div class="lhRow"><span class="k">Tricky</span><span class="v">go → went, run → ran, eat → ate</span></div></div>';
-    h += '<div class="lhTip">\U0001F4A1 <b>Rhyming words</b> end with the same sound: cat, hat, bat, mat, sat.</div>';
+    h += '<div class="lhTip">💡 <b>Rhyming words</b> end with the same sound: cat, hat, bat, mat, sat.</div>';
     return h;
   }
 
   function shapesHTML() {
-    var h = '<div class="lhH">\U0001F537 Shapes &amp; Colours</div>';
-    var shapes = [['Triangle', '3 sides \U0001F53A'], ['Square', '4 equal sides \U0001F7E6'], ['Rectangle', '4 sides (2 long, 2 short)'],
+    var h = '<div class="lhH">🔷 Shapes &amp; Colours</div>';
+    var shapes = [['Triangle', '3 sides 🔺'], ['Square', '4 equal sides 🟦'], ['Rectangle', '4 sides (2 long, 2 short)'],
                   ['Pentagon', '5 sides'], ['Hexagon', '6 sides'], ['Circle', 'round — 0 corners ⭕']];
-    h += '<div class="lhCard"><h4>\U0001F4D0 Shapes &amp; sides</h4>';
+    h += '<div class="lhCard"><h4>📐 Shapes &amp; sides</h4>';
     shapes.forEach(function (s) { h += '<div class="lhRow"><span class="k">' + s[0] + '</span><span class="v">' + s[1] + '</span></div>'; });
     h += '</div>';
-    h += '<div class="lhCard"><h4>\U0001F3A8 Mixing colours</h4>'
-       + '<div class="lhRow"><span class="k">Red + Blue</span><span class="v">= Purple \U0001F49C</span></div>'
-       + '<div class="lhRow"><span class="k">Blue + Yellow</span><span class="v">= Green \U0001F49A</span></div>'
-       + '<div class="lhRow"><span class="k">Red + Yellow</span><span class="v">= Orange \U0001F9E1</span></div>'
-       + '<div class="lhTip">\U0001F4A1 Red, blue and yellow are the <b>primary colours</b> — mix them to make all the others.</div></div>';
+    h += '<div class="lhCard"><h4>🎨 Mixing colours</h4>'
+       + '<div class="lhRow"><span class="k">Red + Blue</span><span class="v">= Purple 💜</span></div>'
+       + '<div class="lhRow"><span class="k">Blue + Yellow</span><span class="v">= Green 💚</span></div>'
+       + '<div class="lhRow"><span class="k">Red + Yellow</span><span class="v">= Orange 🧡</span></div>'
+       + '<div class="lhTip">💡 Red, blue and yellow are the <b>primary colours</b> — mix them to make all the others.</div></div>';
     return h;
   }
 
   var TABS = [
-    ['adv',   '\U0001F5FA️ Adventure', adventureHTML],
+    ['adv',   '🗺️ Adventure', adventureHTML],
     ['mul',   '✖️ Times Tables',  timesHTML],
     ['math',  '➕ Math',                mathHTML],
-    ['real',  '\U0001F550 Real Life',       realLifeHTML],
-    ['word',  '\U0001F524 Words',           wordsHTML],
-    ['shape', '\U0001F537 Shapes',          shapesHTML]
+    ['real',  '🕐 Real Life',       realLifeHTML],
+    ['word',  '🔤 Words',           wordsHTML],
+    ['shape', '🔷 Shapes',          shapesHTML]
   ];
 
   function wireTimes(root) {
@@ -2708,7 +2708,7 @@ class Rewind {
     var m = document.createElement('div'); m.id = 'pqLearn';
     var tabsHTML = TABS.map(function (t, i) { return '<button class="lhTab' + (i === 0 ? ' on' : '') + '" data-tab="' + t[0] + '">' + t[1] + '</button>'; }).join('');
     var secsHTML = TABS.map(function (t, i) { return '<div class="lhSec' + (i === 0 ? ' on' : '') + '" data-sec="' + t[0] + '">' + t[2]() + '</div>'; }).join('');
-    m.innerHTML = '<div id="pqLearnCard"><div id="pqLearnHead"><span>\U0001F4DA Learn Hub</span>'
+    m.innerHTML = '<div id="pqLearnCard"><div id="pqLearnHead"><span>📚 Learn Hub</span>'
       + '<button id="pqLearnClose" title="Close">✕</button></div>'
       + '<div class="lhTabs">' + tabsHTML + '</div>'
       + '<div id="pqLearnBody">' + secsHTML + '</div></div>';
@@ -2728,8 +2728,8 @@ class Rewind {
     var host = document.getElementById('menu_body');
     if (host) {
       var card = document.createElement('section'); card.className = 'card';
-      card.innerHTML = '<h3>\U0001F4DA Learn Hub <small>(walkthrough &amp; learning sheets)</small></h3>'
-        + '<button id="pqLearnOpen" class="lhOpenBtn">\U0001F4DA Open Learn Hub</button>';
+      card.innerHTML = '<h3>📚 Learn Hub <small>(walkthrough &amp; learning sheets)</small></h3>'
+        + '<button id="pqLearnOpen" class="lhOpenBtn">📚 Open Learn Hub</button>';
       host.insertBefore(card, host.firstChild);
       document.getElementById('pqLearnOpen').addEventListener('click', show);
     }
