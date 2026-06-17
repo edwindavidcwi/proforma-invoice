@@ -10,10 +10,14 @@ CableClubNPC::
 	call PrintText
 	jp .didNotConnect
 .receivedPokedex
-	ld a, $1
-	ld [wMenuJoypadPollCount], a
-	ld a, 90
-	ld [wLinkTimeoutCounter], a
+; Quiz Battle: this is a single-player educational build with no link partner,
+; and the real serial handshake can hang forever in an emulator (no cable, no
+; peer) -- which looked like a crash on the Pokemon Center's upper floor. Never
+; attempt to connect: give the friendly "bring a friend + cable" message and
+; return cleanly. (The link establishment code below is left intact but unused.)
+	ld hl, CableClubNPCAreaReservedFor2FriendsLinkedByCableText
+	call PrintText
+	jp .didNotConnect
 .establishConnectionLoop
 	ldh a, [hSerialConnectionStatus]
 	cp USING_INTERNAL_CLOCK

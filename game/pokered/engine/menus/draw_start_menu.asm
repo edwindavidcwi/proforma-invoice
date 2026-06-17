@@ -27,15 +27,15 @@ DrawStartMenu::
 	set BIT_NO_TEXT_DELAY, [hl]
 	hlcoord 12, 2
 	CheckEvent EVENT_GOT_POKEDEX
-; case for not having pokedex (one more item for STUDY)
-	ld a, $07
+; case for not having pokedex (7 items: POKEMON..STUDY..EXIT, max index 6)
+	ld a, $06
 	jr z, .storeMenuItemCount
-; case for having pokedex
+; case for having pokedex (8 items: POKEDEX..STUDY..EXIT, max index 7)
 	ld de, StartMenuPokedexText
 	call PrintStartMenuItem
-	ld a, $08
+	ld a, $07
 .storeMenuItemCount
-	ld [wMaxMenuItem], a ; number of menu items
+	ld [wMaxMenuItem], a ; highest selectable menu index
 	ld de, StartMenuPokemonText
 	call PrintStartMenuItem
 	ld de, StartMenuItemText

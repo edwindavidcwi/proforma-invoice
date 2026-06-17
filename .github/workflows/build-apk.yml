@@ -51,6 +51,7 @@ jobs:
           node test_review.js      ../pokered/pokered.gbc   # spaced-repetition review path (entry stride)
           node test_adaptive.js    ../pokered/pokered.gbc   # adaptive difficulty: grade nudges up/down
           node test_clock.js       ../pokered/pokered.gbc   # analog clock renders + hour-hand mapping
+          node test_startmenu.js   ../pokered/pokered.gbc   # start-menu item count (STUDY item; no off-by-one)
           node test_picker.js      ../pokered/pokered.gbc   # parent grade/subject focus picker (SRAM)
           node test_music.js       ../pokered/pokered.gbc   # context-aware music track selection
           node test_music_engine.js ../pokered/pokered.gbc  # hidden audio GB plays the real song per context
