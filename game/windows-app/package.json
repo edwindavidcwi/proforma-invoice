@@ -22,22 +22,19 @@
       "assets/**"
     ],
     "directories": {
-      "output": "dist"
+      "output": "dist",
+      "buildResources": "build"
     },
     "win": {
+      "icon": "build/icon.ico",
       "target": [
-        "nsis"
+        "portable"
       ]
     },
-    "nsis": {
-      "oneClick": true,
-      "perMachine": false,
-      "allowElevation": false,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "runAfterFinish": true,
-      "shortcutName": "Pokemon Quiz",
-      "artifactName": "PokemonQuiz-Windows-Setup.exe"
+    "portable": {
+      "artifactName": "PokemonQuiz-Windows.exe",
+      "requestExecutionLevel": "user",
+      "unicode": true
     }
   }
 }

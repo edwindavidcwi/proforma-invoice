@@ -121,21 +121,21 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Build the Windows installer (Electron + electron-builder NSIS)
+      - name: Build the portable Windows app (Electron + electron-builder)
         working-directory: game/windows-app
         run: |
           npm install
           npm run dist
 
-      - name: Collect the installer under a friendly name
+      - name: Collect the portable .exe under a friendly name
         shell: bash
         run: |
           mkdir -p win-out
-          # NSIS one-click installer; fall back to whatever single .exe got built.
-          if [ -f game/windows-app/dist/PokemonQuiz-Windows-Setup.exe ]; then
-            cp game/windows-app/dist/PokemonQuiz-Windows-Setup.exe "win-out/PokemonQuiz-Windows-Setup.exe"
+          # Portable single-file .exe (no install). Fall back to whatever single .exe got built.
+          if [ -f game/windows-app/dist/PokemonQuiz-Windows.exe ]; then
+            cp game/windows-app/dist/PokemonQuiz-Windows.exe "win-out/PokemonQuiz-Windows.exe"
           else
-            cp "$(ls game/windows-app/dist/*.exe | head -n1)" "win-out/PokemonQuiz-Windows-Setup.exe"
+            cp "$(ls game/windows-app/dist/*.exe | head -n1)" "win-out/PokemonQuiz-Windows.exe"
           fi
           ls -la win-out/
 
@@ -174,7 +174,7 @@ jobs:
           gh release delete pokemon-quiz-app --yes --cleanup-tag 2>/dev/null || true
           gh release create pokemon-quiz-app \
             dl/PokemonQuiz.apk \
-            dl/PokemonQuiz-Windows-Setup.exe \
+            dl/PokemonQuiz-Windows.exe \
             --title "Pokemon Quiz - Android & Windows apps" \
-            --notes $'Offline Pokemon Quiz game.\n\n- **Windows:** download **PokemonQuiz-Windows-Setup.exe** and run it once. It installs in seconds (no admin needed) and adds a desktop & Start-menu shortcut; after that the game opens quickly every time. (If SmartScreen warns, click *More info -> Run anyway* - it is unsigned.) To uninstall: Add or Remove Programs -> Pokemon Quiz.\n- **Android:** download **PokemonQuiz.apk**, open it on your phone, allow installing from this source.' \
+            --notes $'Offline Pokemon Quiz game.\n\n- **Windows:** download **PokemonQuiz-Windows.exe** and just double-click it to play - **no installation needed**. Keep the file wherever you like (Desktop, a USB stick...) and double-click it any time. Nothing is added to your PC. (If SmartScreen warns, click *More info -> Run anyway* - it is unsigned.)\n- **Android:** download **PokemonQuiz.apk**, open it on your phone, allow installing from this source.' \
             --target "$GITHUB_SHA"

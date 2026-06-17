@@ -4,15 +4,22 @@
 const { app, BrowserWindow, Menu, shell } = require('electron');
 const path = require('path');
 
+// One clean instance: if the game is already open, focus it instead of opening
+// a second window (matters for the portable .exe, which people may double-click twice).
+if (!app.requestSingleInstanceLock()) { app.quit(); }
+
 function createWindow() {
   const win = new BrowserWindow({
-    width: 1024,
-    height: 768,
+    width: 1100,
+    height: 760,
     minWidth: 480,
     minHeight: 432,
     title: 'Pokemon Quiz',
+    icon: path.join(__dirname, 'assets', 'icon.png'),
+    center: true,
+    show: false,                 // reveal only once painted -> no white flash
     autoHideMenuBar: true,
-    backgroundColor: '#000000',
+    backgroundColor: '#0b1f2a',  // matches the game's dark background while it loads
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false
@@ -23,6 +30,10 @@ function createWindow() {
   Menu.setApplicationMenu(null);
 
   win.loadFile(path.join(__dirname, 'assets', 'PokemonQuiz.html'));
+
+  // Show the window only once the page has painted, so the first thing the child
+  // sees is the game -- never a blank white rectangle.
+  win.once('ready-to-show', () => win.show());
 
   // Open any external links in the real browser rather than inside the app.
   win.webContents.setWindowOpenHandler(({ url }) => {
@@ -36,6 +47,12 @@ app.whenReady().then(() => {
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
   });
+});
+
+// Bring the existing window to the front if a second copy is launched.
+app.on('second-instance', () => {
+  const win = BrowserWindow.getAllWindows()[0];
+  if (win) { if (win.isMinimized()) win.restore(); win.focus(); }
 });
 
 app.on('window-all-closed', () => {
