@@ -453,6 +453,7 @@ class Emulator {
   rafCallback(startMs) {
     this.requestAnimationFrame();
     let deltaSec = 0;
+    try {
     if (!this.isRewinding) {
       const startSec = startMs / 1000;
       deltaSec = Math.max(startSec - (this.lastRafSec || startSec), 0);
@@ -477,9 +478,14 @@ class Emulator {
       this.leftoverTicks = (this.ticks - runUntilTicks) | 0;
       this.lastRafSec = startSec;
     }
+    } catch (e) {
+      // Never let one bad emulation frame freeze the game: the next frame is
+      // already scheduled (above), so we just log once and keep looping.
+      if (!this._frameErrLogged) { this._frameErrLogged = true; try { console.error('emulation frame error (continuing):', e); } catch (_) {} }
+    }
     const lerp = (from, to, alpha) => (alpha * from) + (1 - alpha) * to;
     this.fps = lerp(this.fps, Math.min(1 / deltaSec, 10000), 0.3);
-    this.video.renderTexture();
+    try { this.video.renderTexture(); } catch (e) {}
   }
 
   updateOnscreenGamepad() {

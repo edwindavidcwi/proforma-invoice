@@ -2009,10 +2009,27 @@ SAVEFLUSH_JS = r"""
 """
 
 
+# Last-resort safety net. The render loop already reschedules itself every frame
+# (so it self-heals), but this guarantees that NO stray script error or rejected
+# promise -- from any module, the emulator, or a browser quirk -- can ever bubble
+# up and leave the game frozen or blank for the child. Errors are swallowed and
+# logged; the game keeps running underneath.
+GUARD_JS = r"""
+(function () {
+  window.addEventListener('error', function (e) {
+    try { console.error('caught error (game keeps running):', (e && (e.error || e.message)) || e); } catch (x) {}
+  });
+  window.addEventListener('unhandledrejection', function (e) {
+    try { console.error('caught promise rejection (game keeps running):', e && e.reason); } catch (x) {}
+    if (e && e.preventDefault) e.preventDefault();
+  });
+})();
+"""
+
+
 def read_text(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
-
 
 def b64_of(path):
     with open(path, "rb") as f:
@@ -2083,6 +2100,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -2094,6 +2112,7 @@ def main():
         rom_b64,
         emu_js,
         wrap_js,
+        GUARD_JS,
         FILTER_JS,
         SPEED_JS,
         PWA_JS,
