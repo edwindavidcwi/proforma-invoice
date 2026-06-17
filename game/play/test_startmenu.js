@@ -1,13 +1,13 @@
 // Headless guard for the START MENU item count (DrawStartMenu in
 // engine/menus/draw_start_menu.asm + the wrap bounds in home/start_menu.asm).
 //
-// The mod adds a "STUDY" item to the start menu, so the menu has 8 items with
-// the Pokedex (POKEDEX..STUDY,EXIT) and 7 without. wMaxMenuItem is the HIGHEST
-// selectable index, so it must be itemCount-1 (7 with Pokedex, 6 without). A
-// half-finished edit once set it to 8/7 -- one too high -- which let the cursor
-// land on a phantom blank row and made EXIT unreachable. This test calls the
-// real DrawStartMenu and asserts the index is exactly right, both with and
-// without the Pokedex, so the off-by-one can never come back.
+// The start menu has the stock 7 items with the Pokedex (POKEDEX..OPTION,EXIT)
+// and 6 without. wMaxMenuItem is the HIGHEST selectable index, so it must be
+// itemCount-1 (6 with Pokedex, 5 without). (An earlier build added a "STUDY"
+// item and botched the count, which let the cursor land on a phantom blank row
+// and made EXIT unreachable; STUDY was removed and the menu restored to stock.)
+// This test calls the real DrawStartMenu and asserts the index is exactly right,
+// both with and without the Pokedex, so the count can never drift again.
 //
 // Run:  node test_startmenu.js [path/to/pokered.gbc]
 const fs = require("fs"), path = require("path");
@@ -71,13 +71,13 @@ const check = (name, cond, detail) => {
 
   drawAndReadMax(true); // warm-up: settle VRAM/menu state before measuring
 
-  // With the Pokedex: 8 items (POKEDEX..STUDY,EXIT) -> max index 7.
+  // With the Pokedex: 7 items (POKEDEX..OPTION,EXIT) -> max index 6.
   const withDex = drawAndReadMax(true);
-  check("with Pokedex: wMaxMenuItem == 7 (8 items, incl. STUDY)", withDex === 7, "got " + withDex);
+  check("with Pokedex: wMaxMenuItem == 6 (7 items)", withDex === 6, "got " + withDex);
 
-  // Without the Pokedex: 7 items -> max index 6.
+  // Without the Pokedex: 6 items -> max index 5.
   const noDex = drawAndReadMax(false);
-  check("without Pokedex: wMaxMenuItem == 6 (7 items, incl. STUDY)", noDex === 6, "got " + noDex);
+  check("without Pokedex: wMaxMenuItem == 5 (6 items)", noDex === 5, "got " + noDex);
 
   check("the two cases differ by exactly one item", withDex - noDex === 1, `withDex=${withDex} noDex=${noDex}`);
 
