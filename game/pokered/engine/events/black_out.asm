@@ -16,6 +16,12 @@ ResetStatusAndHalveMoneyOnBlackout::
 	call HasEnoughMoney
 	jr c, .lostmoney ; never happens
 
+	; Quiz Battle: do NOT halve the player's money on blackout. For a child,
+	; losing a battle should never feel like a punishment -- you keep your money
+	; (and HealParty below restores the team). All the state cleanup still runs;
+	; only the money penalty is skipped. (The halving code below is now unused.)
+	jr .lostmoney
+
 	; Halve the player's money.
 	ld a, [wPlayerMoney]
 	ldh [hMoney], a

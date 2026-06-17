@@ -1962,6 +1962,23 @@ PICKER_JS = r"""
 """
 
 
+# Save-on-close safety net. The vendored player flushes battery RAM (the in-game
+# save) to localStorage on a 1-second timer; if the child (or a parent) closes
+# the app within that second of pressing SAVE, the last save could be lost. This
+# force-flushes the save whenever the page is hidden or closing, so progress is
+# never lost on exit. (window.__vm.updateExtRam writes the current ext RAM now.)
+SAVEFLUSH_JS = r"""
+(function () {
+  function flush() {
+    try { if (window.__vm && window.__vm.updateExtRam) window.__vm.updateExtRam(); } catch (e) {}
+  }
+  window.addEventListener('pagehide', flush);
+  window.addEventListener('beforeunload', flush);
+  document.addEventListener('visibilitychange', function () { if (document.hidden) flush(); });
+})();
+"""
+
+
 def read_text(path):
     with open(path, "r", encoding="utf-8") as f:
         return f.read()
@@ -2035,6 +2052,7 @@ def main():
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
         '  <script>\n%s\n</script>\n'
+        '  <script>\n%s\n</script>\n'
         "</body>\n"
         "</html>\n"
     ) % (
@@ -2059,6 +2077,7 @@ def main():
         LEARNHUB_JS,
         READALOUD_JS,
         PICKER_JS,
+        SAVEFLUSH_JS,
     )
 
     with open(args.out, "w", encoding="utf-8") as f:
