@@ -1638,12 +1638,11 @@ LEARNHUB_JS = r"""
        + '<div class="lhP">The short <b style="color:#ffd23f">gold hand</b> points to the hour. The long hand pointing straight up at 12 means <b>o\'clock</b>.</div><div class="lhClock">';
     [3, 6, 9, 12].forEach(function (hh) { h += '<div class="lhClockFace">' + clockSVG(hh) + hh + ":00</div>"; });
     h += '</div></div>';
-    h += '<div class="lhCard"><h4>💰 Money (coins)</h4>'
-       + '<div class="lhRow"><span class="k">Penny</span><span class="v">1¢</span></div>'
-       + '<div class="lhRow"><span class="k">Nickel</span><span class="v">5¢</span></div>'
-       + '<div class="lhRow"><span class="k">Dime</span><span class="v">10¢</span></div>'
-       + '<div class="lhRow"><span class="k">Quarter</span><span class="v">25¢</span></div>'
-       + '<div class="lhTip">💡 4 quarters = 100¢ = $1.00.</div></div>';
+    h += '<div class="lhCard"><h4>💰 Money (Indian Rupees ₹)</h4>'
+       + '<div class="lhRow"><span class="k">Coins</span><span class="v">₹1, ₹2, ₹5, ₹10</span></div>'
+       + '<div class="lhRow"><span class="k">Notes</span><span class="v">₹10, ₹20, ₹50, ₹100, ₹200, ₹500</span></div>'
+       + '<div class="lhRow"><span class="k">Paise</span><span class="v">100 paise = ₹1</span></div>'
+       + '<div class="lhTip">💡 Two ₹5 coins make ₹10. Five ₹2 coins also make ₹10.</div></div>';
     h += '<div class="lhCard"><h4>📅 Days &amp; Months</h4>'
        + '<div class="lhP"><b>7 days:</b> Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday.</div>'
        + '<div class="lhP"><b>12 months:</b> Jan, Feb, Mar, Apr, May, Jun, Jul, Aug, Sep, Oct, Nov, Dec.</div>'

@@ -95,7 +95,7 @@ check("type tip Water beats Fire", /Water[\s\S]*beats Fire/.test(H));
 
 // real-life: clock faces drawn as SVG + money + calendar
 check("telling-time clock drawn as <svg>", H.indexOf("<svg") !== -1);
-check("money: quarter = 25 cents", H.indexOf("25¢") !== -1);
+check("money: Indian Rupees (paise)", H.indexOf("100 paise") !== -1 && H.indexOf("₹") !== -1);
 check("calendar: 12 months", H.indexOf("12 months") !== -1);
 
 // words + shapes

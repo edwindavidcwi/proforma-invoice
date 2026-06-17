@@ -154,18 +154,10 @@ QuizItemUse::
 ; back to ItemUseBall (the carry flag would not).
 QuizCapture::
 	call SaveScreenTilesToBuffer2
-	; required streak length, by grade (badge count / 2 + 1)
-	ld hl, wObtainedBadges
-	ld b, 1
-	call CountSetBits
-	ld a, [wNumSetBits]
-	srl a
-	inc a                          ; a = grade (1-5)
-	cp 3
-	ld a, 3                        ; grades 1-2 -> need 3
-	jr c, .gotNeed
-	ld a, 5                        ; grades 3-5 -> need 5
-.gotNeed
+	; Always a 5-question challenge: answer all 5 correctly (first try) and the
+	; wild Pokemon is caught 100%. (The questions still scale to the player's
+	; grade, so they are easier for younger players -- just always 5 of them.)
+	ld a, 5
 	ld [wQuizCapNeed], a
 	xor a
 	ld [wQuizCapCount], a
