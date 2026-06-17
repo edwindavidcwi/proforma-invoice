@@ -6779,6 +6779,7 @@ _InitBattleCommon:
 	call StartBattle
 	callfar EndOfBattle
 	callfar HealParty ; Quiz Battle: fully restore the party (HP/PP/status) after every battle
+	callfar RefreshCurBoxFromSRAM ; Quiz Battle: restore the PC box that the quiz scratch overlaid during battle
 	pop af
 	ld [wLetterPrintingDelayFlags], a
 	pop af

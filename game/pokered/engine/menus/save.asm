@@ -140,6 +140,29 @@ GoodCheckSum:
 	ld [rRAMG], a
 	ret
 
+RefreshCurBoxFromSRAM::
+; Quiz Battle: the battle quiz copies its question/answer strings into WRAM
+; scratch that overlays the current PC box (wBoxData) -- safe during a battle
+; (the box isn't used then) and it renders correctly there. Reload the current
+; box from its SRAM copy after every battle so "SOMEONE's PC" and saving always
+; see a valid box. No checksum on purpose: this must never pop the save-corrupt
+; prompt mid-game; a never-saved game just gets the initialised SRAM box.
+	ld a, RAMG_SRAM_ENABLE
+	ld [rRAMG], a
+	ld a, BMODE_ADVANCED
+	ld [rBMODE], a
+	ASSERT BANK("Save Data") == BMODE_ADVANCED
+	ld [rRAMB], a
+	ld hl, sCurBoxData
+	ld de, wBoxDataStart
+	ld bc, wBoxDataEnd - wBoxDataStart
+	call CopyData
+	ld a, BMODE_SIMPLE
+	ld [rBMODE], a
+	ASSERT RAMG_SRAM_DISABLE == BMODE_SIMPLE
+	ld [rRAMG], a
+	ret
+
 TryLoadSaveFileIgnoreChecksum: ; unreferenced
 ; don't update wSaveFileStatus upon success or failure
 ; don't display warning in case of failed checksum
