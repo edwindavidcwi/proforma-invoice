@@ -378,77 +378,90 @@ body { display: flex; flex-direction: column; }
    hint would just overlap the Select/Start buttons -- hide it there. */
 @media (pointer: coarse) { #hint { display: none; } }
 
-/* ---- Learn Hub (walkthrough + learning reference sheets) ---- */
-.lhOpenBtn { width: 100%; padding: 13px; border: 0; border-radius: 13px; cursor: pointer;
-  font: 700 14px/1 system-ui, sans-serif; color: #06281a; letter-spacing: .01em;
-  background: linear-gradient(180deg, #5be39a, #16a34a); box-shadow: 0 3px 0 #0c7a39;
+/* ---- Learn Hub (walkthrough + learning sheets) -- bright & kid-friendly ---- */
+.lhOpenBtn { width: 100%; padding: 14px; border: 0; border-radius: 14px; cursor: pointer;
+  font: 800 15px/1 "Segoe UI Rounded","SF Pro Rounded","Comic Sans MS",system-ui,sans-serif;
+  color: #3a2a00; letter-spacing: .01em;
+  background: linear-gradient(180deg, #ffe06a, #ffb938); box-shadow: 0 3px 0 #d4912a;
   display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform .08s; }
-.lhOpenBtn:active { transform: translateY(2px); box-shadow: 0 1px 0 #0c7a39; }
-#pqLearn { display: none; position: fixed; inset: 0; z-index: 62; padding: 12px;
-  background: rgba(2,10,15,.78); -webkit-backdrop-filter: blur(5px); backdrop-filter: blur(5px);
-  align-items: center; justify-content: center; }
+.lhOpenBtn:active { transform: translateY(2px); box-shadow: 0 1px 0 #d4912a; }
+#pqLearn { --lh:#6d28d9; --lh2:#9333ea;
+  display: none; position: fixed; inset: 0; z-index: 62; padding: 10px;
+  background: rgba(8,12,28,.72); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+  font-family: "Segoe UI Rounded","SF Pro Rounded","Comic Sans MS","Baloo 2",system-ui,sans-serif; }
 #pqLearn.show { display: flex; animation: pqFade .18s ease; }
-#pqLearnCard { width: min(96vw, 760px); max-height: 92vh; display: flex; flex-direction: column;
-  background: linear-gradient(180deg, #15293a, #0f1d28); color: #e4eef5; border-radius: 18px;
-  overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.6), inset 0 0 0 1px rgba(255,255,255,.05);
-  font-family: system-ui, "Segoe UI", sans-serif; }
-#pqLearnHead { display: flex; align-items: center; gap: 8px; padding: 14px 18px; font-weight: 800;
-  font-size: 17px; color: #04261a; background: linear-gradient(180deg, #6fe7a6, #1faa57); }
-#pqLearnHead span { margin-right: auto; }
-#pqLearnHead button { background: rgba(0,0,0,.16); border: 0; color: #04261a; width: 28px; height: 28px;
-  border-radius: 8px; font-size: 16px; cursor: pointer; line-height: 1; }
-.lhTabs { display: flex; gap: 6px; padding: 10px 12px; overflow-x: auto; background: #0c1923;
-  border-bottom: 1px solid #1b2c38; -webkit-overflow-scrolling: touch; }
-.lhTab { flex: 0 0 auto; padding: 9px 13px; border: 1px solid #213340; border-radius: 999px; cursor: pointer;
-  background: #112230; color: #aecadb; font: 600 13px/1 system-ui, sans-serif; white-space: nowrap; }
-.lhTab.on { background: linear-gradient(180deg, #5be39a, #16a34a); color: #06281a; border-color: transparent; }
-#pqLearnBody { padding: 16px 18px 22px; overflow-y: auto; }
+#pqLearnCard { width: min(96vw, 780px); max-height: 94vh; display: flex; flex-direction: column;
+  background: #fffdf8; color: #26303a; border-radius: 22px; overflow: hidden;
+  box-shadow: 0 30px 70px rgba(0,0,0,.55); }
+#pqLearnHead { display: flex; align-items: center; gap: 10px; padding: 15px 18px; font-weight: 800;
+  font-size: 19px; color: #fff; background: linear-gradient(135deg, var(--lh), var(--lh2)); }
+#pqLearnHead span { margin-right: auto; text-shadow: 0 1px 2px rgba(0,0,0,.18); }
+#pqLearnHead button { background: rgba(255,255,255,.25); border: 0; color: #fff; width: 32px; height: 32px;
+  border-radius: 10px; font-size: 17px; cursor: pointer; line-height: 1; }
+.lhTabs { display: flex; gap: 7px; padding: 11px 12px; overflow-x: auto; background: #f3eee2;
+  border-bottom: 1px solid #e7e0cf; -webkit-overflow-scrolling: touch; }
+.lhTab { flex: 0 0 auto; padding: 10px 15px; border: 0; border-radius: 999px; cursor: pointer;
+  background: #fff; color: #6b5e44; font: 800 13.5px/1 inherit; white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0,0,0,.08); transition: transform .08s; }
+.lhTab:active { transform: translateY(1px); }
+.lhTab.on { background: linear-gradient(180deg, var(--lh2), var(--lh)); color: #fff; box-shadow: 0 3px 8px rgba(0,0,0,.2); }
+#pqLearnBody { padding: 16px 18px 24px; overflow-y: auto; background: #fffdf8; }
 .lhSec { display: none; }
 .lhSec.on { display: block; animation: pqFade .15s ease; }
-.lhH { font-size: 19px; font-weight: 800; margin: 4px 0 8px; color: #eaf4fb; }
-.lhP { font-size: 14.5px; line-height: 1.6; color: #cfe0ec; margin: 6px 0; }
-.lhP b { color: #fff; }
-.lhCard { background: #0c1923; border: 1px solid #1b2c38; border-radius: 13px; padding: 12px 14px; margin: 10px 0; }
-.lhCard h4 { margin: 0 0 6px; font-size: 15px; color: #8fe0b0; }
-.lhStep { display: flex; gap: 10px; padding: 8px 0; border-bottom: 1px dashed #1b2c38; font-size: 14px; line-height: 1.5; color: #d3e3ef; }
+.lhH { font-size: 22px; font-weight: 800; margin: 2px 0 10px; color: var(--lh); }
+.lhP { font-size: 15px; line-height: 1.6; color: #3c4651; margin: 7px 0; }
+.lhP b { color: #1f2933; }
+.lhCard { background: #fff; border: 1px solid #ece6d8; border-left: 5px solid var(--lh);
+  border-radius: 14px; padding: 13px 15px; margin: 11px 0; box-shadow: 0 2px 8px rgba(0,0,0,.05); }
+.lhCard h4 { margin: 0 0 8px; font-size: 16px; color: var(--lh); }
+.lhStep { display: flex; gap: 11px; align-items: flex-start; padding: 9px 0; border-bottom: 1px dashed #ece2cf;
+  font-size: 15px; line-height: 1.5; color: #3c4651; }
 .lhStep:last-child { border-bottom: 0; }
-.lhStep b { color: #ffd23f; }
-.lhNum { flex: 0 0 24px; height: 24px; border-radius: 50%; background: #16a34a; color: #04261a;
-  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 12px; }
+.lhStep b { color: #b4690e; }
+.lhNum { flex: 0 0 26px; height: 26px; border-radius: 50%; color: #fff; font-weight: 800; font-size: 13px;
+  background: linear-gradient(180deg, var(--lh2), var(--lh)); box-shadow: 0 2px 4px rgba(0,0,0,.15);
+  display: flex; align-items: center; justify-content: center; }
 /* multiplication / addition grid */
-.lhGridWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 8px 0; }
-table.lhGrid { border-collapse: collapse; margin: 0 auto; font-variant-numeric: tabular-nums; }
-table.lhGrid th, table.lhGrid td { width: 38px; height: 34px; text-align: center; font-size: 14px;
-  border: 1px solid #1b2c38; color: #d3e3ef; }
-table.lhGrid th { background: #143042; color: #8fe0b0; font-weight: 800; }
-table.lhGrid td { cursor: pointer; background: #0c1923; transition: background .08s; }
-table.lhGrid td.hot { background: #16a34a; color: #04261a; font-weight: 800; }
-table.lhGrid td.lit { background: #1d3a2c; color: #bff0d0; }
-table.lhGrid th.lit { background: #1faa57; color: #04261a; }
-.lhEq { text-align: center; font-size: 20px; font-weight: 800; color: #ffd23f; min-height: 28px; margin: 4px 0 2px; }
-.lhTimesRow { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
-.lhPick { padding: 7px 12px; border-radius: 9px; border: 1px solid #213340; background: #112230; color: #cfe0ec; cursor: pointer; font: 700 13px/1 system-ui; }
-.lhPick.on { background: #16a34a; color: #04261a; border-color: transparent; }
-.lhFacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(86px, 1fr)); gap: 6px; margin-top: 8px; }
-.lhFact { background: #0e1f2b; border: 1px solid #1b2c38; border-radius: 9px; padding: 7px 4px; text-align: center; font-size: 14px; color: #d3e3ef; }
-.lhFact b { color: #8fe0b0; }
-/* coloured reference chips / rows */
+.lhGridWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; margin: 10px 0; padding: 5px;
+  border-radius: 14px; background: #faf6ec; }
+table.lhGrid { border-collapse: separate; border-spacing: 3px; margin: 0 auto; font-variant-numeric: tabular-nums; }
+table.lhGrid th, table.lhGrid td { width: 40px; height: 38px; text-align: center; font-size: 15px; border-radius: 8px; }
+table.lhGrid th { background: linear-gradient(180deg, var(--lh2), var(--lh)); color: #fff; font-weight: 800; }
+table.lhGrid td { cursor: pointer; background: #fff; color: #3c4651; font-weight: 600;
+  box-shadow: inset 0 0 0 1px #eee2cb; transition: transform .06s; }
+table.lhGrid td:active { transform: scale(.92); }
+table.lhGrid td.lit { background: #fff3cf; color: #7a4d00; }
+table.lhGrid th.lit { filter: brightness(1.15) saturate(1.2); }
+table.lhGrid td.hot { background: linear-gradient(180deg, #ffd23f, #f0a818); color: #3a2600; font-weight: 800;
+  box-shadow: 0 2px 6px rgba(240,168,24,.55); }
+.lhEq { text-align: center; font-size: 26px; font-weight: 800; color: var(--lh); min-height: 34px; margin: 6px 0 4px; }
+.lhTimesRow { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 8px; }
+.lhPick { padding: 9px 13px; border-radius: 11px; border: 0; background: #fff; color: #6b5e44; cursor: pointer;
+  font: 800 14px/1 inherit; box-shadow: 0 2px 4px rgba(0,0,0,.08); }
+.lhPick.on { background: linear-gradient(180deg, var(--lh2), var(--lh)); color: #fff; }
+.lhFacts { display: grid; grid-template-columns: repeat(auto-fit, minmax(92px, 1fr)); gap: 7px; margin-top: 10px; }
+.lhFact { background: #fff; border: 1px solid #ece6d8; border-radius: 11px; padding: 9px 5px; text-align: center;
+  font-size: 15px; color: #3c4651; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+.lhFact b { color: var(--lh); }
+/* coloured reference rows */
 .lhRows { margin: 8px 0; }
-.lhRow { display: flex; align-items: center; gap: 10px; padding: 8px 11px; border-radius: 10px; margin: 5px 0;
-  background: #0e1f2b; border: 1px solid #1b2c38; font-size: 14px; color: #d3e3ef; }
-.lhRow .k { flex: 0 0 auto; font-weight: 800; color: #ffd23f; min-width: 64px; }
+.lhRow { display: flex; align-items: center; gap: 11px; padding: 10px 13px; border-radius: 12px; margin: 6px 0;
+  background: #fff; border: 1px solid #ece6d8; font-size: 15px; color: #3c4651; box-shadow: 0 1px 3px rgba(0,0,0,.05); }
+.lhRow .k { flex: 0 0 auto; font-weight: 800; color: var(--lh); min-width: 72px; }
 .lhRow .v { flex: 1 1 auto; }
-.lhPill { display: inline-block; background: #16351f; color: #8fe0b0; border-radius: 999px; padding: 2px 9px; font-size: 13px; margin: 2px 3px 2px 0; }
-.lhWin { color: #6fe08a; font-weight: 700; }
-.lhClock { display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; margin: 8px 0; }
-.lhClockFace { text-align: center; font-size: 13px; color: #aecadb; }
-.lhClockFace svg { display: block; margin: 0 auto 3px; }
-.lhTip { background: linear-gradient(180deg, #143427, #0f2920); border: 1px solid #245a3e; border-left: 4px solid #43c06a;
-  border-radius: 11px; padding: 11px 14px; margin: 10px 0; font-size: 13.5px; line-height: 1.55; color: #d6eade; }
-.lhTip b { color: #fff; }
-.lhTable { width: 100%; border-collapse: collapse; font-size: 13.5px; margin: 6px 0; }
-.lhTable th, .lhTable td { text-align: left; padding: 7px 9px; border-bottom: 1px solid #1b2c38; vertical-align: top; }
-.lhTable th { color: #8fb3c6; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; }
+.lhPill { display: inline-block; background: #eef3ff; color: var(--lh); border-radius: 999px; padding: 2px 10px; font-size: 13px; margin: 2px 3px 2px 0; }
+.lhWin { color: #15803d; font-weight: 800; }
+.lhClock { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; margin: 10px 0; }
+.lhClockFace { text-align: center; font-size: 14px; font-weight: 700; color: #3c4651; }
+.lhClockFace svg { display: block; margin: 0 auto 4px; }
+.lhTip { background: linear-gradient(135deg, #fff6da, #ffeebc); border-left: 5px solid #f0a818;
+  border-radius: 12px; padding: 12px 15px; margin: 11px 0; font-size: 14.5px; line-height: 1.55; color: #5a4410; }
+.lhTip b { color: #3a2a00; }
+.lhTable { width: 100%; border-collapse: collapse; font-size: 14px; margin: 6px 0; }
+.lhTable th, .lhTable td { text-align: left; padding: 8px 10px; border-bottom: 1px solid #ece6d8; vertical-align: top; }
+.lhTable th { color: var(--lh); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+.lhTable tr:nth-child(even) td { background: #faf6ec; }
 .lhTable td:first-child, .lhTable td:nth-child(2) { font-weight: 700; white-space: nowrap; }
 
 /* ---- slide-up menu sheet ---- */
@@ -581,7 +594,7 @@ BODY_HTML = r"""
       <div id="menu_head"><span>&#9776; Menu</span><button id="btnMenuClose" title="Close">&#10005;</button></div>
       <div id="menu_body">
         <section class="card">
-          <h3>Fast-forward speed <small>(normal play is 2&times;; hold Space to boost &mdash; music stays at normal speed)</small></h3>
+          <h3>&#9193; Fast-forward speed <small>(normal play is 2&times;; hold Space to boost &mdash; music stays at normal speed)</small></h3>
           <span class="seg" title="Speed while holding Space">
             <button class="spd" data-spd="3">3&times;</button>
             <button class="spd on" data-spd="4">4&times;</button>
@@ -590,21 +603,21 @@ BODY_HTML = r"""
           </span>
         </section>
         <section class="card">
-          <h3>Save slots</h3>
+          <h3>&#128190; Save slots</h3>
           <div id="slots"></div>
         </section>
         <section class="card">
-          <h3>Display</h3>
+          <h3>&#128444; Display</h3>
           <button id="btnFilter" title="Cycle display filter (HD / Smooth / Crisp / LCD)">&#128444; HD</button>
         </section>
         <section class="card">
-          <h3>Audio</h3>
+          <h3>&#128266; Audio</h3>
           <div class="btnrow">
             <button id="btnSound" title="Music &amp; sound effects on or off">&#128266; Sound</button>
           </div>
         </section>
         <section class="card">
-          <h3>Read aloud <small>(speaks the question &amp; choices)</small></h3>
+          <h3>&#128483; Read aloud <small>(speaks the question &amp; choices)</small></h3>
           <div class="btnrow">
             <button id="btnRead" title="Read the question and answer choices out loud">&#128483; Read aloud</button>
             <button id="btnVoice" title="Switch the speaking voice">&#127908; Voice</button>
@@ -612,7 +625,7 @@ BODY_HTML = r"""
           </div>
         </section>
         <section class="card">
-          <h3>Focus <small>(practice a level/subject; Auto follows badges)</small></h3>
+          <h3>&#127919; Focus <small>(practice a level/subject; Auto follows badges)</small></h3>
           <div class="btnrow">
             <select id="pickGrade" class="pick" title="Force a grade level">
               <option value="0">Level: Auto</option>
@@ -634,7 +647,7 @@ BODY_HTML = r"""
           </div>
         </section>
         <section class="card">
-          <h3>System</h3>
+          <h3>&#9881; System</h3>
           <div class="btnrow">
             <button id="btnFull" title="Make the game fill the screen">&#9974; Big screen</button>
             <button id="btnOpen" title="Open a different .gb / .gbc ROM">&#128193; Open ROM</button>
@@ -1474,7 +1487,7 @@ PROGRESS_JS = r"""
     var host = document.getElementById('menu_body') || document.getElementById('toolbar');
     if (host) {
       var card = document.createElement('section'); card.className = 'card';
-      card.innerHTML = '<h3>Progress</h3><button id="pqReportOpen" class="pqOpenBtn">&#128202; Report Card</button>';
+      card.innerHTML = '<h3>&#128202; Progress</h3><button id="pqReportOpen" class="pqOpenBtn">&#128202; Report Card</button>';
       host.insertBefore(card, host.firstChild);
       document.getElementById('pqReportOpen').addEventListener('click', show);
     }
@@ -1606,15 +1619,17 @@ LEARNHUB_JS = r"""
       var a = (i * 30 - 90) * Math.PI / 180;
       var x1 = cx + Math.cos(a) * 25, y1 = cy + Math.sin(a) * 25;
       var x2 = cx + Math.cos(a) * 29, y2 = cy + Math.sin(a) * 29;
-      ticks += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="#8fb3c6" stroke-width="1.5"/>';
+      ticks += '<line x1="' + x1.toFixed(1) + '" y1="' + y1.toFixed(1) + '" x2="' + x2.toFixed(1) + '" y2="' + y2.toFixed(1) + '" stroke="#9aa7b4" stroke-width="1.5"/>';
     }
     var ha = ((hour % 12) * 30 - 90) * Math.PI / 180;
     var hx = cx + Math.cos(ha) * 15, hy = cy + Math.sin(ha) * 15;
-    return '<svg width="68" height="68" viewBox="0 0 64 64">'
-      + '<circle cx="32" cy="32" r="29" fill="#0c1923" stroke="#8fe0b0" stroke-width="2"/>' + ticks
-      + '<line x1="32" y1="32" x2="32" y2="9" stroke="#cfe0ec" stroke-width="2"/>'
-      + '<line x1="32" y1="32" x2="' + hx.toFixed(1) + '" y2="' + hy.toFixed(1) + '" stroke="#ffd23f" stroke-width="3.5"/>'
-      + '<circle cx="32" cy="32" r="3" fill="#ffd23f"/></svg>';
+    // light face so it reads on the bright Learn Hub: white dial, dark minute
+    // hand, bold red hour hand.
+    return '<svg width="72" height="72" viewBox="0 0 64 64">'
+      + '<circle cx="32" cy="32" r="29" fill="#ffffff" stroke="#1f2933" stroke-width="2.5"/>' + ticks
+      + '<line x1="32" y1="32" x2="32" y2="9" stroke="#334155" stroke-width="2" stroke-linecap="round"/>'
+      + '<line x1="32" y1="32" x2="' + hx.toFixed(1) + '" y2="' + hy.toFixed(1) + '" stroke="#e11d48" stroke-width="4" stroke-linecap="round"/>'
+      + '<circle cx="32" cy="32" r="3" fill="#e11d48"/></svg>';
   }
 
   function realLifeHTML() {
@@ -1708,6 +1723,19 @@ LEARNHUB_JS = r"""
     }
   }
 
+  // Each subject gets its own colour, so the whole panel (header, tabs, accents)
+  // re-themes as the child moves between tabs -- friendlier and easier to tell apart.
+  var LH_COLORS = {
+    adv:   ['#4f46e5', '#6366f1'], mul:  ['#ea580c', '#f97316'],
+    math:  ['#2563eb', '#3b82f6'], real: ['#0d9488', '#14b8a6'],
+    word:  ['#7c3aed', '#9333ea'], shape:['#db2777', '#ec4899']
+  };
+  function setAccent(id) {
+    var c = LH_COLORS[id] || ['#6d28d9', '#9333ea'];
+    var el = document.getElementById('pqLearn');
+    if (el) { el.style.setProperty('--lh', c[0]); el.style.setProperty('--lh2', c[1]); }
+  }
+
   function build() {
     if (document.getElementById('pqLearn')) return;
     var m = document.createElement('div'); m.id = 'pqLearn';
@@ -1718,6 +1746,7 @@ LEARNHUB_JS = r"""
       + '<div class="lhTabs">' + tabsHTML + '</div>'
       + '<div id="pqLearnBody">' + secsHTML + '</div></div>';
     document.body.appendChild(m);
+    setAccent(TABS[0][0]);
     m.addEventListener('click', function (e) { if (e.target === m) hide(); });
     document.getElementById('pqLearnClose').addEventListener('click', hide);
     m.querySelector('.lhTabs').addEventListener('click', function (e) {
@@ -1725,13 +1754,14 @@ LEARNHUB_JS = r"""
       var id = b.getAttribute('data-tab');
       m.querySelectorAll('.lhTab').forEach(function (x) { x.classList.toggle('on', x === b); });
       m.querySelectorAll('.lhSec').forEach(function (x) { x.classList.toggle('on', x.getAttribute('data-sec') === id); });
+      setAccent(id);
       var body = document.getElementById('pqLearnBody'); if (body) body.scrollTop = 0;
     });
     wireTimes(m);
     var host = document.getElementById('menu_body');
     if (host) {
       var card = document.createElement('section'); card.className = 'card';
-      card.innerHTML = '<h3>Learn Hub <small>(walkthrough &amp; learning sheets)</small></h3>'
+      card.innerHTML = '<h3>\U0001F4DA Learn Hub <small>(walkthrough &amp; learning sheets)</small></h3>'
         + '<button id="pqLearnOpen" class="lhOpenBtn">\U0001F4DA Open Learn Hub</button>';
       host.insertBefore(card, host.firstChild);
       document.getElementById('pqLearnOpen').addEventListener('click', show);
