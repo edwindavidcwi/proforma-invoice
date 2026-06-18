@@ -5,6 +5,12 @@ adventure) — same maps, same look, same feel — but in modern code that we ca
 **audit deeply, edit easily, fill with unlimited questions/teaching content, and
 upgrade element-by-element** (nicer trees, nicer characters) over time.
 
+**And it is built as a reusable platform on purpose.** Once Ethan finishes this
+adventure, we reuse the very same engine, tools, art system, content system, and
+audit harness to build a **grand new ORIGINAL game** — a new story, a new world,
+and more kinds of learning. So this plan is really *"build the learning-game
+engine, ship Ethan's first adventure on it, then ship a grand original one."*
+
 **Status: PLAN ONLY — awaiting approval. No game code yet.**
 
 ---
@@ -110,6 +116,13 @@ task, fully decoupled from the game's rules.
   and edit teaching sheets with no files at all.
 - A `validate` step (part of the audit) checks every question (one correct
   answer, has a hint, fits on screen) the moment you save.
+- **Pluggable learning activities (for "more study elements" later).** The quiz
+  is just the *first* activity type. The engine treats a learning challenge as a
+  plug-in with a tiny contract (`present → collect answer → judge → reward`), so
+  we can add new kinds without touching the game: multiple-choice (now), **typed
+  spelling, matching pairs, sequencing/ordering, fill-in-the-blank, read-aloud
+  passages, drawing/tracing, mini-math drills**, etc. The grand new game can lean
+  on these heavily.
 
 ---
 
@@ -185,8 +198,61 @@ look from milestone 1, and only improve from there.
 
 ---
 
+## 10. The long game — one engine, two (and more) adventures
+
+This is the part to plan carefully now, because it changes *nothing* about how we
+build Title 1 but everything about how reusable it is.
+
+**The split that makes it a platform.** The engine, tools, and audit never know
+or care that Title 1 is "Pokémon Red." Everything game-specific lives in a
+self-contained **Game Pack**:
+
+```
+A Game Pack = { world & maps, story & dialogue, characters & creatures,
+                assets (art/audio), learning content (questions + activities),
+                rules-config }            ← all DATA, no engine code
+```
+
+- **Title 1 — "Ethan's First Quest"** (now): a Game Pack that faithfully
+  reproduces the current game (real maps/art) so it looks exactly as it is.
+- **Title 2 — the grand new ORIGINAL adventure** (after Ethan finishes Title 1):
+  a *new* Game Pack — new story, new world, original characters/art, and more
+  kinds of learning — dropped onto the **same engine, tools, and audit**. No
+  re-engineering; we author content and art, not systems.
+
+**Why this is worth doing now (carefully):**
+- **Reuse everything that's hard:** the engine, the renderer, the asset registry,
+  the content pipeline, the Parent Studio editor, the read-aloud, the Report
+  Card, and — crucially — the **audit harness** all carry straight over to Title
+  2. Every future game is born already auditable.
+- **The library of "items" you mentioned** (tiles, characters, creatures, UI,
+  question banks, teaching modules, learning-activity types) becomes a shared,
+  growing **asset & content library** any title can pull from. Make a nicer tree
+  once → every game gets it.
+- **Title 2 can be fully ORIGINAL**, which also removes the personal-use-only
+  constraint for *that* game — it could be freely shared, because it uses our own
+  story and art on our own engine.
+- **More study elements** slot in as new pluggable learning activities (see §4),
+  so the grand game can teach more, more ways.
+
+**Design rules we'll follow from day one to protect this:**
+1. **No game-specific assumptions in the engine** — Title 1 facts (map names,
+   gym order, creature stats) live only in its Game Pack.
+2. **Everything content is data**, versioned and validated.
+3. **Stable contracts** between layers (asset manifest, content schema, learning
+   activity, save format) so packs and tools stay compatible as we grow.
+4. **The audit harness is title-agnostic** — point it at any Game Pack.
+
+**What we will decide later (for Title 2, not now):** its story, world, art
+style, and which new learning activities to feature. We don't need those to build
+Title 1 well — we just need the clean split above, which we get for free by
+building Title 1 the right way.
+
+---
+
 ## What happens next (after you approve this plan)
 I build **Milestone 1**: the engine, the asset registry loading the real art, the
 audit harness, and a faithful one-town quiz-battle slice you can open in your
-browser and compare side-by-side with the current game. If it looks right, we
-continue; if not, we adjust before going further.
+browser and compare side-by-side with the current game — structured from the
+start as **engine + Game Pack**, so it's already the reusable platform for the
+grand new adventure. If it looks right, we continue; if not, we adjust first.
