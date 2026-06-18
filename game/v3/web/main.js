@@ -10,7 +10,7 @@ const SAVE_KEY = "quizquest3_save_r2", GB_W = 160, GB_H = 144, SCALE = 4, WALK_S
 const validPos = s => s && s.cx >= 0 && s.cy >= 0 && s.cx < PACK.cw && s.cy < PACK.ch && PACK.walk[s.cy] && PACK.walk[s.cy][s.cx] === 1;
 const FACE = { down: 0, up: 1, left: 2, right: 2 }, WALKR = { down: 3, up: 4, left: 5, right: 5 };
 let state, ctx, mapCanvas, tilesetImg, spriteImg, creatureImgs = {}, playerCreImg, overlay;
-let rx = 0, ry = 0, anim = 0, hopFrom = null, readAloud = true, lastSpoken = "";
+let rx = 0, ry = 0, anim = 0, hopFrom = null, stepParity = false, readAloud = true, lastSpoken = "";
 let flashEnemy = 0, flashMon = 0;
 
 function boot() {
@@ -46,6 +46,7 @@ const moving = () => rx !== state.cx * 16 || ry !== state.cy * 16;
 function send(input) {
   const before = [state.cx, state.cy];
   let res; try { res = step(state, PACK, input); } catch (e) { console.error(e); res = { events: [] }; }
+  if (input.type === "move" && (state.cx !== before[0] || state.cy !== before[1])) stepParity = !stepParity; // alternate feet each step
   for (const e of res.events || []) {
     if (e.t === "hop") hopFrom = before;
     if (e.t === "playerHit") flashEnemy = 10;
@@ -97,9 +98,14 @@ function loop() {
 }
 
 function drawPlayer(sx, sy) {
-  const walking = moving();
-  const row = (walking && Math.floor(anim / 7) % 2 === 0) ? WALKR[state.facing] : FACE[state.facing];
-  const mirror = state.facing === "right";
+  const f = state.facing;
+  // while moving, always show the WALK pose (so it's never a static glide);
+  // when stopped, the standing pose.
+  const row = moving() ? WALKR[f] : FACE[f];
+  // right faces left-frame mirrored; for down/up, mirror on alternate steps so
+  // the feet visibly swap as you walk.
+  let mirror = (f === "right");
+  if (moving() && (f === "down" || f === "up") && stepParity) mirror = !mirror;
   ctx.save();
   if (mirror) { ctx.translate(sx + 16 * SCALE, sy); ctx.scale(-1, 1); ctx.drawImage(spriteImg, 0, row * 16, 16, 16, 0, 0, 16 * SCALE, 16 * SCALE); }
   else ctx.drawImage(spriteImg, 0, row * 16, 16, 16, sx, sy, 16 * SCALE, 16 * SCALE);
