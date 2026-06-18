@@ -83,15 +83,15 @@ def main():
             if comp[y][x] != bid: walk[y][x] = 0; grass[y][x] = 0   # hide unreachable pockets
 
     sprite = Image.open(os.path.join(PK, "gfx", "sprites", "red.png")).convert("L")
-    creatures = {n: data_url(colorize(Image.open(front(n)).convert("L"), CRE, True)) for n in ("rattata", "pidgey") if os.path.exists(front(n))}
-    player_cre = data_url(colorize(Image.open(front("charmander")).convert("L"), CRE, True)) if os.path.exists(front("charmander")) else list(creatures.values())[0]
+    wild = ["rattata", "pidgey"]; party = ["charmander", "squirtle"]
+    creatures = {n: data_url(colorize(Image.open(front(n)).convert("L"), CRE, True))
+                 for n in (wild + party) if os.path.exists(front(n))}
 
     pack = {"name": MAP_NAME, "w": W, "h": H, "cw": cw, "ch": ch, "tile": TILE, "block": BLOCK,
             "tilesPerRow": per, "blocks": blocks, "map": blk, "walk": walk, "grass": grass, "ledge": ledge,
             "start": start, "encounterRate": 0.18,
             "tilesetURL": data_url(colorize(ts, GB)), "spriteURL": data_url(colorize(sprite, GB, True)),
-            "creatures": creatures, "creatureNames": list(creatures.keys()),
-            "playerCreature": "Charmander", "playerCreatureURL": player_cre}
+            "creatures": creatures, "wild": [n for n in wild if n in creatures], "party": [n for n in party if n in creatures]}
     open(os.path.join(PACK_DIR, "pallet.pack.js"), "w", encoding="utf-8").write(
         "// AUTO-GENERATED Game Pack. Do not edit by hand.\nexport const PACK = " + json.dumps(pack, separators=(",", ":")) + ";\n")
     print("map %s %dx%d  grass %d  ledges %d  start %s  creatures %s" %
