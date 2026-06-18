@@ -1,0 +1,181 @@
+name: Build Pokemon Quiz apps
+
+# Builds the installable apps entirely on GitHub's servers (which have the
+# Android SDK, Windows runners, and internet), so nothing needs to be installed
+# locally. One run produces both the Android .apk and the Windows Setup .exe and
+# publishes them to the "pokemon-quiz-app" release.
+on:
+  workflow_dispatch:
+  push:
+    branches: [ "claude/pokemon-red-question-combat-epas1o" ]
+    paths:
+      - "game/pokered/**"
+      - "game/play/**"
+      - "game/android-app/**"
+      - "game/windows-app/**"
+      - ".github/workflows/build-apk.yml"
+
+# Only one build per branch at a time. A newer push cancels an older in-flight
+# run so two runs can't race on deleting/recreating the shared release tag
+# (which 403s the loser). The latest commit always wins and publishes.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 1. Build the ROM, the self-contained offline player HTML, and the Android APK.
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build deps + rgbds v1.0.1 (Game Boy assembler)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y bison flex libpng-dev pkg-config build-essential cmake
+          git clone --depth 1 --branch v1.0.1 https://github.com/gbdev/rgbds.git /tmp/rgbds
+          make -C /tmp/rgbds -j"$(nproc)"
+          sudo make -C /tmp/rgbds install
+          rgbasm --version
+
+      - name: Build the Pokemon Red (Quiz) ROM
+        run: make -C game/pokered pokered.gbc
+
+      - name: Test the quiz (gate the build on the headless harnesses)
+        run: |
+          cd game/play
+          node test_quiz_cursor.js ../pokered/pokered.gbc   # boot + answer-cursor alignment
+          node play_capture.js     ../pokered/pokered.gbc   # cross-bank render, all 5 grades
+          node audit_render.js     ../pokered/pokered.gbc   # ~1200 live renders + shuffle bias
+          node audit_outcome.js    ../pokered/pokered.gbc   # hit / miss / half-damage behaviour
+          node test_review.js      ../pokered/pokered.gbc   # spaced-repetition review path (entry stride)
+          node test_adaptive.js    ../pokered/pokered.gbc   # adaptive difficulty: grade nudges up/down
+          node test_clock.js       ../pokered/pokered.gbc   # analog clock renders + hour-hand mapping
+          node test_startmenu.js   ../pokered/pokered.gbc   # start-menu item count (STUDY item; no off-by-one)
+          node test_picker.js      ../pokered/pokered.gbc   # parent grade/subject focus picker (SRAM)
+          node test_music.js       ../pokered/pokered.gbc   # context-aware music track selection
+          node test_music_engine.js ../pokered/pokered.gbc  # hidden audio GB plays the real song per context
+          node test_readaloud.js                             # read-aloud text pipeline (decode/sanitize/prompt)
+          node test_learnhub.js                              # in-game Learn Hub: walkthrough + learning sheets (math tables, etc.)
+          python3 audit_facts.py   ../pokered/pokered.gbc   # independent answer-key check
+          python3 audit_player.py                            # player RAM-address drift + MBC-safety lint
+          python3 ../pokered/audit_content.py               # data lint + content report + generator sync
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+
+      - name: Bundle the offline player (single self-contained HTML)
+        run: |
+          mkdir -p game/android-app/app/src/main/assets
+          python3 game/play/build_player.py \
+            --out game/android-app/app/src/main/assets/PokemonQuiz.html
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Build the APK
+        run: |
+          cd game/android-app
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Stage the APK and the player HTML for later jobs
+        run: |
+          mkdir -p out
+          cp game/android-app/app/build/outputs/apk/debug/app-debug.apk out/PokemonQuiz.apk
+          cp game/android-app/app/src/main/assets/PokemonQuiz.html out/PokemonQuiz.html
+
+      - name: Upload the APK + player HTML (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-and-html
+          path: out/
+          if-no-files-found: error
+
+  # 2. Wrap that same offline HTML in an Electron app and build a portable Windows
+  #    .exe (no installer -- double-click the downloaded file and the game opens).
+  windows:
+    needs: android
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the player HTML built on Linux
+        uses: actions/download-artifact@v4
+        with:
+          name: android-and-html
+          path: out
+
+      - name: Place the game inside the Windows app
+        shell: bash
+        run: |
+          mkdir -p game/windows-app/assets
+          cp out/PokemonQuiz.html game/windows-app/assets/PokemonQuiz.html
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Build the portable Windows app (Electron + electron-builder)
+        working-directory: game/windows-app
+        run: |
+          npm install
+          npm run dist
+
+      - name: Collect the portable .exe under a friendly name
+        shell: bash
+        run: |
+          mkdir -p win-out
+          # Portable single-file .exe (no install). Fall back to whatever single .exe got built.
+          if [ -f game/windows-app/dist/PokemonQuiz-Windows.exe ]; then
+            cp game/windows-app/dist/PokemonQuiz-Windows.exe "win-out/PokemonQuiz-Windows.exe"
+          else
+            cp "$(ls game/windows-app/dist/*.exe | head -n1)" "win-out/PokemonQuiz-Windows.exe"
+          fi
+          ls -la win-out/
+
+      - name: Upload the Windows app (artifact)
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-app
+          path: win-out/
+          if-no-files-found: error
+
+  # 3. Publish both apps to a single release with clean direct download links.
+  release:
+    needs: [android, windows]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download the Android + HTML artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: android-and-html
+          path: dl
+
+      - name: Download the Windows app artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-app
+          path: dl
+
+      - name: Publish/refresh the release with both apps
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release delete pokemon-quiz-app --yes --cleanup-tag 2>/dev/null || true
+          gh release create pokemon-quiz-app \
+            dl/PokemonQuiz.apk \
+            dl/PokemonQuiz-Windows.exe \
+            --title "Pokemon Quiz - Android & Windows apps" \
+            --notes $'Offline Pokemon Quiz game.\n\n- **Windows:** download **PokemonQuiz-Windows.exe** and just double-click it to play - **no installation needed**. Keep the file wherever you like (Desktop, a USB stick...) and double-click it any time. Nothing is added to your PC. (If SmartScreen warns, click *More info -> Run anyway* - it is unsigned.)\n- **Android:** download **PokemonQuiz.apk**, open it on your phone, allow installing from this source.' \
+            --target "$GITHUB_SHA"

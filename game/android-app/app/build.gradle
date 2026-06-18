@@ -1,0 +1,32 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.pokequiz.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.pokequiz.app"
+        minSdk 21
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            // Debuggable release so `assembleRelease` produces an installable,
+            // unsigned-then-debug-signed APK without extra keystore setup.
+            minifyEnabled false
+        }
+    }
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+dependencies {
+    // No external deps: plain framework WebView only.
+}

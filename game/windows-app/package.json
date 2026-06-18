@@ -1,0 +1,40 @@
+{
+  "name": "pokemon-quiz",
+  "version": "1.0.0",
+  "description": "Pokemon Quiz - offline learning game for Windows",
+  "main": "main.js",
+  "author": "Cochin Wood Industries",
+  "license": "UNLICENSED",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win"
+  },
+  "devDependencies": {
+    "electron": "31.7.7",
+    "electron-builder": "24.13.3"
+  },
+  "build": {
+    "appId": "com.cochinwood.pokemonquiz",
+    "productName": "Pokemon Quiz",
+    "files": [
+      "main.js",
+      "assets/**"
+    ],
+    "directories": {
+      "output": "dist",
+      "buildResources": "build"
+    },
+    "win": {
+      "icon": "build/icon.ico",
+      "target": [
+        "portable"
+      ]
+    },
+    "portable": {
+      "artifactName": "PokemonQuiz-Windows.exe",
+      "requestExecutionLevel": "user",
+      "unicode": true
+    }
+  }
+}

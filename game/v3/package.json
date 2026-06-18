@@ -1,0 +1,13 @@
+{
+  "name": "quiz-quest-v3",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Quiz Quest v3 -- faithful modern rebuild (engine + real-art Game Pack + audit + playable slice)",
+  "scripts": {
+    "audit": "node audit/harness.mjs",
+    "pack": "python3 tools/build_pack.py",
+    "questions": "python3 tools/gen_questions.py",
+    "build": "python3 build.py"
+  }
+}
