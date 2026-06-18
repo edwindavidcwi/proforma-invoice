@@ -7,7 +7,8 @@
 import { newGame, step, availableInputs, saveGame, loadGame } from "../engine/engine.js";
 import { PACK } from "../pack/pallet.pack.js";
 
-const SAVE_KEY = "quizquest3_save", GB_W = 160, GB_H = 144, SCALE = 4, WALK_SPD = 2;
+const SAVE_KEY = "quizquest3_save_r1", GB_W = 160, GB_H = 144, SCALE = 4, WALK_SPD = 2;
+const validPos = s => s && s.cx >= 0 && s.cy >= 0 && s.cx < PACK.cw && s.cy < PACK.ch && PACK.walk[s.cy] && PACK.walk[s.cy][s.cx] === 1;
 let state, ctx, mapCanvas, tilesetImg, spriteImg, creatureImgs = {}, overlay;
 let rx = 0, ry = 0, readAloud = true, lastSpoken = "";
 
@@ -28,6 +29,9 @@ function boot() {
 
   let saved = null; try { saved = localStorage.getItem(SAVE_KEY); } catch (e) {}
   state = saved ? loadGame(saved, PACK, now()) : newGame(PACK, now());
+  // a save from an older build can place the hero on a tile that no longer
+  // exists / isn't walkable on this map -> start fresh so he can always move
+  if (!validPos(state)) state = newGame(PACK, now());
   rx = state.cx * 16; ry = state.cy * 16;
 
   let need = 2 + Object.keys(PACK.creatures || {}).length, got = 0;
