@@ -40,6 +40,7 @@ body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:c
 .opt{min-height:48px;border:3px solid #cdd7e3;background:#fff;border-radius:13px;padding:10px;font:800 16px/1.1 inherit;color:#26303a;cursor:pointer}
 .opt:active{transform:scale(.96)}
 .opt.go{grid-column:1/3;background:linear-gradient(180deg,#5be39a,#16a34a);color:#04261a;border:0}
+.run{margin-top:8px;width:100%;min-height:38px;border:0;border-radius:10px;background:#eef2f7;color:#5a6b7a;font:700 14px/1 inherit;cursor:pointer}
 #pad{display:flex;align-items:center;justify-content:space-between;padding:14px 18px 18px;background:#0e2838;border-radius:0 0 14px 14px}
 .dpad{position:relative;width:132px;height:132px}
 .dpad .d{position:absolute;width:44px;height:44px;border:0;border-radius:10px;background:#33506f;color:#cfe2ee;font-size:16px;cursor:pointer}
